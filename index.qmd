@@ -1,11 +1,64 @@
 ---
-title: "MASTEMR"
+title: "Quantitative methods in the context of STEM education research"
+subtitle: "MA STEM Education"
+author: "MA STEM @ KCL"
+toc: true
+number-sections: true
+bibliography: references/mastemr.bib
+crossref: 
+  chapters: true
+format:
+  # pdf:
+  #   code-line-numbers: true
+  #https://quarto.org/docs/authoring/callouts.html 
+  html:
+    code-line-numbers: true
+    code-link: true
+css: css/CRESTEMR.css
+execute:
+  cache: false
 ---
 
-This is a Quarto website.
-
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
-
-```{r}
-1 + 1
+```{r setup}
+#| include=FALSE
+library(glue)
+folder_images <- "images"
 ```
+
+# About
+
+{{< include chapters/_00-About.qmd >}}
+
+# Introduction to quantitative methods
+
+{{< include chapters/_01-Intro_to_quant_methods.qmd >}}
+
+# Introduction to analysis software
+
+{{< include chapters/_02-Intro_to_analysis_software.qmd >}}
+
+# What can we say about the performance of different groups in STEM education?
+
+{{< include chapters/_03-Differing_performance_in_STEM.qmd >}}
+
+# Are there significant gender differences in aspects of STEM education? 
+
+{{< include chapters/_05-Gender_differences.qmd >}}
+
+# Setting up analysis for specific datasets
+
+The examples shown in this booklet use a range of freely available datasets. We would like to encourage you to use one of these datasets in your own analysis. This section will take you through the process of downloading and using these datasets.
+
+## PISA
+
+{{< include chapters/_A1-PISA_analysis.qmd >}}
+
+## English Department for Education
+
+{{< include chapters/_A2-DfE_analysis.qmd >}}
+
+## TIMSS
+
+{{< include chapters/_A3-TIMSS_analysis.qmd >}}
+
+# References

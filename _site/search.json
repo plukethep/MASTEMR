@@ -2,9 +2,9 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "MASTEMR",
+    "title": "Quantitative methods in the context of STEM education research",
     "section": "",
-    "text": "To learn more about Quarto websites visit https://quarto.org/docs/websites.\n\n1 + 1\n\n[1] 2"
+    "text": "This book is aimed at students on the MA STEM course at King’s College London. It offers…\nThe course is led by Richard Brock\n\n\n\n\n\n\n\n\n\n\nRichard Brock\nrichard.brock@kcl.ac.uk\n\n\n\n\n\nPeter Kemp"
   },
   {
     "objectID": "about.html",
@@ -12,5 +12,89 @@
     "title": "About",
     "section": "",
     "text": "1 + 1\n\n[1] 2"
+  },
+  {
+    "objectID": "index.html#pisa",
+    "href": "index.html#pisa",
+    "title": "Quantitative methods in the context of STEM education research",
+    "section": "\n6.1 PISA",
+    "text": "6.1 PISA"
+  },
+  {
+    "objectID": "index.html#english-department-for-education",
+    "href": "index.html#english-department-for-education",
+    "title": "Quantitative methods in the context of STEM education research",
+    "section": "\n6.7 English Department for Education",
+    "text": "6.7 English Department for Education"
+  },
+  {
+    "objectID": "index.html#timss",
+    "href": "index.html#timss",
+    "title": "Quantitative methods in the context of STEM education research",
+    "section": "\n6.8 TIMSS",
+    "text": "6.8 TIMSS"
+  },
+  {
+    "objectID": "index.html#introduction",
+    "href": "index.html#introduction",
+    "title": "Quantitative methods in the context of STEM education research",
+    "section": "\n3.1 Introduction",
+    "text": "3.1 Introduction\nThis short course aims to take you through the process of writing your first programs in the R statistical programming language to analyse national and international educational datasets. To do this we will be using the R Studio integrated development environment (IDE), a desktop application to support you in writing R scripts. R Studio supports your programming by flagging up errors in your code as you write it, and helping you manage your analysis environment by giving you quick access to tables, objects and graphs as you develop them. In addition, we will be looking at data analysis using the tidyverse code packages. The tidyverse is a standardised collection of supporting code that helps you read data, tidy it into a usable format, analyse it and present your findings.\nThe R programming language offers similar functionality to an application based statistical tool such as SPSS, with more of a focus on you writing code to solve your problems, rather than using prebuilt tools. R is open source, meaning that it is free to use and that lots of people have written code in R that they have shared with others. R statistical libraries are some of the most comprehensive in existence. R is popular1 in academia and industry, being used for everything from sales modelling to cancer detection.\n\n# This example shows how R can pull data directly from the internet\n# tidy it and start making graphs. All within 9 lines of code\nlibrary(tidyverse)\n\neducation <- read_csv(\n  \"https://barrolee.github.io/BarroLeeDataSet/BLData/BL_v3_MF.csv\")\n\neducation %>%\n  filter(agefrom == 15, ageto == 24,\n         country %in% c(\"Germany\",\"France\",\"Italy\",\"United Kingdom\")) %>%\n  ggplot(aes(x=year, y=yr_sch, colour=country)) +\n  geom_point() +\n  geom_line()\n\n\n\n\nWhilst it is possible to use R through menu systems and drop down tools, the focus of this course is to write your own R scripts. These are text files that will tell the computer how to go through the process of loading, cleaning, analysing and presenting data. The sequential and modular nature of these files makes it very easy to develop and test each stage separately, reuse code in the future, and share with others.\nThis booklet is written with the following sections to support you:\n\n# Code examples and questions appear like this\na <- 1 + 3\n\n[1] Code output appears like this\nCourier font indicates keyboard presses, column names, column values and function names.\n<table> Courier font within brackets describe values that can be passed to functions and that you need to define yourself. I.e. copying and pasting these code chunks verbatim won’t work!\n\n\n\n\n\n\nNote\n\n\n\nspecifies things to note\n\n\n\n\n\n\n\n\nWarning\n\n\n\ngives warning messages\n\n\n\n\n\n\n\n\nImportant\n\n\n\nhighlights issues that might break your code\n\n\n\n\n\n\n\n\nTip\n\n\n\ngives suggestions on how to do things in a better way\n\n\n\nActivities and coding tasks look like this\n\nwhat <- \"does this\"\ncode == \"do\""
+  },
+  {
+    "objectID": "index.html#getting-set-up",
+    "href": "index.html#getting-set-up",
+    "title": "Quantitative methods in the context of STEM education research",
+    "section": "\n3.2 Getting set up",
+    "text": "3.2 Getting set up\n\n3.2.1 Installation (on your own machine)\n\n\nInstall R (default settings should be fine)\n\n\nWindows users visit: here\n\n\nMac users visit: intel M1 Macs\n\n\n\nInstall RStudio, visit here and it should present you with the version suitable for your operating system.\n\n(If the above doesn’t work follow the instructions here)\n\n3.2.2 Installation (KCL restricted machine)\n\nload the software center\n\nSearch for and install “R Statistics”\n\n\n\nSearch for and install “RStudio”\n\n\n\nYou might find this tutorial video helpful:\nhttps://vimeo.com/203516510\n\n3.2.3 Setting up RStudio and the tidyverse\n\nOpen RStudio\n\nOn the bottom right-hand side, select Packages, then select Install, then type “tidyverse” into the Packages field of the new window:\n\n\nClick Install and you should see things happening in the console (bottom left). Wait for the console activity to finish (it’ll be downloading and checking packages).\n\nAdd a new R Script using the  button\n\n\n\nIn the new R script, write the following:\n\n\n\nSelect all the lines and press Control or Command and Enter on your keyboard at the same time. Alternatively, press the  button\n\n\n\nCheck that you have the following in the console window:\n\n\nThat’s it, you should be set up!\nAny issues, please mail peter.kemp@kcl.ac.uk"
+  },
+  {
+    "objectID": "index.html#starting-to-code",
+    "href": "index.html#starting-to-code",
+    "title": "Quantitative methods in the context of STEM education research",
+    "section": "\n3.3 Starting to code",
+    "text": "3.3 Starting to code\nAfter adding a new R Script using the button , there are four parts to R Studio’s interface. For the moment we are most interested in the Script file section, top left."
+  },
+  {
+    "objectID": "index.html#what-is-pisa",
+    "href": "index.html#what-is-pisa",
+    "title": "Quantitative methods in the context of STEM education research",
+    "section": "\n6.2 What is PISA",
+    "text": "6.2 What is PISA\nThe Programme for International Student Assessment (PISA) is an OECD initiative that looks at the reading, mathematics and science abilities of students aged 15 years old. Data is collected from # countries every three years.\n\n\n\n\n\n\n\n\n\n\n\n\nDataset\nDescription\n03\n06\n03\n12\n15\n18\n\n\n\nStudent\ndemographic data on student participants\nx\nx\nx\nx\nx\nx\n\n\nSchool\ndescriptive data about schools\nx\nx\nx\nx\nx\nx\n\n\nParent\n\nx\nx\n\n\n\n\n\n\nTeacher\n\n\n\n\nx\nx\nx\n\n\nCognitive\n\nx\nx\nx\nx\nx\nx"
+  },
+  {
+    "objectID": "index.html#where-to-find-it",
+    "href": "index.html#where-to-find-it",
+    "title": "Quantitative methods in the context of STEM education research",
+    "section": "\n6.3 Where to find it",
+    "text": "6.3 Where to find it\nPISA datasets can be found on the OECD website. Data is provided in SPSS and SAS formats. There are tools available to download your own versions of these datasets"
+  },
+  {
+    "objectID": "index.html#how-to-use-it",
+    "href": "index.html#how-to-use-it",
+    "title": "Quantitative methods in the context of STEM education research",
+    "section": "\n6.4 How to use it",
+    "text": "6.4 How to use it\nDownload data\nClean it\nMerge demographic data with assessment outcomes"
+  },
+  {
+    "objectID": "index.html#interesting-papers-and-reading-on-pisa",
+    "href": "index.html#interesting-papers-and-reading-on-pisa",
+    "title": "Quantitative methods in the context of STEM education research",
+    "section": "\n6.6 Interesting papers and reading on PISA",
+    "text": "6.6 Interesting papers and reading on PISA\nJerrim"
+  },
+  {
+    "objectID": "index.html#heading-2",
+    "href": "index.html#heading-2",
+    "title": "Quantitative methods in the context of STEM education research",
+    "section": "\n2.1 heading 2",
+    "text": "2.1 heading 2\nsomething or other"
+  },
+  {
+    "objectID": "index.html#common-issues",
+    "href": "index.html#common-issues",
+    "title": "Quantitative methods in the context of STEM education research",
+    "section": "\n6.5 Common issues",
+    "text": "6.5 Common issues\nThe PISA datasets can be absolutely huge and might bring your computer to its knees. Tables such as the Cognitive dataset have hundreds of thousands of rows and thousands of columns."
   }
 ]

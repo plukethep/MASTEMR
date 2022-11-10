@@ -1,0 +1,13 @@
+This book is aimed at students on the MA STEM course at King's College London. It offers...
+
+The course is led by Richard Brock
+
++--------------------------------+--------------------------+---+
+| ![](images/brock.jpg)          | Richard Brock            |   |
+|                                |                          |   |
+|                                | richard.brock\@kcl.ac.uk |   |
++--------------------------------+--------------------------+---+
+| ![peter kemp](images/kemp.jpg) | Peter Kemp               |   |
++--------------------------------+--------------------------+---+
+|                                |                          |   |
++--------------------------------+--------------------------+---+

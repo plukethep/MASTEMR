@@ -1,0 +1,133 @@
+
+## Introduction
+
+This short course aims to take you through the process of writing your first programs in the **R statistical programming language** to analyse national and international educational datasets. To do this we will be using the **R Studio** integrated development environment (IDE), a desktop application to support you in writing R scripts. R Studio supports your programming by flagging up errors in your code as you write it, and helping you manage your analysis environment by giving you quick access to tables, objects and graphs as you develop them. In addition, we will be looking at data analysis using the **tidyverse** code packages. The tidyverse is a standardised collection of supporting code that helps you read data, tidy it into a usable format, analyse it and present your findings.
+
+The R programming language offers similar functionality to an application based statistical tool such as SPSS, with more of a focus on you writing code to solve your problems, rather than using prebuilt tools. R is open source, meaning that it is free to use and that lots of people have written code in R that they have shared with others. R statistical libraries are some of the most comprehensive in existence. R is popular[^1] in academia and industry, being used for everything from sales modelling to cancer detection.
+
+[^1]: As of October 2020, Tiobe has R as the 9th most popular programming language: [https://www.tiobe.com/tiobe-index/]() Many other, contradictory, ranking systems exist.
+
+```{r}
+#| warning: false
+#| message: false
+# This example shows how R can pull data directly from the internet
+# tidy it and start making graphs. All within 9 lines of code
+library(tidyverse)
+
+education <- read_csv(
+  "https://barrolee.github.io/BarroLeeDataSet/BLData/BL_v3_MF.csv")
+
+education %>%
+  filter(agefrom == 15, ageto == 24,
+         country %in% c("Germany","France","Italy","United Kingdom")) %>%
+  ggplot(aes(x=year, y=yr_sch, colour=country)) +
+  geom_point() +
+  geom_line()
+```
+
+Whilst it is possible to use R through menu systems and drop down tools, the focus of this course is to write your own R scripts. These are text files that will tell the computer how to go through the process of loading, cleaning, analysing and presenting data. The sequential and modular nature of these files makes it very easy to develop and test each stage separately, reuse code in the future, and share with others.
+
+This booklet is written with the following sections to support you:
+
+```{r example_code}
+# Code examples and questions appear like this
+a <- 1 + 3
+```
+
+```{=html}
+<pre><code>[1] Code output appears like this</code></pre>
+```
+`Courier font` indicates keyboard presses, column names, column values and function names.
+
+`<table>` Courier font within brackets describe values that can be passed to functions and that you need to define yourself. I.e. copying and pasting these code chunks verbatim won't work!
+
+::: callout-note
+specifies things to note
+:::
+
+::: callout-warning
+gives warning messages
+:::
+
+::: callout-important
+highlights issues that might break your code
+:::
+
+::: callout-tip
+gives suggestions on how to do things in a better way
+:::
+
+::: question
+Activities and coding tasks look like this
+
+```{r}
+#| eval: false
+what <- "does this"
+code == "do"
+```
+:::
+
+## Getting set up
+
+### Installation (on your own machine)
+
+1.  Install R (default settings should be fine)
+
+    a.  **Windows** users visit:   [here](https://cran.r-project.org/bin/windows/base/R-4.2.0-win.exe)
+    b.  **Mac** users visit: [intel](https://cran.r-project.org/bin/macosx/base/R-4.2.0.pkg) [M1 Macs](https://cran.r-project.org/bin/macosx/big-sur-arm64/base/R-4.2.0-arm64.pkg)
+
+2.  Install **RStudio**, visit [here](https://rstudio.com/products/rstudio/download/#download) and it should present you with the version suitable for your operating system.
+
+(If the above doesn't work follow the instructions [here](https://www.rstudio.com/products/rstudio/download/#download))
+
+### Installation (KCL restricted machine)
+
+1.  load the software center
+
+2.  Search for and install **"R Statistics"**
+
+    ![](images/software_centre_R.png)
+
+3.  Search for and install **"RStudio"**
+
+    ![](images/software_centre_RStudio.png)
+
+You might find this tutorial video helpful:
+
+https://vimeo.com/203516510
+
+### Setting up RStudio and the tidyverse {#sec-packages}
+
+1.  Open RStudio
+
+2.  On the bottom right-hand side, select **Packages**, then select **Install**, then type **"tidyverse"** into the Packages field of the new window:
+
+    ![](images/tidyverse_install.png)
+
+3.  Click Install and you should see things happening in the console (bottom left). Wait for the console activity to finish (it'll be downloading and checking packages).
+
+4.  Add a new R Script using the ![](images/RStudio_new_button.png) button
+
+    ![](images/RStudio_new_button_RScript.png){width="210" height="74"}
+
+5.  In the new R script, write the following:
+
+    ![](images/code_starwars.png){width="514"}
+
+6.  Select all the lines and press `Control` or `Command` and `Enter` on your keyboard at the same time. Alternatively, press the ![](images/RStudio-run.png){width="36"} button
+
+    ![](images/code_starwars_select.png){width="585"}
+
+7.  Check that you have the following in the console window:
+
+    ![](images/output_data_starwars.png)
+
+8.  That's it, you should be set up!
+
+9.  Any issues, please mail [peter.kemp\@kcl.ac.uk](mailto:peter.kemp@kcl.ac.uk)
+
+## Starting to code
+
+After adding a new R Script using the button ![](images/RStudio_new_button.png){width="27" height="29"}, there are four parts to R Studio's interface. For the moment we are most interested in the Script file section, top left.
+
+![](images/RStudio_interface.png){width="600"}

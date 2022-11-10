@@ -1,0 +1,32 @@
+## What is PISA
+
+The Programme for International Student Assessment (PISA) is an OECD initiative that looks at the reading, mathematics and science abilities of students aged 15 years old. Data is collected from \# countries every three years.
+
+| Dataset   | Description                              | 03  | 06  | 03  | 12  | 15  | 18  |
+|---------|-------------------|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
+| Student   | demographic data on student participants |  x  |  x  |  x  |  x  |  x  |  x  |
+| School    | descriptive data about schools           |  x  |  x  |  x  |  x  |  x  |  x  |
+| Parent    |                                          |  x  |  x  |     |     |     |     |
+| Teacher   |                                          |     |     |     |  x  |  x  |  x  |
+| Cognitive |                                          |  x  |  x  |  x  |  x  |  x  |  x  |
+
+## Where to find it
+
+PISA datasets can be found on the [OECD website](https://www.oecd.org/pisa/data/). Data is provided in SPSS and SAS formats. There are tools available to download your own versions of these datasets
+
+## How to use it
+
+Download data
+
+Clean it
+
+Merge demographic data with assessment outcomes
+
+## Common issues
+
+The PISA datasets can be absolutely huge and might bring your computer to its knees. Tables such as the Cognitive dataset have hundreds of thousands of rows and thousands of columns. 
+
+## Interesting papers and reading on PISA
+
+
+Jerrim
