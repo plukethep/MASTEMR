@@ -25,10 +25,6 @@ library(glue)
 folder_images <- "images"
 ```
 
-# About
-
-{{< include chapters/_00-About.qmd >}}
-
 # Introduction to quantitative methods
 
 {{< include chapters/_01-Intro_to_quant_methods.qmd >}}
@@ -41,7 +37,7 @@ folder_images <- "images"
 
 {{< include chapters/_03-Differing_performance_in_STEM.qmd >}}
 
-# Are there significant gender differences in aspects of STEM education? 
+# Are there significant gender differences in aspects of STEM education?
 
 {{< include chapters/_05-Gender_differences.qmd >}}
 
