@@ -1,0 +1,45 @@
+Add a sub header `##` for the introduction
+
+Write an introduction including bold and italic text, and
+
+- bullet
+- points
+
+And a [link](https://en.wikipedia.org/wiki/Science,_technology,_engineering,_and_mathematics) to a website
+
+Find a bibtex reference on google scholar and copy and paste it into references/mastemr.bib (make sure you save the file!)
+
+Add the reference to the above text
+
+Add an image to help make your point
+
+Add a sub header for "coding example"
+
+Check that the following code loads the teacher's dataset.
+
+```{r}
+library("tidyverse")
+
+# a small hack to set the correct working directory for chapters
+if(grepl("/chapters", getwd())){
+  setwd(str_replace(getwd(), "/chapters", ""))
+}
+
+teacher_df <- readRDS(paste0(getwd(),"/data/teacher2018.rds"))
+```
+
+Explore the dataset
+
+Write more code to find out the total years of experience of staff in a subset of countries
+
+include that code in your markdown
+
+Add the median number of years experience for GBR teachers inline to a block of text
+
+Make a graph of median years of teaching experience and include it in this document
+
+Add a sub heading for questions
+
+Add some questions for students without code
+
+Add some questions for students with code

@@ -8,7 +8,7 @@ website:
       - href: index.qmd
         text: Home
       - about.qmd
-
+      - quarto_help.qmd
 format:
   html:
     theme: cosmo

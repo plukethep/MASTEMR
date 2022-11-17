@@ -1,0 +1,6 @@
+```{r}
+
+
+df <- readRDS(r"[C:\Users\Peter\Google Drive\Kings\Code\PISR\Data\PISA\subset\PISA2018studentnonelevels.rds]")
+
+```

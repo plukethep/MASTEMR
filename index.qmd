@@ -41,6 +41,28 @@ folder_images <- "images"
 
 {{< include chapters/_05-Gender_differences.qmd >}}
 
+# Maths Anxiety
+
+{{< include chapters/_06-Maths_anxiety.qmd >}}
+
+# Inquiry learning in science
+
+{{< include chapters/_07-Inquiry_learning_in_science.qmd >}}
+
+# Science capital
+
+{{< include chapters/_08-Science_capital.qmd >}}
+
+# Teacher relationships
+
+{{< include chapters/_10-teachers_relationships_and_STEM_achievement.qmd >}}
+
+# Teacher relationships
+
+{{< include chapters/_12-effective_international_STEM_ed.qmd >}}
+
+\_12-effective international STEM ed
+
 # Setting up analysis for specific datasets
 
 The examples shown in this booklet use a range of freely available datasets. We would like to encourage you to use one of these datasets in your own analysis. This section will take you through the process of downloading and using these datasets.

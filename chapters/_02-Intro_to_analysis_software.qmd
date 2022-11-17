@@ -1,11 +1,10 @@
-
 ## Introduction
 
 This short course aims to take you through the process of writing your first programs in the **R statistical programming language** to analyse national and international educational datasets. To do this we will be using the **R Studio** integrated development environment (IDE), a desktop application to support you in writing R scripts. R Studio supports your programming by flagging up errors in your code as you write it, and helping you manage your analysis environment by giving you quick access to tables, objects and graphs as you develop them. In addition, we will be looking at data analysis using the **tidyverse** code packages. The tidyverse is a standardised collection of supporting code that helps you read data, tidy it into a usable format, analyse it and present your findings.
 
-The R programming language offers similar functionality to an application based statistical tool such as SPSS, with more of a focus on you writing code to solve your problems, rather than using prebuilt tools. R is open source, meaning that it is free to use and that lots of people have written code in R that they have shared with others. R statistical libraries are some of the most comprehensive in existence. R is popular[^1] in academia and industry, being used for everything from sales modelling to cancer detection.
+The R programming language offers similar functionality to an application based statistical tool such as SPSS, with more of a focus on you writing code to solve your problems, rather than using prebuilt tools. R is open source, meaning that it is free to use and that lots of people have written code in R that they have shared with others. R statistical libraries are some of the most comprehensive in existence. R is popular[^_02-intro_to_analysis_software-1] in academia and industry, being used for everything from sales modelling to cancer detection.
 
-[^1]: As of October 2020, Tiobe has R as the 9th most popular programming language: [https://www.tiobe.com/tiobe-index/]() Many other, contradictory, ranking systems exist.
+[^_02-intro_to_analysis_software-1]: As of November 2022, [Tiobe](https://www.tiobe.com/tiobe-index/) has R as the 12th most popular programming language. Many other, contradictory, ranking systems exist.
 
 ```{r}
 #| warning: false
@@ -73,7 +72,7 @@ code == "do"
 
 1.  Install R (default settings should be fine)
 
-    a.  **Windows** users visit:   [here](https://cran.r-project.org/bin/windows/base/R-4.2.0-win.exe)
+    a.  **Windows** users visit: [here](https://cran.r-project.org/bin/windows/base/R-4.2.0-win.exe)
     b.  **Mac** users visit: [intel](https://cran.r-project.org/bin/macosx/base/R-4.2.0.pkg) [M1 Macs](https://cran.r-project.org/bin/macosx/big-sur-arm64/base/R-4.2.0-arm64.pkg)
 
 2.  Install **RStudio**, visit [here](https://rstudio.com/products/rstudio/download/#download) and it should present you with the version suitable for your operating system.

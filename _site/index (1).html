@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-0.9.377">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="MA STEM @ KCL">
+<title>MASTEMR - Quantitative methods in the context of STEM education research</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+<script src="site_libs/quarto-nav/quarto-nav.js"></script><script src="site_libs/quarto-nav/headroom.min.js"></script><script src="site_libs/clipboard/clipboard.min.js"></script><meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script><script src="site_libs/quarto-search/fuse.min.js"></script><script src="site_libs/quarto-search/quarto-search.js"></script><script src="site_libs/quarto-html/quarto.js"></script><script src="site_libs/quarto-html/popper.min.js"></script><script src="site_libs/quarto-html/tippy.umd.min.js"></script><script src="site_libs/quarto-html/anchor.min.js"></script><link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link id="quarto-text-highlighting-styles" href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script><link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script><link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/CRESTEMR.css">
+</head>
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg navbar-dark "><div class="navbar-container container-fluid">
+      <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">MASTEMR</span>
+  </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+<li class="nav-item">
+    <a class="nav-link active" href="./index.html" aria-current="page">Home</a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./about.html">About</a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./quarto_help.html">Quarto Help</a>
+  </li>  
+</ul>
+<div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#introduction-to-quantitative-methods" id="toc-introduction-to-quantitative-methods" class="nav-link active" data-scroll-target="#introduction-to-quantitative-methods"> <span class="header-section-number">1</span> Introduction to quantitative methods</a></li>
+  <li>
+<a href="#introduction-to-analysis-software" id="toc-introduction-to-analysis-software" class="nav-link" data-scroll-target="#introduction-to-analysis-software"> <span class="header-section-number">2</span> Introduction to analysis software</a>
+  <ul class="collapse">
+<li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction"> <span class="header-section-number">2.1</span> Introduction</a></li>
+  <li>
+<a href="#getting-set-up" id="toc-getting-set-up" class="nav-link" data-scroll-target="#getting-set-up"> <span class="header-section-number">2.2</span> Getting set up</a>
+  <ul class="collapse">
+<li><a href="#installation-on-your-own-machine" id="toc-installation-on-your-own-machine" class="nav-link" data-scroll-target="#installation-on-your-own-machine"> <span class="header-section-number">2.2.1</span> Installation (on your own machine)</a></li>
+  <li><a href="#installation-kcl-restricted-machine" id="toc-installation-kcl-restricted-machine" class="nav-link" data-scroll-target="#installation-kcl-restricted-machine"> <span class="header-section-number">2.2.2</span> Installation (KCL restricted machine)</a></li>
+  <li><a href="#sec-packages" id="toc-sec-packages" class="nav-link" data-scroll-target="#sec-packages"> <span class="header-section-number">2.2.3</span> Setting up RStudio and the tidyverse</a></li>
+  </ul>
+</li>
+  <li><a href="#starting-to-code" id="toc-starting-to-code" class="nav-link" data-scroll-target="#starting-to-code"> <span class="header-section-number">2.3</span> Starting to code</a></li>
+  </ul>
+</li>
+  <li><a href="#what-can-we-say-about-the-performance-of-different-groups-in-stem-education" id="toc-what-can-we-say-about-the-performance-of-different-groups-in-stem-education" class="nav-link" data-scroll-target="#what-can-we-say-about-the-performance-of-different-groups-in-stem-education"> <span class="header-section-number">3</span> What can we say about the performance of different groups in STEM education?</a></li>
+  <li><a href="#are-there-significant-gender-differences-in-aspects-of-stem-education" id="toc-are-there-significant-gender-differences-in-aspects-of-stem-education" class="nav-link" data-scroll-target="#are-there-significant-gender-differences-in-aspects-of-stem-education"> <span class="header-section-number">4</span> Are there significant gender differences in aspects of STEM education?</a></li>
+  <li>
+<a href="#maths-anxiety" id="toc-maths-anxiety" class="nav-link" data-scroll-target="#maths-anxiety"> <span class="header-section-number">5</span> Maths Anxiety</a>
+  <ul class="collapse">
+<li>
+<a href="#maths-anxiety-intro" id="toc-maths-anxiety-intro" class="nav-link" data-scroll-target="#maths-anxiety-intro"> <span class="header-section-number">5.1</span> Maths Anxiety Intro</a>
+  <ul class="collapse">
+<li><a href="#coding-example" id="toc-coding-example" class="nav-link" data-scroll-target="#coding-example"> <span class="header-section-number">5.1.1</span> coding example</a></li>
+  </ul>
+</li>
+  </ul>
+</li>
+  <li><a href="#inquiry-learning-in-science" id="toc-inquiry-learning-in-science" class="nav-link" data-scroll-target="#inquiry-learning-in-science"> <span class="header-section-number">6</span> Inquiry learning in science</a></li>
+  <li><a href="#science-capital" id="toc-science-capital" class="nav-link" data-scroll-target="#science-capital"> <span class="header-section-number">7</span> Science capital</a></li>
+  <li><a href="#teacher-relationships" id="toc-teacher-relationships" class="nav-link" data-scroll-target="#teacher-relationships"> <span class="header-section-number">8</span> Teacher relationships</a></li>
+  <li><a href="#teacher-relationships-1" id="toc-teacher-relationships-1" class="nav-link" data-scroll-target="#teacher-relationships-1"> <span class="header-section-number">9</span> Teacher relationships</a></li>
+  <li>
+<a href="#setting-up-analysis-for-specific-datasets" id="toc-setting-up-analysis-for-specific-datasets" class="nav-link" data-scroll-target="#setting-up-analysis-for-specific-datasets"> <span class="header-section-number">10</span> Setting up analysis for specific datasets</a>
+  <ul class="collapse">
+<li><a href="#pisa" id="toc-pisa" class="nav-link" data-scroll-target="#pisa"> <span class="header-section-number">10.1</span> PISA</a></li>
+  <li><a href="#what-is-pisa" id="toc-what-is-pisa" class="nav-link" data-scroll-target="#what-is-pisa"> <span class="header-section-number">10.2</span> What is PISA</a></li>
+  <li><a href="#where-to-find-it" id="toc-where-to-find-it" class="nav-link" data-scroll-target="#where-to-find-it"> <span class="header-section-number">10.3</span> Where to find it</a></li>
+  <li><a href="#how-to-use-it" id="toc-how-to-use-it" class="nav-link" data-scroll-target="#how-to-use-it"> <span class="header-section-number">10.4</span> How to use it</a></li>
+  <li><a href="#common-issues" id="toc-common-issues" class="nav-link" data-scroll-target="#common-issues"> <span class="header-section-number">10.5</span> Common issues</a></li>
+  <li><a href="#interesting-papers-and-reading-on-pisa" id="toc-interesting-papers-and-reading-on-pisa" class="nav-link" data-scroll-target="#interesting-papers-and-reading-on-pisa"> <span class="header-section-number">10.6</span> Interesting papers and reading on PISA</a></li>
+  <li><a href="#english-department-for-education" id="toc-english-department-for-education" class="nav-link" data-scroll-target="#english-department-for-education"> <span class="header-section-number">10.7</span> English Department for Education</a></li>
+  <li><a href="#timss" id="toc-timss" class="nav-link" data-scroll-target="#timss"> <span class="header-section-number">10.8</span> TIMSS</a></li>
+  </ul>
+</li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"> <span class="header-section-number">11</span> References</a></li>
+  </ul></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title">Quantitative methods in the context of STEM education research</h1>
+<p class="subtitle lead">MA STEM Education</p>
+</div>
+
+
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>MA STEM @ KCL </p>
+          </div>
+  </div>
+    
+    
+  </div>
+  
+
+</header><section id="introduction-to-quantitative-methods" class="level1" data-number="1"><h1 data-number="1">
+<span class="header-section-number">1</span> Introduction to quantitative methods</h1>
+<p>Add a sub header <code>##</code> for the introduction</p>
+<p>Write an introduction including bold and italic text, and</p>
+<ul>
+<li>bullet</li>
+<li>points</li>
+</ul>
+<p>And a <a href="https://en.wikipedia.org/wiki/Science,_technology,_engineering,_and_mathematics">link</a> to a website</p>
+<p>Find a bibtex reference on google scholar and copy and paste it into references/mastemr.bib (make sure you save the file!)</p>
+<p>Add the reference to the above text</p>
+<p>Add an image to help make your point</p>
+<p>Add a sub header for “coding example”</p>
+<p>Check that the following code loads the teacher’s dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
+✔ ggplot2 3.4.0      ✔ purrr   0.3.5 
+✔ tibble  3.1.8      ✔ dplyr   1.0.10
+✔ tidyr   1.2.1      ✔ stringr 1.4.1 
+✔ readr   2.1.3      ✔ forcats 0.5.2 
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># a small hack to set the correct working directory for chapters</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="cf">if</span>(<span class="fu">grepl</span>(<span class="st">"/chapters"</span>, <span class="fu">getwd</span>())){</span>
+<span id="cb3-3"><a href="#cb3-3"></a>  <span class="fu">setwd</span>(<span class="fu">str_replace</span>(<span class="fu">getwd</span>(), <span class="st">"/chapters"</span>, <span class="st">""</span>))</span>
+<span id="cb3-4"><a href="#cb3-4"></a>}</span>
+<span id="cb3-5"><a href="#cb3-5"></a></span>
+<span id="cb3-6"><a href="#cb3-6"></a>teacher_df <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">paste0</span>(<span class="fu">getwd</span>(),<span class="st">"/data/teacher2018.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Explore the dataset</p>
+<p>Write more code to find out the total years of experience of staff in a subset of countries</p>
+<p>include that code in your markdown</p>
+<p>Add the median number of years experience for GBR teachers inline to a block of text</p>
+<p>Make a graph of median years of teaching experience and include it in this document</p>
+<p>Add a sub heading for questions</p>
+<p>Add some questions for students without code</p>
+<p>Add some questions for students with code</p>
+</section><section id="introduction-to-analysis-software" class="level1" data-number="2"><h1 data-number="2">
+<span class="header-section-number">2</span> Introduction to analysis software</h1>
+<section id="introduction" class="level2" data-number="2.1"><h2 data-number="2.1" class="anchored" data-anchor-id="introduction">
+<span class="header-section-number">2.1</span> Introduction</h2>
+<p>This short course aims to take you through the process of writing your first programs in the <strong>R statistical programming language</strong> to analyse national and international educational datasets. To do this we will be using the <strong>R Studio</strong> integrated development environment (IDE), a desktop application to support you in writing R scripts. R Studio supports your programming by flagging up errors in your code as you write it, and helping you manage your analysis environment by giving you quick access to tables, objects and graphs as you develop them. In addition, we will be looking at data analysis using the <strong>tidyverse</strong> code packages. The tidyverse is a standardised collection of supporting code that helps you read data, tidy it into a usable format, analyse it and present your findings.</p>
+<p>The R programming language offers similar functionality to an application based statistical tool such as SPSS, with more of a focus on you writing code to solve your problems, rather than using prebuilt tools. R is open source, meaning that it is free to use and that lots of people have written code in R that they have shared with others. R statistical libraries are some of the most comprehensive in existence. R is popular<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> in academia and industry, being used for everything from sales modelling to cancer detection.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># This example shows how R can pull data directly from the internet</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="co"># tidy it and start making graphs. All within 9 lines of code</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb4-4"><a href="#cb4-4"></a></span>
+<span id="cb4-5"><a href="#cb4-5"></a>education <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(</span>
+<span id="cb4-6"><a href="#cb4-6"></a>  <span class="st">"https://barrolee.github.io/BarroLeeDataSet/BLData/BL_v3_MF.csv"</span>)</span>
+<span id="cb4-7"><a href="#cb4-7"></a></span>
+<span id="cb4-8"><a href="#cb4-8"></a>education <span class="sc">%&gt;%</span></span>
+<span id="cb4-9"><a href="#cb4-9"></a>  <span class="fu">filter</span>(agefrom <span class="sc">==</span> <span class="dv">15</span>, ageto <span class="sc">==</span> <span class="dv">24</span>,</span>
+<span id="cb4-10"><a href="#cb4-10"></a>         country <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Germany"</span>,<span class="st">"France"</span>,<span class="st">"Italy"</span>,<span class="st">"United Kingdom"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb4-11"><a href="#cb4-11"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>year, <span class="at">y=</span>yr_sch, <span class="at">colour=</span>country)) <span class="sc">+</span></span>
+<span id="cb4-12"><a href="#cb4-12"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb4-13"><a href="#cb4-13"></a>  <span class="fu">geom_line</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="chapters/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Whilst it is possible to use R through menu systems and drop down tools, the focus of this course is to write your own R scripts. These are text files that will tell the computer how to go through the process of loading, cleaning, analysing and presenting data. The sequential and modular nature of these files makes it very easy to develop and test each stage separately, reuse code in the future, and share with others.</p>
+<p>This booklet is written with the following sections to support you:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># Code examples and questions appear like this</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a>a <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">3</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<pre><code>[1] Code output appears like this</code></pre>
+<p><code>Courier font</code> indicates keyboard presses, column names, column values and function names.</p>
+<p><code>&lt;table&gt;</code> Courier font within brackets describe values that can be passed to functions and that you need to define yourself. I.e. copying and pasting these code chunks verbatim won’t work!</p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>specifies things to note</p>
+</div>
+</div>
+<div class="callout-warning callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>gives warning messages</p>
+</div>
+</div>
+<div class="callout-important callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>highlights issues that might break your code</p>
+</div>
+</div>
+<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>gives suggestions on how to do things in a better way</p>
+</div>
+</div>
+<div class="question">
+<p>Activities and coding tasks look like this</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>what <span class="ot">&lt;-</span> <span class="st">"does this"</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a>code <span class="sc">==</span> <span class="st">"do"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</section><section id="getting-set-up" class="level2" data-number="2.2"><h2 data-number="2.2" class="anchored" data-anchor-id="getting-set-up">
+<span class="header-section-number">2.2</span> Getting set up</h2>
+<section id="installation-on-your-own-machine" class="level3" data-number="2.2.1"><h3 data-number="2.2.1" class="anchored" data-anchor-id="installation-on-your-own-machine">
+<span class="header-section-number">2.2.1</span> Installation (on your own machine)</h3>
+<ol type="1">
+<li>
+<p>Install R (default settings should be fine)</p>
+<ol type="a">
+<li>
+<strong>Windows</strong> users visit: <a href="https://cran.r-project.org/bin/windows/base/R-4.2.0-win.exe">here</a>
+</li>
+<li>
+<strong>Mac</strong> users visit: <a href="https://cran.r-project.org/bin/macosx/base/R-4.2.0.pkg">intel</a> <a href="https://cran.r-project.org/bin/macosx/big-sur-arm64/base/R-4.2.0-arm64.pkg">M1 Macs</a>
+</li>
+</ol>
+</li>
+<li><p>Install <strong>RStudio</strong>, visit <a href="https://rstudio.com/products/rstudio/download/#download">here</a> and it should present you with the version suitable for your operating system.</p></li>
+</ol>
+<p>(If the above doesn’t work follow the instructions <a href="https://www.rstudio.com/products/rstudio/download/#download">here</a>)</p>
+</section><section id="installation-kcl-restricted-machine" class="level3" data-number="2.2.2"><h3 data-number="2.2.2" class="anchored" data-anchor-id="installation-kcl-restricted-machine">
+<span class="header-section-number">2.2.2</span> Installation (KCL restricted machine)</h3>
+<ol type="1">
+<li><p>load the software center</p></li>
+<li>
+<p>Search for and install <strong>“R Statistics”</strong></p>
+<p><img src="chapters/images/software_centre_R.png" class="img-fluid"></p>
+</li>
+<li>
+<p>Search for and install <strong>“RStudio”</strong></p>
+<p><img src="chapters/images/software_centre_RStudio.png" class="img-fluid"></p>
+</li>
+</ol>
+<p>You might find this tutorial video helpful:</p>
+<p>https://vimeo.com/203516510</p>
+</section><section id="sec-packages" class="level3" data-number="2.2.3"><h3 data-number="2.2.3" class="anchored" data-anchor-id="sec-packages">
+<span class="header-section-number">2.2.3</span> Setting up RStudio and the tidyverse</h3>
+<ol type="1">
+<li><p>Open RStudio</p></li>
+<li>
+<p>On the bottom right-hand side, select <strong>Packages</strong>, then select <strong>Install</strong>, then type <strong>“tidyverse”</strong> into the Packages field of the new window:</p>
+<p><img src="chapters/images/tidyverse_install.png" class="img-fluid"></p>
+</li>
+<li><p>Click Install and you should see things happening in the console (bottom left). Wait for the console activity to finish (it’ll be downloading and checking packages).</p></li>
+<li>
+<p>Add a new R Script using the <img src="chapters/images/RStudio_new_button.png" class="img-fluid"> button</p>
+<p><img src="chapters/images/RStudio_new_button_RScript.png" width="210" height="74"></p>
+</li>
+<li>
+<p>In the new R script, write the following:</p>
+<p><img src="chapters/images/code_starwars.png" class="img-fluid" width="514"></p>
+</li>
+<li>
+<p>Select all the lines and press <code>Control</code> or <code>Command</code> and <code>Enter</code> on your keyboard at the same time. Alternatively, press the <img src="chapters/images/RStudio-run.png" class="img-fluid" width="36"> button</p>
+<p><img src="chapters/images/code_starwars_select.png" class="img-fluid" width="585"></p>
+</li>
+<li>
+<p>Check that you have the following in the console window:</p>
+<p><img src="chapters/images/output_data_starwars.png" class="img-fluid"></p>
+</li>
+<li><p>That’s it, you should be set up!</p></li>
+<li><p>Any issues, please mail <a href="chapters/mailto:peter.kemp@kcl.ac.uk">peter.kemp@kcl.ac.uk</a></p></li>
+</ol></section></section><section id="starting-to-code" class="level2" data-number="2.3"><h2 data-number="2.3" class="anchored" data-anchor-id="starting-to-code">
+<span class="header-section-number">2.3</span> Starting to code</h2>
+<p>After adding a new R Script using the button <img src="chapters/images/RStudio_new_button.png" width="27" height="29">, there are four parts to R Studio’s interface. For the moment we are most interested in the Script file section, top left.</p>
+<p><img src="chapters/images/RStudio_interface.png" class="img-fluid" width="600"></p>
+</section></section><section id="what-can-we-say-about-the-performance-of-different-groups-in-stem-education" class="level1" data-number="3"><h1 data-number="3">
+<span class="header-section-number">3</span> What can we say about the performance of different groups in STEM education?</h1>
+<p>Add a sub header <code>##</code> for the introduction</p>
+<p>Write an introduction including bold and italic text, and</p>
+<ul>
+<li>bullet</li>
+<li>points</li>
+</ul>
+<p>And a <a href="https://en.wikipedia.org/wiki/Science,_technology,_engineering,_and_mathematics">link</a> to a website</p>
+<p>Find a bibtex reference on google scholar and copy and paste it into references/mastemr.bib (make sure you save the file!)</p>
+<p>Add the reference to the above text</p>
+<p>Add a sub header for “coding example”</p>
+<p>Add an image to help make your point</p>
+<p>Check that the following code loads the teacher’s dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span>
+<span id="cb7-2"><a href="#cb7-2"></a></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="co"># a small hack to set the correct working directory for chapters</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="cf">if</span>(<span class="fu">grepl</span>(<span class="st">"/chapters"</span>, <span class="fu">getwd</span>())){</span>
+<span id="cb7-5"><a href="#cb7-5"></a>  <span class="fu">setwd</span>(<span class="fu">str_replace</span>(<span class="fu">getwd</span>(), <span class="st">"/chapters"</span>, <span class="st">""</span>))</span>
+<span id="cb7-6"><a href="#cb7-6"></a>}</span>
+<span id="cb7-7"><a href="#cb7-7"></a></span>
+<span id="cb7-8"><a href="#cb7-8"></a>teacher_df <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">paste0</span>(<span class="fu">getwd</span>(),<span class="st">"/data/teacher2018.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Explore the dataset</p>
+<p>Write more code to find out the total years of experience of staff in a subset of countries</p>
+<p>include that code in your markdown</p>
+<p>Add the median number of years experience for GBR teachers inline to a block of text</p>
+<p>Make a graph of median years of teaching experience and include it in this document</p>
+<p>Add a sub heading for questions</p>
+<p>Add some questions for students without code</p>
+<p>Add some questions for students with code</p>
+</section><section id="are-there-significant-gender-differences-in-aspects-of-stem-education" class="level1" data-number="4"><h1 data-number="4">
+<span class="header-section-number">4</span> Are there significant gender differences in aspects of STEM education?</h1>
+<p>Add a sub header <code>##</code> for the introduction</p>
+<p>Write an introduction including bold and italic text, and</p>
+<ul>
+<li>bullet</li>
+<li>points</li>
+</ul>
+<p>And a <a href="https://en.wikipedia.org/wiki/Science,_technology,_engineering,_and_mathematics">link</a> to a website</p>
+<p>Find a bibtex reference on google scholar and copy and paste it into references/mastemr.bib (make sure you save the file!)</p>
+<p>Add the reference to the above text</p>
+<p>Add a sub header for “coding example”</p>
+<p>Add an image to help make your point</p>
+<p>Check that the following code loads the teacher’s dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2"></a></span>
+<span id="cb8-3"><a href="#cb8-3"></a><span class="co"># a small hack to set the correct working directory for chapters</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a><span class="cf">if</span>(<span class="fu">grepl</span>(<span class="st">"/chapters"</span>, <span class="fu">getwd</span>())){</span>
+<span id="cb8-5"><a href="#cb8-5"></a>  <span class="fu">setwd</span>(<span class="fu">str_replace</span>(<span class="fu">getwd</span>(), <span class="st">"/chapters"</span>, <span class="st">""</span>))</span>
+<span id="cb8-6"><a href="#cb8-6"></a>}</span>
+<span id="cb8-7"><a href="#cb8-7"></a></span>
+<span id="cb8-8"><a href="#cb8-8"></a>teacher_df <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">paste0</span>(<span class="fu">getwd</span>(),<span class="st">"/data/teacher2018.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Explore the dataset</p>
+<p>Write more code to find out the total years of experience of staff in a subset of countries</p>
+<p>include that code in your markdown</p>
+<p>Add the median number of years experience for GBR teachers inline to a block of text</p>
+<p>Make a graph of median years of teaching experience and include it in this document</p>
+<p>Add a sub heading for questions</p>
+<p>Add some questions for students without code</p>
+<p>Add some questions for students with code</p>
+</section><section id="maths-anxiety" class="level1" data-number="5"><h1 data-number="5">
+<span class="header-section-number">5</span> Maths Anxiety</h1>
+<section id="maths-anxiety-intro" class="level2" data-number="5.1"><h2 data-number="5.1" class="anchored" data-anchor-id="maths-anxiety-intro">
+<span class="header-section-number">5.1</span> Maths Anxiety Intro</h2>
+<p>Write an introduction including bold and italic text, and</p>
+<ul>
+<li>bullet</li>
+<li>points</li>
+</ul>
+<p>This is a <a href="https://en.wikipedia.org/wiki/Science,_technology,_engineering,_and_mathematics">STEM website</a></p>
+<p>Find a bibtex reference on google scholar and copy and paste it into references/mastemr.bib (make sure you save the file!)</p>
+<p><span class="citation" data-cites="francis2017exploring">(<a href="#ref-francis2017exploring" role="doc-biblioref"><strong>francis2017exploring?</strong></a>)</span> said some interesting things</p>
+<p>Francis <span class="citation" data-cites="francis2017exploring">(<a href="#ref-francis2017exploring" role="doc-biblioref"><strong>francis2017exploring?</strong></a>)</span></p>
+<p><img src="./images/kemp.jpg" class="img-fluid"></p>
+<p>Add the reference to the above text</p>
+<section id="coding-example" class="level3" data-number="5.1.1"><h3 data-number="5.1.1" class="anchored" data-anchor-id="coding-example">
+<span class="header-section-number">5.1.1</span> coding example</h3>
+<p>Add an image to help make your point</p>
+<p>Check that the following code loads the teacher’s dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span>
+<span id="cb9-2"><a href="#cb9-2"></a></span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="co"># a small hack to set the correct working directory for chapters</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a><span class="cf">if</span>(<span class="fu">grepl</span>(<span class="st">"/chapters"</span>, <span class="fu">getwd</span>())){</span>
+<span id="cb9-5"><a href="#cb9-5"></a>  <span class="fu">setwd</span>(<span class="fu">str_replace</span>(<span class="fu">getwd</span>(), <span class="st">"/chapters"</span>, <span class="st">""</span>))</span>
+<span id="cb9-6"><a href="#cb9-6"></a>}</span>
+<span id="cb9-7"><a href="#cb9-7"></a></span>
+<span id="cb9-8"><a href="#cb9-8"></a>teacher_df <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">paste0</span>(<span class="fu">getwd</span>(),<span class="st">"/data/teacher2018.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>teacher_df <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(CNT) <span class="sc">%&gt;%</span> <span class="fu">summarise</span>(<span class="at">n=</span><span class="fu">n</span>()) <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  CNT                            n
+  &lt;chr+lbl&gt;                  &lt;int&gt;
+1 ALB [Albania]               3375
+2 ARE [United Arab Emirates] 12358
+3 BRA [Brazil]                8969
+4 CHL [Chile]                 3755
+5 DEU [Germany]               6687
+6 DOM [Dominican Republic]    2700</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>teacher_df <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(CNT) <span class="sc">%&gt;%</span> <span class="fu">summarise</span>(<span class="at">n=</span><span class="fu">n</span>()) <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Explore the dataset</p>
+<p>Write more code to find out the total years of experience of staff in a subset of countries</p>
+<p>include that code in your markdown</p>
+<p>Add the median number of years experience for GBR teachers inline to a block of text</p>
+<p>Make a graph of median years of teaching experience and include it in this document</p>
+<p>Add a sub heading for questions</p>
+<p>Add some questions for students without code</p>
+<p>Add some questions for students with code</p>
+</section></section></section><section id="inquiry-learning-in-science" class="level1" data-number="6"><h1 data-number="6">
+<span class="header-section-number">6</span> Inquiry learning in science</h1>
+<p>Add a sub header <code>##</code> for the introduction</p>
+<p>Write an introduction including bold and italic text, and</p>
+<ul>
+<li>bullet</li>
+<li>points</li>
+</ul>
+<p>And a <a href="https://en.wikipedia.org/wiki/Science,_technology,_engineering,_and_mathematics">link</a> to a website</p>
+<p>Find a bibtex reference on google scholar and copy and paste it into references/mastemr.bib (make sure you save the file!)</p>
+<p>Add the reference to the above text</p>
+<p>Add a sub header for “coding example”</p>
+<p>Add an image to help make your point</p>
+<p>Check that the following code loads the teacher’s dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span>
+<span id="cb13-2"><a href="#cb13-2"></a></span>
+<span id="cb13-3"><a href="#cb13-3"></a><span class="co"># a small hack to set the correct working directory for chapters</span></span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="cf">if</span>(<span class="fu">grepl</span>(<span class="st">"/chapters"</span>, <span class="fu">getwd</span>())){</span>
+<span id="cb13-5"><a href="#cb13-5"></a>  <span class="fu">setwd</span>(<span class="fu">str_replace</span>(<span class="fu">getwd</span>(), <span class="st">"/chapters"</span>, <span class="st">""</span>))</span>
+<span id="cb13-6"><a href="#cb13-6"></a>}</span>
+<span id="cb13-7"><a href="#cb13-7"></a></span>
+<span id="cb13-8"><a href="#cb13-8"></a>teacher_df <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">paste0</span>(<span class="fu">getwd</span>(),<span class="st">"/data/teacher2018.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Explore the dataset</p>
+<p>Write more code to find out the total years of experience of staff in a subset of countries</p>
+<p>include that code in your markdown</p>
+<p>Add the median number of years experience for GBR teachers inline to a block of text</p>
+<p>Make a graph of median years of teaching experience and include it in this document</p>
+<p>Add a sub heading for questions</p>
+<p>Add some questions for students without code</p>
+<p>Add some questions for students with code</p>
+</section><section id="science-capital" class="level1" data-number="7"><h1 data-number="7">
+<span class="header-section-number">7</span> Science capital</h1>
+<p>Add a sub header <code>##</code> for the introduction</p>
+<p>Write an introduction including bold and italic text, and</p>
+<ul>
+<li>bullet</li>
+<li>points</li>
+</ul>
+<p>And a <a href="https://en.wikipedia.org/wiki/Science,_technology,_engineering,_and_mathematics">link</a> to a website</p>
+<p>Find a bibtex reference on google scholar and copy and paste it into references/mastemr.bib (make sure you save the file!)</p>
+<p>Add the reference to the above text</p>
+<p>Add a sub header for “coding example”</p>
+<p>Add an image to help make your point</p>
+<p>Check that the following code loads the teacher’s dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span>
+<span id="cb14-2"><a href="#cb14-2"></a></span>
+<span id="cb14-3"><a href="#cb14-3"></a><span class="co"># a small hack to set the correct working directory for chapters</span></span>
+<span id="cb14-4"><a href="#cb14-4"></a><span class="cf">if</span>(<span class="fu">grepl</span>(<span class="st">"/chapters"</span>, <span class="fu">getwd</span>())){</span>
+<span id="cb14-5"><a href="#cb14-5"></a>  <span class="fu">setwd</span>(<span class="fu">str_replace</span>(<span class="fu">getwd</span>(), <span class="st">"/chapters"</span>, <span class="st">""</span>))</span>
+<span id="cb14-6"><a href="#cb14-6"></a>}</span>
+<span id="cb14-7"><a href="#cb14-7"></a></span>
+<span id="cb14-8"><a href="#cb14-8"></a>teacher_df <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">paste0</span>(<span class="fu">getwd</span>(),<span class="st">"/data/teacher2018.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Explore the dataset</p>
+<p>Write more code to find out the total years of experience of staff in a subset of countries</p>
+<p>include that code in your markdown</p>
+<p>Add the median number of years experience for GBR teachers inline to a block of text</p>
+<p>Make a graph of median years of teaching experience and include it in this document</p>
+<p>Add a sub heading for questions</p>
+<p>Add some questions for students without code</p>
+<p>Add some questions for students with code</p>
+</section><section id="teacher-relationships" class="level1" data-number="8"><h1 data-number="8">
+<span class="header-section-number">8</span> Teacher relationships</h1>
+<p>Add a sub header <code>##</code> for the introduction</p>
+<p>Write an introduction including bold and italic text, and</p>
+<ul>
+<li>bullet</li>
+<li>points</li>
+</ul>
+<p>And a <a href="https://en.wikipedia.org/wiki/Science,_technology,_engineering,_and_mathematics">link</a> to a website</p>
+<p>Find a bibtex reference on google scholar and copy and paste it into references/mastemr.bib (make sure you save the file!)</p>
+<p>Add the reference to the above text</p>
+<p>Add an image to help make your point</p>
+<p>Add a sub header for “coding example”</p>
+<p>Check that the following code loads the teacher’s dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2"></a></span>
+<span id="cb15-3"><a href="#cb15-3"></a><span class="co"># a small hack to set the correct working directory for chapters</span></span>
+<span id="cb15-4"><a href="#cb15-4"></a><span class="cf">if</span>(<span class="fu">grepl</span>(<span class="st">"/chapters"</span>, <span class="fu">getwd</span>())){</span>
+<span id="cb15-5"><a href="#cb15-5"></a>  <span class="fu">setwd</span>(<span class="fu">str_replace</span>(<span class="fu">getwd</span>(), <span class="st">"/chapters"</span>, <span class="st">""</span>))</span>
+<span id="cb15-6"><a href="#cb15-6"></a>}</span>
+<span id="cb15-7"><a href="#cb15-7"></a></span>
+<span id="cb15-8"><a href="#cb15-8"></a>teacher_df <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">paste0</span>(<span class="fu">getwd</span>(),<span class="st">"/data/teacher2018.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Explore the dataset</p>
+<p>Write more code to find out the total years of experience of staff in a subset of countries</p>
+<p>include that code in your markdown</p>
+<p>Add the median number of years experience for GBR teachers inline to a block of text</p>
+<p>Make a graph of median years of teaching experience and include it in this document</p>
+<p>Add a sub heading for questions</p>
+<p>Add some questions for students without code</p>
+<p>Add some questions for students with code</p>
+</section><section id="teacher-relationships-1" class="level1" data-number="9"><h1 data-number="9">
+<span class="header-section-number">9</span> Teacher relationships</h1>
+<p>Add a sub header <code>##</code> for the introduction</p>
+<p>Write an introduction including bold and italic text, and</p>
+<ul>
+<li>bullet</li>
+<li>points</li>
+</ul>
+<p>And a <a href="https://en.wikipedia.org/wiki/Science,_technology,_engineering,_and_mathematics">link</a> to a website</p>
+<p>Find a bibtex reference on google scholar and copy and paste it into references/mastemr.bib (make sure you save the file!)</p>
+<p>Add the reference to the above text</p>
+<p>Add a sub header for “coding example”</p>
+<p>Add an image to help make your point</p>
+<p>Check that the following code loads the teacher’s dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2"></a></span>
+<span id="cb16-3"><a href="#cb16-3"></a><span class="co"># a small hack to set the correct working directory for chapters</span></span>
+<span id="cb16-4"><a href="#cb16-4"></a><span class="cf">if</span>(<span class="fu">grepl</span>(<span class="st">"/chapters"</span>, <span class="fu">getwd</span>())){</span>
+<span id="cb16-5"><a href="#cb16-5"></a>  <span class="fu">setwd</span>(<span class="fu">str_replace</span>(<span class="fu">getwd</span>(), <span class="st">"/chapters"</span>, <span class="st">""</span>))</span>
+<span id="cb16-6"><a href="#cb16-6"></a>}</span>
+<span id="cb16-7"><a href="#cb16-7"></a></span>
+<span id="cb16-8"><a href="#cb16-8"></a>teacher_df <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">paste0</span>(<span class="fu">getwd</span>(),<span class="st">"/data/teacher2018.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Explore the dataset</p>
+<p>Write more code to find out the total years of experience of staff in a subset of countries</p>
+<p>include that code in your markdown</p>
+<p>Add the median number of years experience for GBR teachers inline to a block of text</p>
+<p>Make a graph of median years of teaching experience and include it in this document</p>
+<p>Add a sub heading for questions</p>
+<p>Add some questions for students without code</p>
+<p>Add some questions for students with code</p>
+<p>_12-effective international STEM ed</p>
+</section><section id="setting-up-analysis-for-specific-datasets" class="level1" data-number="10"><h1 data-number="10">
+<span class="header-section-number">10</span> Setting up analysis for specific datasets</h1>
+<p>The examples shown in this booklet use a range of freely available datasets. We would like to encourage you to use one of these datasets in your own analysis. This section will take you through the process of downloading and using these datasets.</p>
+<section id="pisa" class="level2" data-number="10.1"><h2 data-number="10.1" class="anchored" data-anchor-id="pisa">
+<span class="header-section-number">10.1</span> PISA</h2>
+</section><section id="what-is-pisa" class="level2" data-number="10.2"><h2 data-number="10.2" class="anchored" data-anchor-id="what-is-pisa">
+<span class="header-section-number">10.2</span> What is PISA</h2>
+<p>The Programme for International Student Assessment (PISA) is an OECD initiative that looks at the reading, mathematics and science abilities of students aged 15 years old. Data is collected from # countries every three years.</p>
+<table class="table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+</colgroup>
+<thead><tr class="header">
+<th>Dataset</th>
+<th>Description</th>
+<th style="text-align: center;">03</th>
+<th style="text-align: center;">06</th>
+<th style="text-align: center;">03</th>
+<th style="text-align: center;">12</th>
+<th style="text-align: center;">15</th>
+<th style="text-align: center;">18</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Student</td>
+<td>demographic data on student participants</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+</tr>
+<tr class="even">
+<td>School</td>
+<td>descriptive data about schools</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+</tr>
+<tr class="odd">
+<td>Parent</td>
+<td>a survey for student’s parents including information about home environments and parental education</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td>Teacher</td>
+<td>demographic, teaching, qualification and training data</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+</tr>
+<tr class="odd">
+<td>Cognitive</td>
+<td></td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+</tr>
+</tbody>
+</table></section><section id="where-to-find-it" class="level2" data-number="10.3"><h2 data-number="10.3" class="anchored" data-anchor-id="where-to-find-it">
+<span class="header-section-number">10.3</span> Where to find it</h2>
+<p>PISA datasets can be found on the <a href="https://www.oecd.org/pisa/data/">OECD website</a>. Data is provided in SPSS and SAS formats. There are tools available to download your own versions of these datasets</p>
+</section><section id="how-to-use-it" class="level2" data-number="10.4"><h2 data-number="10.4" class="anchored" data-anchor-id="how-to-use-it">
+<span class="header-section-number">10.4</span> How to use it</h2>
+<p>Download data</p>
+<p>Clean it</p>
+<p>Merge demographic data with assessment outcomes</p>
+</section><section id="common-issues" class="level2" data-number="10.5"><h2 data-number="10.5" class="anchored" data-anchor-id="common-issues">
+<span class="header-section-number">10.5</span> Common issues</h2>
+<p>The PISA datasets can be absolutely huge and might bring your computer to its knees, if you are using a computer with less than 16Gb of RAM you might not be able to load some certain tables at all. Tables such as the <em>Cognitive</em> dataset have hundreds of thousands of rows and thousands of columns, loading them directly might lead to an error similar to this: <code>Error: cannot allocate vector of size 2.1 Gb</code>. This means that R can’t find enough RAM to load the dataset and has given up. You can see a rough estimate of how much RAM R is currently using the top Environment panel:</p>
+<p><img src="./images/environment-RAM.png" class="img-fluid"></p>
+<p>To get around this issues you can try to clean your current R environment using the brush tool:</p>
+<p><img src="./images/environment-brush.png" class="img-fluid"></p>
+<p>This will drop all the current dataframes, objects, functions and packages that you have loaded meaning you will have to reload packages such as <code><a href="https://tidyverse.tidyverse.org">library(tidyverse)</a></code> and <code><a href="https://haven.tidyverse.org">library(haven)</a></code> before you can attempt to reload the PISA tables.</p>
+<p>A lack of RAM might also be the result of lots of other programs running concurrently on your computer. Try to close anything that you don’t need, web browsers can be particularly RAM hungry, so close them or as many tabs as you can.</p>
+<p>If none of the above works, then please get in touch with the team, letting them know which table you need from which year, with which fields and for which countries. We will be able to provide you with a cutdown dataset.</p>
+</section><section id="interesting-papers-and-reading-on-pisa" class="level2" data-number="10.6"><h2 data-number="10.6" class="anchored" data-anchor-id="interesting-papers-and-reading-on-pisa">
+<span class="header-section-number">10.6</span> Interesting papers and reading on PISA</h2>
+<p>Jerrim</p>
+</section><section id="english-department-for-education" class="level2" data-number="10.7"><h2 data-number="10.7" class="anchored" data-anchor-id="english-department-for-education">
+<span class="header-section-number">10.7</span> English Department for Education</h2>
+</section><section id="timss" class="level2" data-number="10.8"><h2 data-number="10.8" class="anchored" data-anchor-id="timss">
+<span class="header-section-number">10.8</span> TIMSS</h2>
+</section></section><section id="references" class="level1" data-number="11"><h1 data-number="11">
+<span class="header-section-number">11</span> References</h1>
+
+
+</section><div id="quarto-appendix" class="default"><section class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1" role="doc-endnote"><p>As of November 2022, <a href="https://www.tiobe.com/tiobe-index/">Tiobe</a> has R as the 12th most popular programming language. Many other, contradictory, ranking systems exist.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

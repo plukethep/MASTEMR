@@ -4,35 +4,35 @@
     "href": "index.html",
     "title": "Quantitative methods in the context of STEM education research",
     "section": "",
-    "text": "there is some text here for chapter 1\nMore text\nMore text\n\n\nsomething or other"
+    "text": "Add a sub header ## for the introduction\nWrite an introduction including bold and italic text, and\n\nbullet\npoints\n\nAnd a link to a website\nFind a bibtex reference on google scholar and copy and paste it into references/mastemr.bib (make sure you save the file!)\nAdd the reference to the above text\nAdd an image to help make your point\nAdd a sub header for “coding example”\nCheck that the following code loads the teacher’s dataset.\n\nlibrary(\"tidyverse\")\n\n── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──\n✔ ggplot2 3.3.6      ✔ purrr   0.3.5 \n✔ tibble  3.1.8      ✔ dplyr   1.0.10\n✔ tidyr   1.2.1      ✔ stringr 1.4.1 \n✔ readr   2.1.3      ✔ forcats 0.5.2 \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\n\n# a small hack to set the correct working directory for chapters\nif(grepl(\"/chapters\", getwd())){\n  setwd(str_replace(getwd(), \"/chapters\", \"\"))\n}\n\nteacher_df <- readRDS(paste0(getwd(),\"/data/teacher2018.rds\"))\n\nExplore the dataset\nWrite more code to find out the total years of experience of staff in a subset of countries\ninclude that code in your markdown\nAdd the median number of years experience for GBR teachers inline to a block of text\nMake a graph of median years of teaching experience and include it in this document\nAdd a sub heading for questions\nAdd some questions for students without code\nAdd some questions for students with code"
   },
   {
     "objectID": "about.html",
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "The course is led by Richard Brock\n\n\n\n\n\n\n\n\n\n| \\| Richard Brock\nrichard.brock@kcl.ac.uk\n| \\|\n\n\n | Peter\nKemp | | |"
+    "text": "The course is led by Richard Brock\n\n\n\n\n\n\n\n\n | |\n\nRichard Brock | |\n\nrichard.brock@kcl.ac.uk\n\n\n\n | Peter | Kemp |\n| | |"
   },
   {
     "objectID": "index.html#pisa",
     "href": "index.html#pisa",
     "title": "Quantitative methods in the context of STEM education research",
-    "section": "5.1 PISA",
-    "text": "5.1 PISA"
+    "section": "10.1 PISA",
+    "text": "10.1 PISA"
   },
   {
     "objectID": "index.html#english-department-for-education",
     "href": "index.html#english-department-for-education",
     "title": "Quantitative methods in the context of STEM education research",
-    "section": "5.7 English Department for Education",
-    "text": "5.7 English Department for Education"
+    "section": "10.7 English Department for Education",
+    "text": "10.7 English Department for Education"
   },
   {
     "objectID": "index.html#timss",
     "href": "index.html#timss",
     "title": "Quantitative methods in the context of STEM education research",
-    "section": "5.8 TIMSS",
-    "text": "5.8 TIMSS"
+    "section": "10.8 TIMSS",
+    "text": "10.8 TIMSS"
   },
   {
     "objectID": "index.html#introduction",
@@ -59,29 +59,29 @@
     "objectID": "index.html#what-is-pisa",
     "href": "index.html#what-is-pisa",
     "title": "Quantitative methods in the context of STEM education research",
-    "section": "5.2 What is PISA",
-    "text": "5.2 What is PISA\nThe Programme for International Student Assessment (PISA) is an OECD initiative that looks at the reading, mathematics and science abilities of students aged 15 years old. Data is collected from # countries every three years.\n\n\n\n\n\n\n\n\n\n\n\n\n\nDataset\nDescription\n03\n06\n03\n12\n15\n18\n\n\n\n\nStudent\ndemographic data on student participants\nx\nx\nx\nx\nx\nx\n\n\nSchool\ndescriptive data about schools\nx\nx\nx\nx\nx\nx\n\n\nParent\n\nx\nx\n\n\n\n\n\n\nTeacher\n\n\n\n\nx\nx\nx\n\n\nCognitive\n\nx\nx\nx\nx\nx\nx"
+    "section": "10.2 What is PISA",
+    "text": "10.2 What is PISA\nThe Programme for International Student Assessment (PISA) is an OECD initiative that looks at the reading, mathematics and science abilities of students aged 15 years old. Data is collected from # countries every three years.\n\n\n\n\n\n\n\n\n\n\n\n\n\nDataset\nDescription\n03\n06\n03\n12\n15\n18\n\n\n\n\nStudent\ndemographic data on student participants\nx\nx\nx\nx\nx\nx\n\n\nSchool\ndescriptive data about schools\nx\nx\nx\nx\nx\nx\n\n\nParent\na survey for student’s parents including information about home environments and parental education\nx\nx\n\n\n\n\n\n\nTeacher\ndemographic, teaching, qualification and training data\n\n\n\nx\nx\nx\n\n\nCognitive\n\nx\nx\nx\nx\nx\nx"
   },
   {
     "objectID": "index.html#where-to-find-it",
     "href": "index.html#where-to-find-it",
     "title": "Quantitative methods in the context of STEM education research",
-    "section": "5.3 Where to find it",
-    "text": "5.3 Where to find it\nPISA datasets can be found on the OECD website. Data is provided in SPSS and SAS formats. There are tools available to download your own versions of these datasets"
+    "section": "10.3 Where to find it",
+    "text": "10.3 Where to find it\nPISA datasets can be found on the OECD website. Data is provided in SPSS and SAS formats. There are tools available to download your own versions of these datasets"
   },
   {
     "objectID": "index.html#how-to-use-it",
     "href": "index.html#how-to-use-it",
     "title": "Quantitative methods in the context of STEM education research",
-    "section": "5.4 How to use it",
-    "text": "5.4 How to use it\nDownload data\nClean it\nMerge demographic data with assessment outcomes"
+    "section": "10.4 How to use it",
+    "text": "10.4 How to use it\nDownload data\nClean it\nMerge demographic data with assessment outcomes"
   },
   {
     "objectID": "index.html#interesting-papers-and-reading-on-pisa",
     "href": "index.html#interesting-papers-and-reading-on-pisa",
     "title": "Quantitative methods in the context of STEM education research",
-    "section": "5.6 Interesting papers and reading on PISA",
-    "text": "5.6 Interesting papers and reading on PISA\nJerrim"
+    "section": "10.6 Interesting papers and reading on PISA",
+    "text": "10.6 Interesting papers and reading on PISA\nJerrim"
   },
   {
     "objectID": "index.html#heading-2",
@@ -94,7 +94,28 @@
     "objectID": "index.html#common-issues",
     "href": "index.html#common-issues",
     "title": "Quantitative methods in the context of STEM education research",
-    "section": "5.5 Common issues",
-    "text": "5.5 Common issues\nThe PISA datasets can be absolutely huge and might bring your computer to its knees. Tables such as the Cognitive dataset have hundreds of thousands of rows and thousands of columns."
+    "section": "10.5 Common issues",
+    "text": "10.5 Common issues\nThe PISA datasets can be absolutely huge and might bring your computer to its knees, if you are using a computer with less than 16Gb of RAM you might not be able to load some certain tables at all. Tables such as the Cognitive dataset have hundreds of thousands of rows and thousands of columns, loading them directly might lead to an error similar to this: Error: cannot allocate vector of size 2.1 Gb. This means that R can’t find enough RAM to load the dataset and has given up. You can see a rough estimate of how much RAM R is currently using the top Environment panel:\n\nTo get around this issues you can try to clean your current R environment using the brush tool:\n\nThis will drop all the current dataframes, objects, functions and packages that you have loaded meaning you will have to reload packages such as library(tidyverse) and library(haven) before you can attempt to reload the PISA tables.\nA lack of RAM might also be the result of lots of other programs running concurrently on your computer. Try to close anything that you don’t need, web browsers can be particularly RAM hungry, so close them or as many tabs as you can.\nIf none of the above works, then please get in touch with the team, letting them know which table you need from which year, with which fields and for which countries. We will be able to provide you with a cutdown dataset."
+  },
+  {
+    "objectID": "index.html#an-example-chapter",
+    "href": "index.html#an-example-chapter",
+    "title": "Quantitative methods in the context of STEM education research",
+    "section": "\n6.1 An example chapter",
+    "text": "6.1 An example chapter\n\n6.1.1 Why Quarto\n\nWe are looking to create a course book to guide students focused on STEM education stats. This booklet will include theory, code examples, questions, answers and seminar tasks all in one location. There will be a clear thread of R tasks to exemplify the theory topics, running throughout, so students can get plenty of practice. We are hoping that students will use this booklet to build their own models for their assignments and it will support them in dealing with major, rather scary looking, datasets.\nQuarto is pretty new, so you might find that searching for help to do things in rmarkdown (the older version of Quarto), will give you the support that you need. The examples here will help you create a website for the MA STEM course, but quarto also allows you to create powerpoints, Word docs and pdfs for publication.\n\n6.1.2 Basic formatting\nYou can write a .qmd file much like you would write a plain text document, but it does also allow basic formatting using a language called markdown. Markdown lets you have text that is **bold**, *italic*and <u>underlined</u>, it allows for linking actions, such as hyperlinks to webpages through [webpages](https://en.wikipedia.org/wiki/Main_Page) and inserting images ![](images/brock.jpg):\n\nMake sure that your images are in the images/ folder and that the address you use includes the image type, here it is images/brock.jpg. Try to give your images sensible names or place the images for your chapter in a subfolder of the images folder, e.g. images/chpt4/amy.jpg.\n\n6.1.3 This is sub header\n### This is sub header #### This is an even smaller header\nFor something that might be less important, you can have multiple levels of subheading by adding more #s, for example ##### would be a level 5 heading, the more #s you have the smaller the heading.\n\n6.1.4 Lists\n\n6.1.4.1 You can create a list:\n-   this is a list\n-   of bullet pointed\n-   created by\n-   items, which can be\n    -   indented with four spaces\n    -   before the hyphen `-`\n\nthis is a list\nof bullet pointed\ncreated by\nitems, which can be\n\nindented with four spaces\nbefore the hyphen -\n\n\n\n\n6.1.4.2 You can also have:\n1.  numbered lists\n2.  by using numbers followed by\n3.  bullet points\n4.  You can embed [links](https://stackoverflow.com/questions/73066792/how-to-create-lettered-lists-using-quarto) in lists\n\nnumbered lists\nby using numbers followed by\nbullet points\nYou can embed links in lists\n\n6.1.5 Quotes and references\nIf someone has said something interesting, you can block quote them by using the right arrow > quote goes here.\n\nDirt glitters as long as the sun shines. – Goethe\n\nIf you want to find out more about how to format your writing in quarto take a look at one of the helpsheet or the help website\nWhen writing you might want to add academic references to your quarto document. This is very straight forward using `bibtex` - a structured way of recording references. You can find bibtex entries for most academic references through the google scholar cite menu:\n\nYou can also hand-craft your own references if you can’t find them online. Once you have your bibtex code, place it in the `references/mastemr.bib` file. The name of the reference is at the top of each entry, in the example below kuhn1970structure:\n@book{kuhn1970structure,\n  title={The structure of scientific revolutions},\n  author={Kuhn, Thomas S},\n  volume={111},\n  year={1970},\n  publisher={Chicago University of Chicago Press}\n}\nTo add a reference to your writing use [@kuhn1970structure] to get (Kuhn 1970). If you just require the year use [-@kuhn1970structure] - (1970). If you want to include multiple references together, use the ;, e.g. [@kuhn1970structure; @stoet2018gender] - (Kuhn 1970; Stoet and Geary 2018).\nAll your references will be included at the bottom of the website (go check them out!) and students can quickly access reference information by hovering over the references inline in the text. Depending on the fields you provide and the format, e.g. @book and @article, the references will display differently.\n\n6.1.6 Using datasets in your chapters\n\n6.1.6.1 Loading datasets\nFor the creation of this book we are keeping the datasets in the /data/ folder. I’ll create a separate chapter on loading data from web locations and local hard drives that students can refer to, so you can reference that in your chapters without having to repeat yourselves. To use the datasets you can load them from the data folder using the readRDS(<location>), .rds files are standard format used in R, they are pretty small (think ~30Mb rather than 2Gb) and relatively fast to load.\n\nlibrary(\"tidyverse\")\n\n# a small hack to set the correct working directory for chapters\nif(grepl(\"/chapters\", getwd())){\n  setwd(str_replace(getwd(), \"/chapters\", \"\"))\n}\n\nteacher_df <- readRDS(paste0(getwd(),\"/data/teacher2018.rds\"))\n\nThe PISA datasets are huge, so please speak with me about which dataset you need, which year, which columns and which countries. I’ll then produce a much smaller .rds for you to use.\n\n6.1.7 Including code\nOne of the joys of using quarto is that it allows you to write R code directly into your .qmd file so the code you are talking about, the results of the code and the write up are all in one place. This has a few benefits:\n\nyou don’t need to keep copy and pasting code and results from R to your support sheets\nif the underlying datasets change any changes automatically filter through\nit’s easy to include the code that you use so students can see exactly what you have done\nstudents can copy and adapt your code for their own projects.\n\nTo add a code chunk we need to place it between ```{r} and ``` lines, the results will be automatically displayed below the code:\n\n```{r}\n1 + 1\n```\n\n[1] 2\n\n\nAs the datasets are so big, you might want to focus on a few countries. Once you have declared an object in one code block you can use it in subsequent code clocks:\n\n```{r}\nteacher_df <- teacher_df %>% \n                filter(CNT %in% c(\"USA\", \"KOR\", \"GBR\"))\n```\n\nNote that there is no output from the above code, it applies a filter and stores <- it, it doesn’t have any print or output commands. Now that we have data loaded we can peek at the top few rows using head(<rows>):\n\n```{r}\nteacher_df %>% \n  select(CNT,TC018Q10NA) %>% \n  head(3)\n```\n\n# A tibble: 3 × 2\n  CNT         TC018Q10NA     \n  <chr+lbl>   <dbl+lbl>      \n1 KOR [Korea] 0 [Not checked]\n2 KOR [Korea] 0 [Not checked]\n3 KOR [Korea] 0 [Not checked]\n\n\nBut maybe we want to show the students some code without actually running it. To do this we can pass variables to the code chunks through the use of #| setting: value that tell quarto how to handle each chunk. For example, by adding #| eval: false to the top of the code chunk. The code then displays, but doesn’t run (evaluate):\n\n```{r}\n#| eval: false\nteacher_df %>% \n  head(3)\n```\n\nWe might want to do the opposite, to run the code chunk but only display the output and not the code that produced the output. To do this we can add #| echo: false to top of the code chunk:\n\n\n# A tibble: 3 × 5\n  CNT                      n median_age males females\n  <chr+lbl>            <int>      <dbl> <dbl>   <dbl>\n1 GBR [United Kingdom]  2650         40   476     959\n2 KOR [Korea]           4068         44  1816    2156\n3 USA [United States]   3526         42  1019    1784\n\n\nThe above examples show how you can output tables and simple sums to the screen, you might also want to output calculated values and graphs. Imagine we want to add the number of male teachers to a report, in the middle of some text. First we need to calculate this value and store it in an object male_num. Note here that we use the pull(<column>) command, this returns the vector stored in the males column, rather than the column datatype.\n\n```{r}\n# get number of male teachers in total\nmale_num <- teacher_df %>% \n  summarise(males = sum(ifelse(TC001Q01NA == 2, 1,0), \n                        na.rm = TRUE)) %>% pull(males)\n\ncountries <- teacher_df %>% distinct(CNT) %>% pull(CNT)\n```\n\nNow that this has been calculated we can insert it into our text using the inline `r countries` and `r male_num` commands:\n > The number of male teachers in the PISA dataset for `r countries`is `r male_num`\n\nThe number of male teachers in the PISA dataset for KOR, GBR, USA is 3311.\n\nThe great thing about the above is that if the dataset changes, the names and the number will automatically update.\n\n6.1.8 Including graphs\nTo add graphs to your booklets use the {r} coding blocks as normal. Create your graph and it should display. You can add a caption to the graph using the #| fig-cap: <text> command:\n\n```{r}\n#| fig-cap: median age of teacher by country\n# get number of male teachers in total\ngraph_data <- teacher_df %>% \n  filter(TC001Q01NA %in% c(1,2)) %>%\n  mutate(gender = ifelse(TC001Q01NA == 2, \"male\",\"female\")) %>%\n  group_by(CNT, gender) %>%\n  summarise(median_age = median(TC002Q01NA))\n```\n\n`summarise()` has grouped output by 'CNT'. You can override using the `.groups`\nargument.\n\n```{r}\n#| fig-cap: median age of teacher by country\nggplot(data=graph_data, \n       aes(x=CNT, y=median_age, fill=gender)) +\n  geom_bar(stat=\"identity\", position = \"dodge\")\n```\n\n\n\nmedian age of teacher by country\n\n\n\n\n\n6.1.9 Adding tables\nYou can add tables to your pages, these can be a bit fiddlym check out the advice document\n\n6.1.10 Creating Exercises and different section types\nThere are several inbuilt section types that come with Quarto for common book sections such as “Note” or “Warning!”. You can access these by surrounding a section with ::: <section-type>. For example:\n::: callout-note \\n specifies things to note\\n :::\n\n\n\n\n\n\nNote\n\n\n\nspecifies things to note\n\n\n::: callout-warning\\n gives warning messages\\n :::\n\n\n\n\n\n\nWarning\n\n\n\ngives warning messages\n\n\nThere are also callout-important\n\n\n\n\n\n\nImportant\n\n\n\nhighlights issues that might break your code\n\n\nand callout-tip\n\n\n\n\n\n\nTip\n\n\n\ngives suggestions on how to do things in a better way\n\n\nTo create your exercise section we do something similar but you might also want to add code:\n::: question\nActivities and coding tasks look like this\n\n```{r}\n#| eval: false\nwhat <- \"does this\"\ncode == \"do\"\n```\n\n:::\n\nActivities and coding tasks look like this ::: {.cell}\nwhat <- \"does this\"\ncode == \"do\"\n\n:::\n\n6.1.11 Your task"
+  },
+  {
+    "objectID": "quarto_help.html",
+    "href": "quarto_help.html",
+    "title": "Quarto Help",
+    "section": "",
+    "text": "0.1.11 Your task\n\nKuhn, Thomas S. 1970. The Structure of Scientific Revolutions. Vol. 111. Chicago University of Chicago Press.\n\n\nStoet, Gijsbert, and David C Geary. 2018. “The Gender-Equality Paradox in Science, Technology, Engineering, and Mathematics Education.” Psychological Science 29 (4): 581–93."
+  },
+  {
+    "objectID": "index.html#maths-anxiety-intro",
+    "href": "index.html#maths-anxiety-intro",
+    "title": "Quantitative methods in the context of STEM education research",
+    "section": "5.1 Maths Anxiety Intro",
+    "text": "5.1 Maths Anxiety Intro\nWrite an introduction including bold and italic text, and\n\nbullet\npoints\n\nThis is a STEM website\nFind a bibtex reference on google scholar and copy and paste it into references/mastemr.bib (make sure you save the file!)\nFrancis et al. (2017) said some interesting things\nFrancis (2017)\n\nAdd the reference to the above text\n\n5.1.1 coding example\nAdd an image to help make your point\nCheck that the following code loads the teacher’s dataset.\n\nlibrary(\"tidyverse\")\n\n# a small hack to set the correct working directory for chapters\nif(grepl(\"/chapters\", getwd())){\n  setwd(str_replace(getwd(), \"/chapters\", \"\"))\n}\n\nteacher_df <- readRDS(paste0(getwd(),\"/data/teacher2018.rds\"))\n\n\nteacher_df %>% group_by(CNT) %>% summarise(n=n()) %>% head(6)\n\n\n\n\n\nCNT\nn\n\n\n\n\nALB\n3375\n\n\nARE\n12358\n\n\nBRA\n8969\n\n\nCHL\n3755\n\n\nDEU\n6687\n\n\nDOM\n2700\n\n\n\n\n\n\n\nteacher_df %>% group_by(CNT) %>% summarise(n=n()) %>% head(6)\n\n\nHow big is the moon?\n\n\n\npi * 4 ^ 2\n\nWhat does this code do?\n\nExplore the dataset\nWrite more code to find out the total years of experience of staff in a subset of countries\ninclude that code in your markdown\nAdd the median number of years experience for GBR teachers inline to a block of text\nMake a graph of median years of teaching experience and include it in this document\nAdd a sub heading for questions\nAdd some questions for students without code\nAdd some questions for students with code"
   }
 ]

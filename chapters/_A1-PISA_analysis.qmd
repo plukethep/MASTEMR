@@ -2,13 +2,13 @@
 
 The Programme for International Student Assessment (PISA) is an OECD initiative that looks at the reading, mathematics and science abilities of students aged 15 years old. Data is collected from \# countries every three years.
 
-| Dataset   | Description                              | 03  | 06  | 03  | 12  | 15  | 18  |
-|---------|-------------------|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
-| Student   | demographic data on student participants |  x  |  x  |  x  |  x  |  x  |  x  |
-| School    | descriptive data about schools           |  x  |  x  |  x  |  x  |  x  |  x  |
-| Parent    |                                          |  x  |  x  |     |     |     |     |
-| Teacher   |                                          |     |     |     |  x  |  x  |  x  |
-| Cognitive |                                          |  x  |  x  |  x  |  x  |  x  |  x  |
+| Dataset   | Description                                                                                         | 03  | 06  | 03  | 12  | 15  | 18  |
+|---------|---------|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
+| Student   | demographic data on student participants                                                            |  x  |  x  |  x  |  x  |  x  |  x  |
+| School    | descriptive data about schools                                                                      |  x  |  x  |  x  |  x  |  x  |  x  |
+| Parent    | a survey for student's parents including information about home environments and parental education |  x  |  x  |     |     |     |     |
+| Teacher   | demographic, teaching, qualification and training data                                              |     |     |     |  x  |  x  |  x  |
+| Cognitive |                                                                                                     |  x  |  x  |  x  |  x  |  x  |  x  |
 
 ## Where to find it
 
@@ -24,9 +24,20 @@ Merge demographic data with assessment outcomes
 
 ## Common issues
 
-The PISA datasets can be absolutely huge and might bring your computer to its knees. Tables such as the Cognitive dataset have hundreds of thousands of rows and thousands of columns. 
+The PISA datasets can be absolutely huge and might bring your computer to its knees, if you are using a computer with less than 16Gb of RAM you might not be able to load some certain tables at all. Tables such as the *Cognitive* dataset have hundreds of thousands of rows and thousands of columns, loading them directly might lead to an error similar to this: `Error: cannot allocate vector of size 2.1 Gb`. This means that R can't find enough RAM to load the dataset and has given up. You can see a rough estimate of how much RAM R is currently using the top Environment panel:
+
+![](/images/environment-RAM.png)
+
+To get around this issues you can try to clean your current R environment using the brush tool:
+
+![](/images/environment-brush.png)
+
+This will drop all the current dataframes, objects, functions and packages that you have loaded meaning you will have to reload packages such as `library(tidyverse)` and `library(haven)` before you can attempt to reload the PISA tables.
+
+A lack of RAM might also be the result of lots of other programs running concurrently on your computer. Try to close anything that you don't need, web browsers can be particularly RAM hungry, so close them or as many tabs as you can.
+
+If none of the above works, then please get in touch with the team, letting them know which table you need from which year, with which fields and for which countries. We will be able to provide you with a cutdown dataset.
 
 ## Interesting papers and reading on PISA
-
 
 Jerrim
