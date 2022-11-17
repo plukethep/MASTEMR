@@ -43,7 +43,7 @@ folder_images <- "images"
 
 # Setting up analysis for specific datasets
 
-The examples shown in this booklet use a range of freely available datasets. We would like to encourage you to use one of these datasets in your own analysis. This section will take you through the process of downloading and using these datasets.
+Examples shown in this booklet use a range of freely available datasets. We would like to encourage you to use one of these datasets in your own analysis. This section will take you through the process of downloading and using these datasets.
 
 ## PISA
 
