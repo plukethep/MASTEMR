@@ -4,7 +4,7 @@ This short course aims to take you through the process of writing your first pro
 
 The R programming language offers similar functionality to an application based statistical tool such as SPSS, with more of a focus on you writing code to solve your problems, rather than using prebuilt tools. R is open source, meaning that it is free to use and that lots of people have written code in R that they have shared with others. R statistical libraries are some of the most comprehensive in existence. R is popular[^_02-intro_to_analysis_software-1] in academia and industry, being used for everything from sales modelling to cancer detection.
 
-[^_02-intro_to_analysis_software-1]: As of November 2022, [Tiobe](https://www.tiobe.com/tiobe-index/) has R as the 12th most popular programming language. Many other, contradictory, ranking systems exist.
+[^_02-intro_to_analysis_software-1]: As of November 2022, [Tiobe](https://www.tiobe.com/tiobe-index/) has R as the 12^th^ most popular programming language. Many other, contradictory, ranking systems exist.
 
 ```{r}
 #| warning: false
