@@ -14,7 +14,7 @@ library(lsr)       # for eta squared
 library(nortest)   # normal test
 library(easystats) # for report in David's Chapter
 library(multcomp)  # for glht in David's Chapter
-library(ggmosaic)  # for Amy's chapter on chi square
+# library(ggmosaic)  # for Amy's chapter on chi square
 library(RVAideMemoire) # for Amy's chapter on chi square
 library(broom)     # for the t-test chapter, final graph
 library(ggpubr)

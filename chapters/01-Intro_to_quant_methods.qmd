@@ -1,7 +1,6 @@
 ---
 title: "01 Introduction"
 subtitle: "Introducing quantitative methods in educational research: Assumptions, purposes, and conceptualisations"
-bibliography: "../references/mastemr.bib"
 ---
 
 ```{r setup}

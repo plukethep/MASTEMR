@@ -4,6 +4,23 @@ title: "PISA"
 ---
 
 ```{r setup}
+
+  
+  library(glue)
+  node <- Sys.info()
+  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
+    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
+    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
+  }else if(node["nodename"] == "PETES_PC"){ #Pete's NEW Laptop
+    base_location <- "C:\\github\\mastemr\\"
+    proj_folder <- "C:\\github\\mastemr\\"
+  }else if(node["nodename"] == "Amys-MacBook-Air.local"){ #Amy's NEW Laptop
+    proj_folder <- r"(/Users/amyobrien/Google Drive/My Drive/MASTEMR/)"
+  }
+
+source(glue("{proj_folder}MASTEMR_setup.R"))
+
 ```
 
 ```{r}

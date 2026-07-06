@@ -1,0 +1,15 @@
+{
+  "hash": "1769e1181aa4ccb272bc052d08a01cd6",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"08 Assignment 3 tutorials\"\n---\n\n\n::: {.cell}\n\n:::\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

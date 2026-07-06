@@ -1,34 +1,12 @@
 ---
 title: "Making graphs"
-# bibliography: ../references/mastemr.bib
 ---
 
 ```{r setup}
-#| eval: true
-#| warning: true
-#| echo: false
+    options(max.print=15)
 
-# update with: https://royal-statistical-society.github.io/datavisguide/docs/references.html
-
-# only load this code if testing this file independently of overall project
-if(!exists("test")){
-  warning("RUNNING LOCAL FILE LOAD")
-  
-  library(glue)
-  proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
-  proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
-  
-  node <- Sys.info()
-  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
-    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
-  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
-    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
-  }else if(node["nodename"] == "PETES_PC"){ #Pete's NEW Laptop
-    proj_folder <- r"(C:\Users\Peter\Google Drive\Kings\Code\MASTEMR\)"
-  }
-
-  source(glue("{proj_folder}MASTEMR_setup.R"))
-}
+    library(here)
+    source(here::here("MASTEMR_page_setup.R"))
 ```
 
 The tidyverse includes the incredibly powerful `ggplot2` package. This package is pretty much the industry standard for making graphs for publication. `ggplot2` is built on the *grammar of graphics* where you build graphs by specifying underlying attributes and layering geometric objects on top of each other. In the diagram below you can see how a graph is built from *geometric objects* (the things that are plotted such as points and bars) a *scale*, and *plot annotations* (e.g. a key, title etc). You can then apply *faceting* to the graph to automatically split one graph into multiple plots, allowing you to easily compare different groupings. Publications, such as the Financial Times, make daily use of `ggplot2`.

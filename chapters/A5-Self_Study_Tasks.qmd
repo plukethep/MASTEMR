@@ -3,6 +3,10 @@ title: "Self Study Tasks"
 ---
 
 ```{r setup}
+    options(max.print=15)
+
+    library(here)
+    source(here::here("MASTEMR_page_setup.R"))
 ```
 
 The pages below set out a series of graded challenges that you can use

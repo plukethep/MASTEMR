@@ -1,8 +1,5 @@
 ---
 title: "Bayesian Statistics"
-format: html
-editor: visual
-bibliography: references.bib
 ---
 
 ## The Frequentist Approach to Statistics

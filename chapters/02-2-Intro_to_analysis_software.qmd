@@ -1,14 +1,8 @@
 ---
 title: "Loading packages and exploring data"
-bibliography: ./references/mastemr.bib
 ---
 
 ```{r setup}
-    #| eval: true
-    #| warning: false
-    #| echo: false
-    
-    # options(max.print=10000)
     options(max.print=15)
     
     # only load this code if testing this file independently of overall project
@@ -25,16 +19,13 @@ bibliography: ./references/mastemr.bib
       }else if(node["nodename"] == "KCL3Y7NKR3"){ #Petes NEW Laptop
         proj_folder <- r"(G:/My Drive/Kings/code/MASTEMR/)"
       }else if(node["nodename"] == "PETES_PC"){ #Petes NEW Laptop
-        proj_folder <- r"(C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/)"
+        base_location <- "C:\\github\\mastemr\\"
+        proj_folder <- "C:\\github\\mastemr\\"
       }
       
       source(glue("{proj_folder}MASTEMR_functions.R"))
       source(glue("{proj_folder}MASTEMR_setup_libs.R"))
       source(glue("{proj_folder}MASTEMR_setup.R"))
-      
-      # OpenAnalysis_load_ALL(use_cache = TRUE,
-      #                       report_cache_folder=r"[',MASTEMR_cache,']",
-      #                       over_write=FALSE)
     }
 
 ```

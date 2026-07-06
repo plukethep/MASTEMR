@@ -1,0 +1,17 @@
+{
+  "hash": "5c02b21911dafe885781610f11e6ec6e",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Quantitative methods in the context of education research\"\nsubtitle: \"MA Education courses, School of Education, Communication & Society, King's College London\"\nexecute:\n  cache: false\neditor:\n  mode: source\ndate: \"Last compiled on 06 July, 2026\"\n\nauthor:\n  - name: Peter EJ Kemp\n    orcid: 0000-0003-1131-0787\n    email: peter.kemp@kcl.ac.uk\n    # affiliations:\n    #   - name: King's College London\n  - name: Richard Brock\n    orcid: 0000-0003-2497-8030\n    email: richard.brock@kcl.ac.uk\n    # affiliations:\n    #   - name: King's College London\n  - name: Amy O'Brien\n    orcid: 0000-0003-3846-6538\n    email: amy.l.o'brien@kcl.ac.uk\n    # affiliations:\n    #   - name: King's College London\n  - name: Lulu Healy\n    orcid: 0000-0003-1698-5134\n    # affiliations:\n    #   - name: King's College London\n  - name: David Pepper\n    orcid: 0000-0002-2228-7677\n    email: david.pepper@kcl.ac.uk\n    # affiliations:\n    #   - name: King's College London\n\n---\n\n\n::: {.cell}\n\n:::\n\n\n\n::: {.cell}\n\n:::\n\n\n\n::: {.cell}\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-2-1.png){width=95%}\n:::\n:::\n\n\nThis book has been written to accompany the MA STEM quantitative methods course at King's College London. It will take the reader through the process of learning the R statistical programming language through the analysis of the **2022 PISA survey data**. The book does not assume any prior knowledge and should suit the needs of those looking to learn R, learn statistics, learn how to analyse PISA data, or any combination of these. \n\n# Copyright and usage\n\nThis book is free to use under a [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/deed.en) license.\n\nAll PISA products are published under the [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 IGO](https://creativecommons.org/licenses/by-nc-sa/3.0/igo/) (CC BY-NC-SA 3.0 IGO) license. This includes the `.feather` and `.parquet` formatted datasets linked throughout the text. The PISA 2022 dataset is also available from the [OECD website](https://www.oecd.org/pisa/data/2022database/).\n\nWe have tested the software and datasets used in the making of this book, but cannot guarantee that they are free from errors. If you find any errors or have any questions, please contact [peter.kemp\\@kcl.ac.uk](mailto:peter.kemp@kcl.ac.uk) and/or [richard.brock\\@kcl.ac.uk](mailto:richard.brock@kcl.ac.uk). You are using this book at your own risk and we cannot be held responsible for any loss or damage arising from the use of this book (please don't overwrite your hard disks!).\n\nTo reference this book, please use:<!--@MASTEMR2023-->\n\n> Kemp, Peter EJ, Richard Brock, Amy O’Brien, Carla Finesilver, Lulu Healy, and David Pepper. 2023. _Quantitative Methods in the Context of Education Research: The PISA 2022 data set_. London, United Kingdom: King’s College London. https://peterejkemp.github.io/v3/.\n\nAnd to reference the PISA 2022 dataset, please use:<!-- @OECD2022results. -->\n\n> OECD. 2022. _PISA 2022 Results (Volume i)_. OECD. https://www.oecd-ilibrary.org/docserver/53f23881-en.pdf.",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

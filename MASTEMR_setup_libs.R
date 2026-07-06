@@ -11,7 +11,7 @@ library(lsr)       # for eta squared
 library(nortest)   # normal test
 library(easystats) # for report in David's Chapter
 # library(multcomp)  # for glht in David's Chapter -don't think we need this anymore 26/9
-library(ggmosaic)  # for Amy's chapter on chi square
+# library(ggmosaic)  # for Amy's chapter on chi square
 library(broom)     # for the t-test chapter, final graph
 library(tidyverse)
 library(ggpubr)
@@ -25,7 +25,7 @@ library(quanteda)
 # install.packages("dgof")
 # library(dgof) # removed this, not sure what it is needed for 2023-09-12
 library(rworldmap)
-library(chisq.posthoc.test) # Contains a posthoc chi.sq test
+# library(chisq.posthoc.test) # Contains a posthoc chi.sq test
 library(readtext)
 library(ResourceSelection)
 library(pscl)

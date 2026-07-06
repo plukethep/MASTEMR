@@ -1,6 +1,5 @@
 ---
 title: "Introduction to R"
-bibliography: ./references/mastemr.bib
 ---
 
 ```{r setup}

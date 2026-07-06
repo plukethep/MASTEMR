@@ -14,15 +14,17 @@ project:
   render:
       #- !chapters/
     - index.qmd
+    - chapters/A1-PISA_analysis.qmd
     # - about.qmd
     # - chapters/A6-Bayesian.qmd
+    - chapters/02-4-Intro_to_graphs.qmd
     - chapters/07-ChisqPISA.qmd
     - chapters/10-Correlation_and_regression.qmd
     - chapters/01-Intro_to_quant_methods.qmd
     - chapters/02-1-Intro_to_analysis_software.qmd
     - chapters/02-2-Intro_to_analysis_software.qmd
     - chapters/02-3-Intro_to_analysis_software.qmd
-    - chapters/02-4-Intro_to_graphs.qmd
+    
     - chapters/03-Descriptive.qmd
     - chapters/04-Introduction_to_PISA.qmd
     - chapters/05-Presentations.qmd
@@ -31,8 +33,7 @@ project:
     - chapters/09-Assignment_3_tutorials.qmd
     - chapters/11-selecting_statistical_tools.qmd
     #- chapters/12-value_of_quant.qmd
-    - chapters/A8-SEM.qmd
-    - chapters/A1-PISA_analysis.qmd
+    # - chapters/A8-SEM.qmd
     - chapters/A2-DfE_analysis.qmd
     - chapters/A3-TIMSS_analysis.qmd
     - chapters/A4-Other_datasets.qmd
@@ -82,9 +83,9 @@ website:
           - chapters/10-Correlation_and_regression.qmd
           - chapters/11-selecting_statistical_tools.qmd
           #- chapters/12-value_of_quant.qmd
-      - section: "Additional tests"
-        contents:
-          - chapters/A8-SEM.qmd
+      # - section: "Additional tests"
+      #   contents:
+      #     - chapters/A8-SEM.qmd
       - section: "Appendicies"
         contents:
           - chapters/A1-PISA_analysis.qmd

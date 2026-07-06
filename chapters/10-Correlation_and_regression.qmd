@@ -21,8 +21,9 @@ if(!exists("test")){
   }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
     proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
   }else if(node["nodename"] == "PETES_PC"){ #Pete's NEW Laptop
-    proj_folder <- r"(C:\Users\Peter\Google Drive\Kings\Code\MASTEMR\)"
-}else if(node["nodename"] == "Amys-MacBook-Air.local"){ #Amy's NEW Laptop
+    base_location <- "C:\\github\\mastemr\\"
+    proj_folder <- "C:\\github\\mastemr\\"
+  }else if(node["nodename"] == "Amys-MacBook-Air.local"){ #Amy's NEW Laptop
     proj_folder <- r"(/Users/amyobrien/Google Drive/My Drive/MASTEMR/)"
 }
   source(glue("{proj_folder}MASTEMR_setup.R"))
@@ -468,7 +469,7 @@ For regression to work we need to have a large enough sample size, the means to 
 
 The model used is a **linear** one, therefore, we describe the relationship using the equation of a straight line. In linear regression, with one dependent and one independent variable, we use the *Method of Least Squares* to find the line of best fit. The means finding a straight line that passes as close as possible to all the points. The distance between a point and this line is called a _residual_. The line of best fit is the line where the sum of the residuals squared is the smallest number possible.
 
-![Method of Least Squares](images/method_of_least_squares.png)
+![Method of Least Squares](../images/method_of_least_squares.png)
 
 The line that is created can be described by the equation:
 

@@ -3,13 +3,17 @@ title: "Piping and dplyr"
 ---
 
 ```{r setup}
+    options(max.print=15)
+
+    library(here)
+    source(here::here("MASTEMR_page_setup.R"))
 ```
 
 Piping allows us to break down complex tasks into manageable chunks that can be written and tested one after another. There are several powerful commands in the tidyverse as part of the *dplyr* package that can help us `group`, `filter`, `select`, `mutate` and `summarise` datasets. With this small set of commands we can use piping to convert massive datasets into simple and useful results.
 
 Using the pipe `%>%` command, we can feed the results from one command into the next command making for reusable and easy to read code.
 
-![how piping works](images/pipe_drawing.svg){fig-align="center"}
+![how piping works](../images/pipe_drawing.svg){fig-align="center"}
 
 ::: callout-note
 The pipe command we are using `%>%` is from the *magrittr* package which is installed alongside the tidyverse. Recently *R* introduced another pipe `|>` which offers very similar functionality and tutorials online might use either. The examples below use the `%>%` pipe.

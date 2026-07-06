@@ -9,30 +9,10 @@ warning: false
 ---
 
 ```{r setup}
-#| eval: true
-#| warning: false
-#| echo: false
+    options(max.print=15)
 
-# only load this code if testing this file independently of overall project
-if(!exists("test")){
-  warning("RUNNING LOCAL FILE LOAD")
-  
-  library(glue)
-  proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
-  proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
-  
-  node <- Sys.info()
-  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
-    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
-  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
-    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
-  }else if(node["nodename"] == "Amys-MacBook-Air.local"){ #Amy's NEW Laptop
-    proj_folder <- r"(/Users/amyobrien/Google Drive/My Drive/MASTEMR/)"
-    
-  }
-
-  source(glue("{proj_folder}MASTEMR_setup.R"))
-}
+    library(here)
+    source(here::here("MASTEMR_page_setup.R"))
 ```
 
 # Pre-reading and pre-session tasks
