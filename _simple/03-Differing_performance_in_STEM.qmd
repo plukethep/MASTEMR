@@ -1,0 +1,811 @@
+---
+title: "3 Differing performance in STEM (+graphs)"
+# bibliography: references.bib
+---
+
+```{r}
+#| eval: true
+#| warning: true
+#| echo: false
+
+# only load this code if testing this file independently of overall project
+if(!exists("test")){
+  warning("RUNNING LOCAL FILE LOAD")
+  
+  library(glue)
+  proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
+  proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  
+  node <- Sys.info()
+  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
+    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
+    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
+  }else if(node["nodename"] == "PETES_PC"){ #Pete's NEW Laptop
+    proj_folder <- r"(C:\Users\Peter\Google Drive\Kings\Code\MASTEMR\)"
+  }
+
+  source(glue("{proj_folder}MASTEMR_setup.R"))
+}
+```
+
+## Introduction to graphing in R {#sec-graphing}
+
+The tidyverse includes the incredibly powerful `ggplot2` package. This package is pretty much the industry standard for making graphs for publication. `ggplot2` is built on the *grammar of graphics* where you build graphs by specifying underlying attributes and layering geometric objects on top of each other. In the diagram below you can see how a graph is built from *geometric objects* (the things that are plotted such as points and bars) a *scale*, and *plot annotations* (e.g. a key, title etc). You can then apply *faceting* to the graph to automatically split one graph into multiple plots, allowing you to easily compare different groupings.
+
+[![Adapted from A Layered Grammar of Graphics, Wickham, 2010](images/grammarofgraphics.svg){fig-align="center"}](http://vita.had.co.nz/papers/layered-grammar.pdf)
+
+The basic structure of `ggplot` code is to combine different graphing elements through the use of the `+` operator. To demonstrate this, let's look at the relationship between the percentage of males in a school and the percentage of the school taking `computer science`:
+
+```{r}
+#| warning: false
+# wrangle our data
+graph_data <- PISA_2018 %>% 
+  filter(CNT %in% c("France", "United Kingdom"))
+
+# display a graph of the results
+ggplot(data=graph_data, 
+       aes(x=ESCS, y=PV1MATH, colour=ST004D01T)) +
+  geom_point() +
+  geom_smooth(method='lm') +
+  facet_wrap(. ~ CNT) +
+  ggtitle("Comparison of poverty and Maths result, by gender and country")
+```
+
+Hopefully you can work out what lines 1-3 do from the previous chapter, let's focus on the `ggplot` commands:
+
+-   6-7 these lines set up the `ggplot` giving it the table object `graph_data` as its data input and setting up the aesthetics for the rest of the graph elements using columns from `graph_data`. The `aes(<attribute>, <attribute>, ...)` command allows us to specify aesthetic elements of the graph that will change dependent on the dataset we use. In the PISA_2018 data set, the variable ESCS refers to an index of economic status, and PV1Math, is the plausible value of the mathematics score. We set the x and y variables `x=ESCS` and `y=PV1MATH` , defining `aes()` inside `ggplot()` means we will pass down these values to subsequent geometric objects so we don't have to define these `x` and `y` axis items again and again.
+-   8 using the data and `aes` values defined on lines 6-7, `geom_point` uses the `x` and `y` values defined on line 19 to draw a point for each school in our dataset. There are lots of different parameters we could give `geom_point` e.g. specifying size and shape, but here we are content with using the defaults.
+-   9 we add another geometric object on top of the points, this time we add a line of best fit `geom_smooth`, again this geometric object uses the values specified on lines 6-7, and we define the `method` as `lm`, to calculate a *linear model* line of best fit.
+-   10 next we use `facet_wrap(. ~ CNT)` to create a graph for each group of `CNT` in the dataset, i.e. a graph for each country defined on line 3.
+-   11 finally we customise the title of the graph, `ggtitle`, ready for display.
+
+## Geoms
+
+There are about 40 different geometric objects in ggplot, allowing you to create almost any sort of graph. We will be exploring a few of them in detail, but if you want to explore others, please follow some of the links below:
+
+-   [geom_bar](https://ggplot2.tidyverse.org/reference/geom_bar.html) for creating bar charts and histograms
+-   [geom_point](https://ggplot2.tidyverse.org/reference/geom_point.html) for plotting single points
+-   [geom_line](https://ggplot2.tidyverse.org/reference/geom_path.html) for connecting points together and showing trends
+-   [geom_text](https://ggplot2.tidyverse.org/reference/geom_text.html) for adding text labels to data points
+-   [geom_boxplot](https://ggplot2.tidyverse.org/reference/geom_boxplot.html) for representing the range of data
+-   [geom_hex](https://ggplot2.tidyverse.org/reference/geom_hex.html) for creating heat maps
+-   [geom_map](https://ggplot2.tidyverse.org/reference/geom_map.html) for adding geographic maps
+-   [geom_smooth](https://ggplot2.tidyverse.org/reference/geom_smooth.html) for adding lines of best fit
+
+### geom_point
+
+Rather unsurprisingly, `geom_point` allows us to plot a layer of *points* using x and y coordinates. The below example shows how we can specify within the `ggplot` function `data=school_plot_data`. We then define the `aes`thetic attributes of the graph, passing the x `x=NumberOfBoys` and y `y=NumberOfGirls` values.
+
+```{r}
+#| warning: false
+# to make things a little faster we are going to focus on open secondary schools
+# plotting 40k+ data points can be slow
+school_plot_data <- PISA_2018 %>% 
+  group_by(OECD, CNT) %>%
+  summarise(mean_maths = mean(PV1MATH),
+            mean_read = mean(PV1READ),
+            sz = n())
+
+ggplot(data=school_plot_data, 
+       aes(x=mean_maths, y=mean_read)) +
+  geom_point(aes(size=sz, colour=OECD), alpha = 0.6)
+```
+
+• In line 3 above we pipe the large data.frame PISA_2018 to apply a number of functions. First we group by OECD (a Yes or No indicating membership) and CNT (the name of the country).
+
+• Lines 5-6 calculate the mean mathematics and reading score, and create new variables (mean_maths, and mean_read) for their values.
+
+• In addition, in line 7, the variables sz is created which counts the number of responses per country.
+
+As above we then pass the information to ggplot.
+
+• In line 9, we specify the data that should be plotted - the new dataframe school_data_plot we have created.
+
+• Line 10, then we pass the x and y variables we want inside aes.
+
+• Finally, in line 11, we make a number of tweaks to the points: first setting the aesthetics - the size of the points is linked to the sz variable we created, the number of responses per country, and the colour is linked to OECD membership. Finally (and note this is outside the aes brackets, we set an alpha value which makes the point slightly transparent, which is more visually appealing where points overlap.
+
+::: callout-important
+Switching between the pipes and ggplot can get rather confusing. A very common mistake in using ggplot is to try and link together the `geom_` elements with a pipe command `%>%` rather than the `+`.
+:::
+
+### Questions
+
+::: question
+1.  Spot the three errors in this graph code
+
+```{r}
+#| eval: false
+#| class.source: "none"
+ggplot(adta=diamonds, x=depth, y=price) +
+  geom_point()
+  ggtitle("diamond graph")
+```
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: answer
+# 1-data not adta, 2-x and y need to be inside aes
+ggplot(data=diamonds, aes(x=depth, y=price)) +
+  geom_point() + #3 missing +
+  ggtitle("diamond graph")
+```
+
+2.  Using the `PISA_2018` dataset, plot a graph for students from Norway to help you work out whether there is a relationship between *poverty* `ESCS` and *maths grade* `PV1MATH`. Colour each point with the gender of the student. Give the graph sensible x and y labels (e.g. `xlab`).
+
+```{r}
+#| warning: false
+#| echo: true
+#| code-fold: true
+#| code-summary: answer
+graph_data <- PISA_2018 %>% filter(CNT == "Norway")
+
+ggplot(graph_data,
+       aes(x=ESCS,
+           y=PV1MATH)) +
+  geom_point(aes(colour=ST004D01T)) +
+  xlab("") +
+  ylab("")
+```
+
+3.  Using the `PISA_2018` dataset for each country `CNT`, create a graph to explore how the `median` of the sense of school belonging `BELONG` relates to the `median` of the disciplinary climate in the school `DISCLIMA`, adjust the colour of each point to reflect the `mean` wealth of students in each country `ESCS`.
+
+**HINT:** You'll need create a new dataframe with `summarise`d variables for `median_belong`, `median_discipline` and `mean_wealth`.
+
+```{r}
+#| warning: false
+#| code-fold: true
+#| code-summary: answer dataframe
+
+graph_data <- PISA_2018 %>%
+  group_by(OECD, CNT) %>%
+  summarise(median_belong = median(BELONG, na.rm=TRUE),
+            median_discipline = median(DISCLIMA, na.rm=TRUE),
+            mean_wealth = mean(ESCS, na.rm=TRUE))
+```
+
+**HINT:** To make your colours stand out more, add `+ scale_color_gradientn(colours = rainbow(3))` to the end of your plot.
+
+```{r}
+#| warning: false
+#| code-fold: true
+#| code-summary: answer graph
+# display a graph of the results
+ggplot(data=graph_data, 
+       aes(x=median_belong, 
+           y=median_discipline)) +
+  geom_point(aes(colour = mean_wealth)) + 
+  scale_color_gradientn(colours = rainbow(3))
+
+```
+:::
+
+### Recoding data (ifelse) {#sec-ifelse}
+
+Often we want to plot values in groupings that don't yet exist, for example might want to give all schools over a certain size a different *colour* from others schools. To do this we need to look at how we can *recode* values. A common way to recode values is through an if statement:
+
+> `ifelse(<statement(s)>, <value_if_true>, <value_if_false>)`
+
+`ifelse` allow us to *recode* the data. In the example below, we are going to add a new column to the schools table (using `mutate`) noting whether a school is a *grammar* school or not. A school is a grammar school *if* it is not an *Independent* school *and* it is *selective* in its admissions policy, either of these two criteria being false will mean that the school is not a grammar school.
+
+You can see how the above logic is is implemented in an R `ifelse` statement on lines 4-8.
+
+```{r}
+#| warning: false
+#| eval: false
+plot_data <- schools %>% 
+  filter(Open=="Open", 
+         Phase=="Secondary") %>%
+  mutate(sch_type = 
+           ifelse(EstablishmentGroup != "Independent schools" & 
+                    AdmissionsPolicy=="Selective",
+                  "GRAMMAR",
+                  "NOT GRAMMAR")) %>%
+  arrange(desc(sch_type))
+```
+
+-   4 uses mutate to create a new column in the schools table called `sch_type`, this will be given the value of the `ifelse` statement calculation for each line.
+-   5 - 6 the `if` statement to be evaluated as either `true` or `false` has two parts, separated by the ampersand symbol `&` instead of the word *and* (as we have seen above, *or* is implemented using a bar `|`).
+-   7 "GRAMMAR" will be returned `if` the statements on line 5 and 6 are both *TRUE*
+-   8 "NOT GRAMMAR" will be returned if the combined statements on line 5 and 6 are *FALSE*, i.e. *else* the values on line 5 and 6 are true
+
+Additionally, on line 9 we arrange the results, which means you can explore the details of the 163 grammar schools using the Environment panel, how you use arrange also changes the order in which the points will be plotted, allowing you to plot the grammar schools on top of other school types to make them stand out.
+
+::: callout-tip
+It's possible to nest our `ifelse` statements, for example we might want to give a little more information on the school type:
+
+```{r}
+#| eval: false
+plot_data <- schools %>% 
+  filter(Open=="Open") %>%
+  mutate(sch_type = 
+           ifelse(grepl("Special", EstablishmentGroup), "Special",
+                  ifelse(EstablishmentGroup == "Independent schools", "Independent",
+                         ifelse(AdmissionsPolicy=="Selective", 
+                                "Grammar", "Comprehensive"))))
+```
+:::
+
+Now we have *recoded* the data to display whether a school is a grammar school or not, we can plot this dataset onto the graph:
+
+```{r}
+#| warning: false
+#| eval: false
+ggplot(data=plot_data) +
+  geom_point(aes(x=Easting, y=Northing, 
+                 size = NumberOfBoys+NumberOfGirls,
+                 colour=sch_type),
+                 alpha=0.4)
+```
+
+-   1 we pass the custom table `plot_data` to the ggplot command, this means this data will be available in subsequent `geom_`
+-   2 we define the `x` and `y` `aes`theic values here for the `geom_point`s, we could have done this on line one, but this shows that this can be done separately for each `geom_`
+-   3 `size` is also inside `aes()` and takes the `NumberOfBoys+NumberOfGirls` as a parameter, i.e. the population of the school will change the size of the points on the graph
+-   4 `colour` is also inside `aes()` and takes the newly coded `sch_type` values, this means that grammar schools will be a different colour from non-grammar schools
+-   5 to stop the schools blotting each other out, we set the `alpha` (transparency) of each point to `0.4`. This is done outside the `aes` as we want all points to have the same transparency.
+
+::: callout-important
+If you define the `colour`, `size` and `alpha` attributes *outside* the `aes()` function, you will hard code the values and they won't change when your dataset changes. Placing these attributes inside `aes` allows them to be dynamically changed by your dataset values
+:::
+
+### Questions
+
+::: question
+1.  Using the TIMSS dataset, and only using schools from England, Finland and USA, plot to see how the *number of computers* `BCBG07` is related to the *Instruction Affected Resource Shortage (Mathematics)* `BCBGMRS`. `colour` the points in using the country `CNTRY`.
+
+```{r}
+#| eval: false
+#| echo: false
+plot_data <- TIMSS %>% filter(CNTRY == "ENG" |
+                              CNTRY == "FIN" |
+                              CNTRY == "USA" )
+
+# you can also use:
+plot_data <- TIMSS %>% filter(CNTRY %in% c("ENG", "FIN", "USA"))
+
+ggplot(data=plot_data,
+       aes(x=as.numeric(BCBGMRS), y=as.numeric(BCBG07))) +
+  geom_point(aes(colour=CNTRY))
+
+```
+
+2.  Using `ifelse`, add a column to TIMSS called `region`, recode "NOR", "SWE" and "FIN" to be "Nordic" and everyone else "RestOfWorld".
+
+```{r}
+#| eval: false
+#| echo: false
+
+plot_data <- TIMSS %>% 
+  mutate(region =
+           ifelse(CNTRY == "NOR" | CNTRY == "SWE" | CNTRY == "FIN",
+                  "Nordic", "RestOfWorld"))
+
+# you can also use:
+plot_data <- TIMSS %>% 
+  mutate(region =
+           ifelse(CNTRY %in% c("NOR", "SWE", "FIN"),
+                  "Nordic", "RestOfWorld"))
+```
+
+3.  Using the dataset from Q2, Count the number of schools in each of the two regions and the median number of taught hours `BCDGTIHY`.
+
+```{r}
+#| eval: false
+#| echo: false
+#| warning: false
+plot_data  %>%
+  group_by(region) %>%
+  summarise(n = n(),
+            med = median(BCDGTIHY, na.rm = TRUE))
+```
+
+4.  Using the data from Q2 (take a look at the [answers](CRESTEMR-answers.html#sec-ifelse-questions) if you couldn't work it out), plot a graph of:
+    -   school's teaching time per year `BCDGTIHY` against the behavioural issues that they have `BCBGDAS`.
+    -   `colour` the points to show the difference between "Nordic" and "RestOfWorld" schools.
+    -   Provide sensible labels for the `x` and `y` axis
+    -   change the `alpha` of each point so schools don't blot each other out
+    -   add a line of best fit to see how the two axis are related
+
+```{r}
+#| eval: false
+#| echo: false
+
+ggplot(data=plot_data, 
+       aes(x=as.numeric(BCDGTIHY), 
+           y=as.numeric(BCBGDAS))) + 
+  geom_point(aes(colour=region), alpha=0.4) +
+  xlab("teaching time per year") +
+  ylab("behavioural issues") +
+  geom_smooth(method="lm")
+
+```
+:::
+
+### geom_bar
+
+The `geom_bar` function is versatile, allowing the creation of bar, multiple bar, stacked bar charts and histograms. This first example shows how we can use bar charts to represent the quality ratings given by the Office of Standards in Education (Ofsted) to schools in different parts of the country:
+
+```{r}
+#| warning: false
+#| eval: false
+plot_schools <- schools %>% 
+  filter(Open == "Open",
+         Region != "Not Applicable",
+         OfstedRating %in% c("Outstanding", "Good", "Requires improvement", "Inadequate"))
+
+ggplot(data = plot_schools, 
+       aes(x=Region)) + 
+  geom_bar()
+```
+
+<!--the `is.na(OfstedRating)` command selects only those rows from _OfstedRating_ that have an `NA` value. By putting the `!` mark in front of this we `NOT` or reverse the result. In this case `!is.na(OfstedRating)` returns all the rows that don't contain `NA` in OfstedRating.-->
+
+-   1 to 3 gets the schools dataset and filters it to only include schools that are *Open*, which are in recognised *Region*.
+-   4 filters only those rows containing the *OfstedRating* listed, removing any `NA` or other values.
+-   6 to 7 we pass the `plot_schools` dataset created on lines 1 to 4 to ggplot and set the `x` axis to the be the *Region*. Note, we don't set the `y` axis, as geom_bar will calculate this for us
+-   8 we pass the `plot_schools` and `x=Region` to `geom_bar`, which counts the number of rows (schools) in each Region and creates a bar of that height.
+
+The graph above gives us a feel for the data, but it doesn't tell us the Ofsted ratings for each Region and the a axis labels are a mess. We need to add a `fill` to the `geom_bar` and adjust the `theme`:
+
+```{r}
+#| eval: false
+ggplot(data = plot_schools, 
+       aes(x=Region)) + 
+  geom_bar(aes(fill=OfstedRating)) + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+-   3 using the `fill` attribute `aes(fill=OfstedRating)` will create a stacked and coloured bar to show the number of schools gaining each *OftstedRating* in each *Region*
+-   4 the `theme` function and `axis.text.x` adjust the x axis labels, rotating them 90 degrees
+
+We can now make rough comparisons between the different number of each Ofsted rating. But it remains hard to compare the percentage split. For example the number of *Good* and *Outstanding* schools in London is hard to compare with the North East, as the total number of schools in the North East is much smaller than the number of schools in London. Additionally, the order of the bars seems random, we want to have *Outstanding* at the top and *Inadequate* at the bottom, not next to each other:
+
+```{r}
+#| eval: false
+ggplot(data = plot_schools, 
+       aes(x=Region)) + 
+  geom_bar(aes(fill=factor(OfstedRating, 
+                           levels = c("Outstanding", "Good", "Requires improvement", "Inadequate"))),
+           position="fill") + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  scale_fill_discrete(name = "Ofsted Ratings")
+
+```
+
+-   3 to 4 converts *OfstedRating* from the *character* datatype to a *factor*. Factors allow us to categorise the data we store, limiting the number of values a column can hold, in this case we are limiting it to the *levels* specified, with the order given to levels specifying the order that this column's data will be displayed in graphs.
+-   5 `position` tells ggplot what to do when a bar on the x axis is made up of multiple elements, in this case `position="fill"` will take each x axis bar grouping and work out the fractional value of each Ofsted rating for each Region.
+-   7 when we created the factor on lines 3-4 to pass to the fill command, it also created a really inconvenient title for the graph legend: *factor(OfstedRating, levels = c("Outstanding", "Good", "Requires improvement", "Inadequate"))*. `scale_fill_discrete` let's us provide a more sensible title for the key.
+
+We might also want to look at this graph on a Region by Region basis, at the moment it's very hard to tell if the East Midlands have more schools that are *Outstanding*, or more schools that *Require improvement*. To do compare the bars in each x axis group we can use the position command, setting it to `position="dodge"`:
+
+```{r}
+#| eval: false
+ggplot(data = plot_schools, 
+       aes(x=Region)) + 
+  geom_bar(aes(fill=factor(OfstedRating, 
+                           levels = c("Outstanding", "Good", "Requires improvement", "Inadequate"))),
+           position="dodge") + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  scale_fill_discrete(name = "Ofsted Ratings")
+
+```
+
+#### Raising the bars yourself
+
+`ggplot` can do a lot of the hard work when putting together bar charts, but there might also be times when you want to use pipes to calculate summary values that you then want plot. That is, you want to specify the heights of the bars yourself. To do this we *will* specify the y axis in the `aes` and use `stat="indentity"` to tell ggplot that's what we're doing. Take the example where you want to find the overall percentages of each grade given to the *four* single sciences in one year (can we say one is harder than another?):
+
+```{r}
+#| warning: false
+#| echo: true
+#| eval: false
+plot_data <- results %>%
+  filter(Description %in% c("Physics", "Biology", "Chemistry", "Computer Studies/Computing"),
+         Qualification == "GCSE (9-1) Full Course") %>%
+  group_by(Description, Grade) %>%
+  summarise(total_grade = sum(Entries, na.rm=TRUE)) %>%
+  mutate(total_entries = max(total_grade, na.rm=TRUE),
+         per_entries = total_grade/total_entries) %>%
+  filter(Grade != "Total number entered")
+
+ggplot(data=plot_data, aes(x=Grade, y=per_entries)) +
+  geom_bar(aes(fill=Description), 
+           position="dodge",
+           stat="identity")
+```
+
+-   1 to 8 creates a dataframe `plot_data` that calculates the percentage of entries for each science subject achieving each grade, this is called `per_entries`
+-   10 as we are setting the heights of the bars ourselves, we need to give the ggplot aes command a y value, in this case `y=per_entries`
+-   11 the geom_bar is given a fill value of `Description`, this will allow us to see the plots of different subjects
+-   12 we use `position="dodge"` as we want the perctange grades of each subject to be next to each other so we can look for differences in heights
+-   13 `stat="identity"` tells `geom_bar` that you have defined your own bar heights in the `y` attribute and not to count the number of rows.
+
+### Questions
+
+::: question
+1.  Can you spot the 4 errors in this code.
+
+```{r}
+#| eval: false
+#| echo: false
+#| class.source: "none"
+ggplot(data=schools %>% filter(Phase == "Secondary"), 
+       x=Region +
+  geom_bar(aes(fill=Gender) position="full") 
+```
+
+```{r}
+#| eval: false
+#| echo: false
+ggplot(data=schools %>% filter(Phase == "Secondary"), 
+       aes(x=Region)) + # 1 no aes() around the x value # 2 missing close brackets
+  geom_bar(aes(fill=Gender), position="fill") # 3 missing comma # 4 position="full" rather than fill 
+```
+
+2.  Create a bar chart showing the total number of open Independent schools for each Gender
+
+```{r}
+#| eval: false
+#| echo: false
+#| warning: false
+plot_data <- schools %>% filter(Open == "Open",
+                                EstablishmentGroup == "Independent schools")
+
+ggplot(data=plot_data,
+       aes(x=Gender)) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+3.  Using the TIMSS dataset:
+    -   `filter` to only look at the USA and ENG
+    -   make a graph to show the overall picture of *Parental expectations for student achievement* (`BCBG14G`).
+    -   Make the `x` axis a `factor` so the graph makes sense
+    -   `fill` the bars in to show how many schools each bar came from each country
+    -   `position` bars so they aren't stacked on top of each other
+
+```{r}
+#| warning: false
+#| echo: false
+#| eval: false
+plot_data <- TIMSS %>% 
+  filter(CNTRY %in% c("USA", "ENG"),
+         !is.na(BCBG14G))
+
+ggplot(data=plot_data,
+       aes(x=factor(BCBG14G,
+                    levels=c("Very low", "Low", "Medium", "High", "Very high")))) +
+  geom_bar(aes(fill=CNTRY), position="dodge")
+```
+
+4.  Repeat Q3, but this time work out the percentage of responses for each option in `BCBG14G` by country. Display a graph showing this "indentity".
+
+```{r}
+#| warning: false
+#| echo: false
+#| eval: false
+plot_data <- TIMSS %>% 
+  filter(CNTRY %in% c("USA", "ENG"),
+         !is.na(BCBG14G)) %>%
+  group_by(CNTRY) %>%
+  mutate(total = n()) %>%
+  group_by(CNTRY, BCBG14G) %>%
+  summarise(per = n()/max(total))
+  
+ggplot(data=plot_data,
+       aes(x=factor(BCBG14G,
+                    levels=c("Very low", "Low", "Medium", "High", "Very high")),
+           y=per)) +
+  geom_bar(aes(fill=CNTRY), position="dodge", stat="identity")
+```
+
+5.  \[Extension\] Explore other patterns in: "Teachers' ability to inspire students" `BCBG14D` and "Parental expectations for student achievement" `BCBG14G`
+:::
+
+### geom_text
+
+TODO: if time
+
+## Faceting
+
+Faceting allows you to easily create multiple graphs from one dataset and one graph definition by splitting the data on different factors. By defining
+
+`facet_wrap(<factor_to_split> ~ .)`
+
+Let's return to grammar school dataset from @sec-ifelse, we can easily plot this to show the relationship between poverty and school size, showing that grammar schools tend to serve quite affluent cohorts and that larger secondary schools tend to serve poorer cohorts:
+
+```{r}
+#| warning: false
+#| eval: false
+plot_data <- schools %>% 
+  filter(Open=="Open", 
+         Phase=="Secondary") %>%
+  mutate(sch_type = 
+           ifelse(EstablishmentGroup != "Independent schools" & 
+                    AdmissionsPolicy=="Selective",
+                  "GRAMMAR",
+                  "NOT GRAMMAR")) %>%
+  arrange(desc(sch_type))
+
+ggplot(data=plot_data, aes(x=FSM, y=NumberOfBoys + NumberOfGirls)) + 
+  geom_point(aes(colour=sch_type)) +
+  geom_smooth(method ="lm") +
+  theme(legend.position="bottom")
+
+```
+
+What isn't clear about the above is how this changes on a regional basis. We might be tempted to filter on each region and create separate charts for each regional name. But this would take a considerable amount of time and effort. Another way to do this is using `facet_wrap(Region ~ .)`. The below example uses the `Region` column to create the same chart for each Region, only using the data that is recorded as being in that region:
+
+```{r}
+#| warning: false
+#| eval: false
+ggplot(data=plot_data, aes(x=FSM, y=NumberOfBoys + NumberOfGirls)) + 
+  geom_point(aes(colour=sch_type)) +
+  geom_smooth(method ="lm") +
+  theme(legend.position="bottom") +
+  facet_wrap(Region ~ .)
+```
+
+## Exporting plots
+
+ggplot can export data in a variety of formats suitable for printing, publication and the web. Once you have created a graph and stored it in an object, the command to save the graph to your hard drive is:
+
+`ggsave(<file_name_and_extension>, <object_name>)`
+
+```{r}
+#| echo: true
+#| eval: false
+ggsave("poverty_size.pdf", graph_poverty_size)
+```
+
+If you want to change the output format, just change the extension of the file you are saving:
+
+-   "poverty_size.pdf" perfect for publication and printing, large size
+-   "poverty_size.svg" the same as pdf, also suitable for putting on webpages
+-   "poverty_size.png" smaller file size, suitable for websites and presentations
+-   "poverty_size.jpg" same as the png
+
+## Discussion activity
+
+Based on @davis2013introduction [Link to chapter](https://ieas-szeged.hu/downtherabbithole/wp-content/uploads/2018/02/Lennard-J.-Davis-ed.-The-Disability-Studies-Reader-Routledge-2014.pdf#page=15)
+
+![](images/03%20Normal%20Curve-01.jpg)
+
+Consider how and why we think of things as being 'normal' (or not). Some suggested questions are: What were your immediate thoughts on reading this paper?
+
+In what ways have you yourself been aware of being compared to norms or ideals? How do you feel about that? As an education professional, have you made comparisons between individual students and expected norms or averages? Between groups of students? When and how was this useful? When and how was this problematic?
+
+## Statistics
+
+Using the following `.csv` data set and the `read.csv` command: [DfE_SEN_School_Level](https://content.explore-education-statistics.service.gov.uk/api/releases/daf8d64d-ce21-4f21-c28c-08da3ee963bf/files/4cba1d1f-7ee8-4731-96fe-08da47b59ff3)
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Loading the data"
+# Descriptive Statistics using the DfE SEN School Level Data
+
+library("tidyverse")
+loc<-"<your drive>/sen_school_level_underlying_data.csv"
+DfE_SEN_data <- read.csv(loc)
+```
+
+**Individually**:
+
+-   Select a single local authority (LA) or region, and copy-paste the data to a new sheet.
+-   Calculate the total number of pupils in the LA, the total number listed as receiving SEN support, and the total number with an EHC plan.
+-   Calculate the percentages of pupils in the SEN support and EHC plan categories.
+-   Find the `mean`, `median`, `max`imum and `min`imum percentages of students with SEN support and EHC plans.
+
+**As a class**: Compare results for the different areas, and also to England as a whole. How much variation is there?
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+# Descriptive Statistics using the DfE SEN School Level Data
+
+install.packages("psych")
+library(psych)
+library(tidyverse)
+
+# Counting in a selected region
+
+DfE_SEN_data %>% 
+  filter(la_name=="Camden") %>% 
+  summarise(SEN_total=sum(SEN.support), 
+            EHCplan=sum(EHC.plan), 
+            Total=sum(Total.pupils))
+
+# Counting total SEN supported students in regions
+DfE_SEN_data %>%
+  group_by(district_administrative_name) %>%
+  summarise(SEN_support=sum(SEN.support), 
+            EHCplan=sum(EHC.plan), 
+            Total=sum(Total.pupils))
+
+# Calculating Percentages of students and finding maximums and minimums
+Percenttable<-DfE_SEN_data  %>% 
+  group_by(district_administrative_name) %>%
+  summarise(SEN_support=sum(SEN.support), 
+            EHCplan=sum(EHC.plan), 
+            Total=sum(Total.pupils)) %>%
+  mutate(percentageEHCplan = (EHCplan/Total)*100, 
+         percentagesupport = (SEN_support/Total)*100) 
+
+describe(Percenttable) # describe is a function from the psych package (remember to load tidyverse after it)
+                       #  which gives summary data include max, min, mean etc.
+
+# An alternative way to do this is to turn the table into the longer format
+# This converts each entry in the table into an individual row in a list
+# which can then be used to calculate descriptive statistics
+
+DfE_SEN_data %>%
+  group_by(district_administrative_name) %>%
+  summarise(SEN_support=sum(SEN.support), 
+            EHCplan=sum(EHC.plan), 
+            Total=sum(Total.pupils))
+new_table %>% 
+  pivot_longer(!district_administrative_name,
+               names_to = "variable",
+               values_to = "value") %>%
+  group_by(variable) %>%
+  summarise(mean_value = mean(value),
+            max_value = max(value),
+            median_value = median(value)
+  )
+
+
+```
+
+## Statistics
+
+Using the same data set: [DfE_SEN_School_Level](https://content.explore-education-statistics.service.gov.uk/api/releases/daf8d64d-ce21-4f21-c28c-08da3ee963bf/files/4cba1d1f-7ee8-4731-96fe-08da47b59ff3)
+
+Practice:
+
+-   Filtering and reorganizing data
+-   Calculating averages and ranges (and, optionally, quartiles, percentiles, standard deviations, etc.)
+-   Displaying data in different types of chart
+-   Comparing subsets of the data on variables that interest you (e.g. state-funded vs independent, religious denomination, girls' vs boys' vs mixed schools, etc.) Why might single sex schools have smaller numbers of EHC plans?
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+# Presenting % on EHC by gender of school
+genderplot <- DfE_SEN_data %>%
+  group_by(sex_of_school_description) %>%
+  summarise(SEN_support=sum(SEN.support), 
+            EHCplan=sum(EHC.plan), 
+            Total=sum(Total.pupils)) %>%
+  mutate(percentageEHCplan = (EHCplan/Total)*100, 
+         percentagesupport = (SEN_support/Total)*100)
+
+
+# using the genderplot data create a graph
+ggplot(data=genderplot,
+       aes(x=sex_of_school_description,
+           y=percentageEHCplan)) +
+  geom_col()
+
+# Calculate percentage on plan and support by type of school
+
+estabdata<-DfE_SEN_data %>%
+  group_by(type_of_establishment) %>%
+  summarise(SEN_support=sum(SEN.support), 
+            EHCplan=sum(EHC.plan), 
+            Total=sum(Total.pupils)) %>%
+  mutate(percentageEHCplan = (EHCplan/Total)*100, 
+         percentagesupport = (SEN_support/Total)*100)
+
+# Plot the type of school data
+ggplot(data=estabdata,
+       aes(x=type_of_establishment,
+           y=percentageEHCplan)) +
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  
+
+```
+
+## Using R to do descriptive statistics and plot graphs
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/J6yN0y1sm5g?start=2" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+
+</iframe>
+
+You can find the code used in the video below:
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+# Introduction to plotting graphs
+#
+# Download data from /Users/k1765032/Library/CloudStorage/GoogleDrive-richardandrewbrock@gmail.com/.shortcut-targets-by-id/1c3CkaEBOICzepArDfjQUP34W2BYhFjM4/PISR/Data/PISA/subset/Students_2018_RBDP_none_levels.rds
+# You want the file: Students_2018_RBDP_none_levels.rds
+# and place in your own file system
+# change loc to load the data directly. Loading into R might take a few minutes
+library(tidyverse)
+loc <- "/Users/k1765032/Library/CloudStorage/GoogleDrive-richardandrewbrock@gmail.com/.shortcut-targets-by-id/1c3CkaEBOICzepArDfjQUP34W2BYhFjM4/PISR/Data/PISA/subset/Students_2018_RBDP_none_levels.rds"
+PISA_2018 <- read_rds(loc)
+
+# Calculating means of groups
+# The PISA_2018 dataframe is piped to a new dataframe MeanPISA
+# The data are grouped by the country variable (CNT)
+# The countries of interest are chosen (UK, France, Germany and the US)
+# The summarise function is used to output the mean and standard deviation score for each country
+# on the Science Plausible Value (PV1SCIE) and NAs are ignored na.rm=TRUE
+
+MeanPISA <- PISA_2018 %>%
+  group_by(CNT)  %>%
+  filter(CNT=="United Kingdom" | CNT== "France" | CNT== "Germany" | CNT=="United States")  %>%
+  summarise(mean_sci = mean(PV1SCIE, na.rm=TRUE), sd_sci= sd(PV1SCIE, na.rm=TRUE)) 
+print(MeanPISA)
+
+
+# To plot data we can use the ggplot function. 
+# We will start by plotting a column graph use geom_col
+# We specify the data set for ggplot to use (MeanPisa) and then 
+# define the x and y variables:
+# ggplot(MeanPISA,
+#       aes(x=CNT, y=mean_sci))
+# geom_col() (Note the plus is on the line before) plots the graph and the fill colour is set to red
+# The next three lines set the formatting of the axis text and add x and y axis labels
+
+ggplot(MeanPISA,
+       aes(x=CNT, y=mean_sci))+
+geom_col(fill="red") +
+  theme(axis.text.x = element_text(angle = 90, hjust=0.95, vjust=0.2, size=10)) +
+  xlab("Country") +
+  ylab("Science Score")
+
+# For plotting a scatter plot or PISA reading scores against science scores
+#, first we make a managable data set
+# I will filter the data set to include only the UK data
+# Select the country, reading and science score, and remove any NAs
+
+UKData <- PISA_2018 %>%
+  filter(CNT=="United Kingdom") %>%
+  select(CNT, PV1SCIE, PV1READ, ST004D01T) %>%
+  drop_na(PV1SCIE)
+
+# This time I will use ggplot to plot a scatter graph
+# I feed UKDATA to ggplot, specify the x (PISA Reading score)
+# And y (PISA science score). This time, I have linked the colour
+# to a variable (ST004D01T) which is the gender value, giving
+# plot points of different colours for boys and girls
+# To produce a scatter plot, I use geom_point to plot points,
+# Giving the size of point and the transparency (alpha=0.5) -
+# some transparency of points is helpful when plots become dense
+# The x and y lables are added
+# Finally, a line is plotted - geom_smooth(method='lm')
+# sets the line to a linear ('lm') line
+
+  ggplot(UKData,
+       aes(x=PV1READ, y=PV1SCIE, colour=ST004D01T)) +
+  geom_point(size=0.1, alpha=0.5) +
+  ylab("Science Score") +
+  xlab("Reading Score") +
+  geom_smooth(method='lm')
+  
+# Where R becomes very powerful is being able to produce multiple charts rapidly
+# In the code below, I plot reading against science scores as above, but this time
+# Use the entire data set - for the whole world!
+# All the steps are the same, except, I use the facet_wrap, a way to create multiple
+# graph panels - the instruction creates a set of graphs for each country  
+  
+  WorldData <- PISA_2018 %>%
+    select(CNT, PV1SCIE, PV1READ, ST004D01T) %>%
+    drop_na(PV1SCIE)
+  
+  ggplot(WorldData,
+         aes(x=PV1READ, y=PV1SCIE, colour=ST004D01T)) +
+    geom_point(size=0.1, alpha=0.5) +
+    ylab("Science Score") +
+    xlab("Reading Score") +
+    geom_smooth(method='lm') +
+    facet_wrap(CNT~.)
+```

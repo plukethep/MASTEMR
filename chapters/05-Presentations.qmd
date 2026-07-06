@@ -1,0 +1,42 @@
+---
+title: "05 Presentations"
+---
+
+This task is worth 10% of total marks
+
+Prepare a 5-minute presentation: On a single slide, produce a graph of PISA data. Discuss assumptions in the variables, and how you prepared the data. Describe patterns you can see and link to the literature (you may add a second slide for linking to literature).
+
+## Suggestions
+
+Think of the variables in PISA (science, maths and reading achievement, gender, social class, wealth, food poverty, well being...) and then think of an interesting question:
+
+Is the correlation between maths score and wealth the same in the UK, the US and Germany?
+Does food poverty impact reading scores across the whole data set?
+How large are gender differences in reading score and do they vary across countries?
+Do mean reading and mean science score correlate?
+
+Then, using what you have learned so far about ggplot, produce one graph and discuss the patterns in it. Put the graph on a single PowerPoint slide and play with the options in ggplot to produce the best presented graph you can. Then compare the pattern in the literature to one or two papers. For example, if addressing the first question above, what has previous research said about the relationship between maths and wealth? Does your graph agree with or differ from the previous research.
+
+You can find an example presentation on KEATs.
+
+## Marking points
+
+-   Were assumptions in the variables discussed?
+-   Was data cleaning and preparation (and its implications) discussed?
+-   Was a well-presented graph produced?
+-   Were the patterns in the graph discussed?
+-   Were the data linked to the literature?
+-   General comments on insight into issues and presentation
+
+
+::: callout-tip
+Make sure you practice your presentation to fit into the time
+:::
+
+::: callout-tip
+Don't try to pack too much data into your graph. There is a skill to making a graph that tells a good story. You might find some of these pages provide useful gudiance:
+
+-   The '[From Data to Viz'](https://www.data-to-viz.com) blog has a helpful flowchart for choosing an appropriate type of graph for different forms of data. The'[Visual Vocabulary](https://ft-interactive.github.io/visual-vocabulary/)' site, produced by the Financial times is an alternative option for selecting an appropriate chart.
+-   You can find a gallery of around 400 types of visualisation you can produce in R [at the R chart gallery](https://r-graph-gallery.com/all-graphs.html).
+-   The Royal Statistical Society has produced a guide to making visual representations, [Best Practice for Data Representations](https://royal-statistical-society.github.io/datavisguide/), that shows you how to make readable, accessible data visualisations.
+:::

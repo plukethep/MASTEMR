@@ -1,0 +1,132 @@
+```{r}
+library(glue)
+library(tidyverse)
+
+loc <- glue("C:/Users/k1345925/OneDrive - King's College London/R stats/PISA2015studentbz2levelsDP2.rds")
+message("LOADING: PISA 2015 data")
+PISA_2015 <- read_rds(loc)
+names(PISA_2015)
+```
+
+<!--https://www.r-bloggers.com/2022/01/how-to-perform-eta-squared-in-r/-->
+
+```{r}
+#| code-fold: true
+#| code-summary: inquiry preparation code
+#| eval: true
+
+# mapping used
+# c(1 = "In all lessons",
+#  2 = "In most lessons",
+#  3 = "In some lessons",
+#  4 = "Never or hardly ever",
+#  NA = "Valid Skip",
+#  NA = "Not Reached",
+#  NA = "Not Applicable",
+#  NA = "Invalid",
+#  NA = "No Response")
+
+inquiry_data <- PISA_2015 %>%
+  select(ST098Q10NA, ST098Q07TA, ST098Q05TA, 
+         ST098Q02TA, PV1SCIE, IBTEACH, TDTEACH) %>%
+  mutate(ST098Q10NA = as.numeric(ST098Q10NA),
+         ST098Q07TA = as.numeric(ST098Q07TA),
+         ST098Q05TA = as.numeric(ST098Q05TA),
+         ST098Q02TA = as.numeric(ST098Q02TA)) %>%
+  drop_na() %>%
+    mutate(inquiry_components =  ifelse(
+                ST098Q10NA > 2 & ST098Q07TA > 2 & ST098Q05TA > 2 & ST098Q02TA > 2, "N",
+              ifelse(
+                ST098Q10NA > 2 & ST098Q07TA > 2 & ST098Q05TA > 2 & ST098Q02TA < 3, "A",
+              ifelse(
+                ST098Q10NA > 2 & ST098Q07TA > 2 & ST098Q05TA < 3 & ST098Q02TA < 3, "C",
+              ifelse(
+                ST098Q10NA > 2 & ST098Q07TA < 3 & ST098Q05TA < 3 & ST098Q02TA < 3, "I",
+              ifelse(
+                ST098Q10NA < 3 & ST098Q07TA < 3 & ST098Q05TA < 3 & ST098Q02TA < 3, "Q",
+              99)))))) %>%
+  mutate(inquiry_components = as.factor(inquiry_components)) %>%
+  filter(inquiry_components != "99")
+```
+
+## Running the test
+
+```{r}
+
+res_aov <- aov(PV1SCIE ~ inquiry_components,
+               data = inquiry_data)
+
+summary(res_aov)
+
+TukeyHSD(res_aov)
+
+```
+
+### Reporting the test
+
+To put the ANOVA and Tukey tests in a format for reporting we can use the `easystats` package. Easystats is a collection of tools to help you statistically analyse data and present your findings. One you have installed and loaded `easystats` you can then use the `report(<stats_model>)` command to format your results for a paper you are writing:
+
+```{r}
+install.packages("easystats")
+library("easystats") # Load the package every time you want to use these tools
+
+report(res_aov)
+```
+
+### Plotting the results
+
+-   Explain how to understand this
+-   Could we have a ggplot version of this?
+
+```{r}
+plot(TukeyHSD(res_aov))
+```
+
+### Post tests function
+
+Explanation needed here
+
+```{r}
+library(multcomp)
+# Tukey HSD test:
+post_test <- glht(res_aov,
+                  linfct = mcp(inquiry_components = "Tukey"))
+summary(post_test)
+```
+
+### Eta squared
+
+Explanation needed here
+
+```{r}
+library(lsr)
+etaSquared(res_aov)
+```
+
+## Seminar tasks
+
+### Activity 1: run ANOVA tests exploring...
+
+Need to set something simple for them to do here
+
+```{r}
+# code solution to go here
+
+
+```
+
+### Activity 2: prepare for and run Tukey HSD post hoc test with summary and plot of which contrasts between levels are statistically significant
+
+```{r}
+# code solution to go here
+
+
+```
+
+### Activity 3
+
+```{r}
+# code solution to go here
+
+
+```

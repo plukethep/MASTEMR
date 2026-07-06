@@ -1,0 +1,43 @@
+---
+title: "08 Science capital"
+---
+
+In the lecture you looked at @du2019science as an example of a quantitative report. This session will help you structure your writing for your own quantitative report in assignment 3.
+
+## Activity 1: Proposing a question
+
+a)  Spend 10 minutes researching a problem (this can't be extensive but find something that is flagged as requiring more research). Alternatively, you make already have a problem, in which case move onto the next step
+
+b)  State a rough research problem:
+
+    e.g., There is an imbalance in the number of students studying a-level biology (i.e., too few boys)
+
+c)  Turn the problem into a question:
+
+    e.g., What school features correlate with higher and lower level of male uptake of a-level biology?
+
+d)  Increase the specificity of the question:
+
+    e.g., In DfE school census data for the period 2017-2022 what school variables (including number of biology teachers, uptake of GCSE triple science, % of FSM students etc.) correlate with higher and lower level of male uptake of a-level biology?
+
+## Activity 2: Find a data set and check its applicability
+
+-   Use the list of open data sets to choose an appropriate data set
+-   Does it include all the data to answer your question? Which items will you use in your analysis? What form is the data you will use in?
+-   What form of cleaning will the data require?
+-   Will you need to draw on multiple data sets?
+
+## Activity 3: Decide on approaches to analysis
+
+-   What types of data are relevant to your questions (continuous, discontinuous?)
+-   What types of test will you need to run?
+-   What kind of descriptive statistics will be useful?
+
+## Activity 4: Sketch a research plan
+
+-   When will you finalize your question?
+-   When will you carry out your data analysis?
+-   When will you write up?
+-   What help will you need?
+-   How can you collaborate with peers?
+-   What R/SPSS/Excel skills do you need to acquire?

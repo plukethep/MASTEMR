@@ -1,0 +1,98 @@
+# title: "Quantitative methods in the context of STEM education research"
+# subtitle: "MA STEM Education"
+
+number-sections: true
+
+project:
+  type: website
+  # render:
+  #    - quarto_help.qmd
+  #    - about.qmd
+  
+#  render:
+#      #- !simple/
+#    - index.qmd
+#    - about.qmd
+#    - simple/01-Intro_to_quant_methods.qmd
+#    - simple/02-1-Intro_to_analysis_software.qmd
+#    - simple/02-2-Intro_to_analysis_software.qmd
+#    - simple/02-2-Intro_to_analysis_software.qmd
+#    - simple/03-Differing_performance_in_STEM.qmd
+#    - simple/04-Presentations.qmd
+#    - simple/05-Gender_differences.qmd
+#    - simple/06-Maths_anxiety.qmd
+#    - simple/07-Inquiry_learning_in_science.qmd
+#    - simple/08-Science_capital.qmd
+#    - simple/09-Assignment_3_tutorials.qmd
+#    - simple/10-teachers_relationships_and_STEM_achievement.qmd
+#    - simple/11-selecting_statistical_tools.qmd
+#    - simple/12-effective_international_STEM_ed.qmd
+#    - simple/A1-PISA_analysis.qmd
+#    - simple/A2-DfE_analysis.qmd
+#    - simple/A3-TIMSS_analysis.qmd
+#    - simple/A4-Other_datasets.qmd
+#    - simple/QandA.qmd
+  # https://quarto.org/docs/websites/
+
+# https://quarto.org/docs/projects/code-execution.html
+execute:
+  freeze: auto
+
+website:
+  title: "MASTEMR"
+  navbar:
+    logo: images/KCL_logo.png
+    logo-href: https://keats.kcl.ac.uk/course/view.php?id=106595
+    left:
+      - href: index.qmd
+        text: Home
+      - href: about.qmd
+        text: About
+      - href: quarto_help.qmd
+        text: Quarto
+# https://quarto.org/docs/websites/website-navigation.html
+#  sidebar:
+#    style: "docked"
+#    search: true
+#    contents:
+#      - section: "Sessions"
+#        contents:
+#          - simple/01-Intro_to_quant_methods.qmd
+#          - simple/02-1-Intro_to_analysis_software.qmd
+#          - simple/02-2-Intro_to_analysis_software.qmd
+#          - simple/02-2-Intro_to_analysis_software.qmd
+#          - simple/03-Differing_performance_in_STEM.qmd
+#          - simple/04-Presentations.qmd
+#          - simple/05-Gender_differences.qmd
+#          - simple/06-Maths_anxiety.qmd
+#          - simple/07-Inquiry_learning_in_science.qmd
+#          - simple/08-Science_capital.qmd
+#          - simple/09-Assignment_3_tutorials.qmd
+#          - simple/10-teachers_relationships_and_STEM_achievement.qmd
+#          - simple/11-selecting_statistical_tools.qmd
+#          - simple/12-effective_international_STEM_ed.qmd
+#      - section: "Data sets"
+#        contents:
+#          - simple/A1-PISA_analysis.qmd
+#          - simple/A2-DfE_analysis.qmd
+#          - simple/A3-TIMSS_analysis.qmd
+#          - simple/A4-Other_datasets.qmd
+#      - section: "Common questions"
+#        contents:
+#          - simple/QandA.qmd
+         
+format:
+  html:
+    theme: journal #cosmo
+    css: css/CRESTEMR.css
+    toc: true
+    code-line-numbers: true
+    code-link: true
+
+editor: 
+  mode: source
+
+crossref: 
+  chapters: true
+  
+bibliography: references/mastemr.bib

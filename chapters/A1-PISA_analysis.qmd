@@ -1,0 +1,1009 @@
+---
+title: "PISA"
+# bibliography: ../references/mastemr.bib
+---
+
+```{r setup}
+```
+
+```{r}
+#| eval: true
+#| warning: false
+#| echo: false
+PISA_2022 <- read_feather(glue("{pisa_data}2022/PISA_student_2022.feather"))
+```
+
+# What is PISA
+
+The _Programme for International Student Assessment_ (PISA) is an OECD initiative that looks at the reading, mathematics and science abilities of students aged 15 years old. Data is collected from \~38 OECD countries and other partner countries every three years.
+
+| Dataset   | Description                                                                                         | 03  | 06  | 09  |                                                                                12                                                                                 |                                                                                 15                                                                                 |                                                                                 18                                                                                 |                                                                                 22                                                                                 |
+|--------|--------|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
+| Student   | demographic data on student participants                                                            |  [x](https://emckclac-my.sharepoint.com/:u:/g/personal/k1926273_kcl_ac_uk/EX6zg63qlJpEgZ8uQhjxJ30BkXxo3MhtDnnxcdXV6d_9GA?e=ZjDjLE "PISA 2003 student parquet file") |  [x](https://emckclac-my.sharepoint.com/:u:/g/personal/k1926273_kcl_ac_uk/EZrlaEKCQtZLpC8_pZZFQeQBoh8lOI3_KvTd931QY4CzuQ?e=zOzhDU "PISA 2006 student parquet file") |  [x](https://emckclac-my.sharepoint.com/:u:/g/personal/k1926273_kcl_ac_uk/EWvwfbrA9z1Fu9uGQXBIGmwBoMDZQglAh4pHID_i3DB-GQ?e=mFDJW5 "PISA 2009 student parquet file") |                                    [x](https://emckclac-my.sharepoint.com/:u:/g/personal/k1926273_kcl_ac_uk/Ed6fJmhhfdNLomH5evre2DsBOStpg5KjkjtZKgflRX-J3g?e=qfgp7X "PISA 2012 student parquet file")<!--old link https://drive.google.com/file/d/1-41Ynn4hzEL1vO2L-wIqdRotXDtDdjYh/view?usp=share_link)--> | [x](https://emckclac-my.sharepoint.com/:u:/g/personal/k1926273_kcl_ac_uk/Eb9NSm5rzm1OhtKiX6ZlPZwBm86Cd82ZAUohbzbozlkk4A?e=xofvn5 "PISA 2015 student parquet file") | [x](https://emckclac-my.sharepoint.com/:u:/g/personal/k1926273_kcl_ac_uk/EZsx7bC_8jlDpsLrODivNpIBrFdwhJRezNYosyhoCyPjMA?e=7od1Dm "PISA 2018 student parquet file") | [x](https://emckclac-my.sharepoint.com/:u:/r/personal/k1926273_kcl_ac_uk/Documents/Code/QERKCL_PISA/data/pisa/2022/PISA_student_2022.parquet?csf=1&web=1&e=jppggv "PISA 2022 student parquet file") |
+| School    | descriptive data about schools                                                                      |  x  |  x  |  x  | [x](https://emckclac-my.sharepoint.com/:u:/g/personal/k1926273_kcl_ac_uk/EcqBboQfdChEv4AWCosNfSkBHD_477xotsXmioba4OMixg?e=f9OFKz "PISA 2015 school parquet file") | [x](https://emckclac-my.sharepoint.com/:u:/g/personal/k1926273_kcl_ac_uk/EcqBboQfdChEv4AWCosNfSkBHD_477xotsXmioba4OMixg?e=PeIwqX "PISA 2015 school parquet file")  | [x](https://emckclac-my.sharepoint.com/:u:/g/personal/k1926273_kcl_ac_uk/EZ6gBqzavF5Dr3bHGL8jPBkB0AzqtCvflBFRRfrNrIFLEg?e=8alaVy "PISA 2018 school parquet file")  | [x](https://emckclac-my.sharepoint.com/:u:/g/personal/k1926273_kcl_ac_uk/EaEQPEKYzR9MmiqLBYXOhmYBNXYg15UoDKGip-78kS1DvA?e=q74fyK "PISA 2022 school parquet file")  |
+| Parent    | a survey for student's parents including information about home environments and parental education |  x  |  x  |     |                                                                                                                                                                   |                                                                                                                                                                    |                                                                                                                                                                    |                                                                                                                                                                    |
+| Teacher   | demographic, teaching, qualification and training data                                              |     |     |     |                                                                                 x                                                                                 | [x](https://emckclac-my.sharepoint.com/:u:/g/personal/k1926273_kcl_ac_uk/ERlZD45RXhRBoOoR1B3EVNMBhCiAoB5Hd8LsgUlwHzlEdA?e=yyJfW7 "PISA 2015 teacher parquet file") | [x](https://emckclac-my.sharepoint.com/:u:/g/personal/k1926273_kcl_ac_uk/EdVdIhwprLRGgN-o9u4DDH0BoIcgGEy84ERCKX4z-I3zaw?e=t3ceLR "PISA 2018 teacher parquet file") | [x](https://emckclac-my.sharepoint.com/:u:/g/personal/k1926273_kcl_ac_uk/EbFmgVVbQD9DlIIgOKHDhLcB8bA8lfQMDVSEkcjtByM2cQ?e=zYG4Is "PISA 2022 teacher parquet file") |
+| Cognitive | individual results for each exam style question students took                                       |  x  |  x  |  x  |                                    [x](https://drive.google.com/file/d/19GLw1-YA1aJGWoCWXfZGtUWnQi4pcjik/view?usp=share_link)                                     |                                     [x](https://drive.google.com/file/d/1sTpe3TJSnByhZdxzezkmXjH2uTH9TOUP/view?usp=share_link)                                     |                       [x](https://drive.google.com/file/d/1nhwySp0A-LHfN-oO8HES9PQOIDZNmOzT/view?usp=share_link)                                                   |                                                                                                                                                                    |
+
+PISA datasets above can be found on the [OECD website](https://www.oecd.org/pisa/data/). The links in the table above will allow you to download `.parquet` versions of these files which we have created, though they might need additional editing, e.g. reducing the number of columns or changing the types of each column. If you want to find out more about what each field stores, take a look at the corresponding codebook: [2022](https://webfs.oecd.org/pisa2022/CY08MSP_CODEBOOK_5thDecember23.xlsx), [2018](https://webfs.oecd.org/pisa2018/PISA2018_CODEBOOK.xlsx), [2015](https://webfs.oecd.org/pisa/Codebook_CMB.xlsx).
+
+# How to use it
+
+The PISA datasets come in *SPSS* or *SAS* formats. The data used in this course comes directly from downloading the SPSS `.sav` files and using the `haven` package to clean it into a native R format suitable for analysis, in most cases `.parquet` files (see: @sec-parquet). There are a few quirks that you need to be aware of:
+
+-   R uses levels (factors) instead of labelled data
+-   All SPSS fields are *labelled*, and auto conversion into the native R data frame format would make numeric fields, factors(!?). To avoid this confusion we have stripped out the no-response data for numeric fields and replaced it with `NA` values. This means that you won't be able to tell the reason that a field is missing, but most of the original data doesn't appear to use the majority of these levels, i.e. there are few reasons given for missing data. The following labels have all been set to `NA`:
+
+| value | label          |
+|-------|----------------|
+| 95    | Valid Skip     |
+| 97    | Not Applicable |
+| 98    | Invalid        |
+| 99    | No Response    |
+
+: Labels set to `NA` in `.parquet` files
+
+-   As the fields are now using R's native factor format you might find that the data doesn't quite match the format of the table labels. For example, `CNT` is labelled "Country code 3-character", but the data is now instead the full country name.
+-   the examples shown in the book use cut down PISA data sets, where only a limited number of columns are included. The _full_ datasets are linked in the table above.
+
+## Cleaning code
+
+The `.parquet` files used in this book were produced using the following code.
+
+First download the SPSS versions of the files from the [OECD website](https://www.oecd.org/pisa/data/), i.e. the `.sav` files. 
+
+Next create a function that converts `.sav` file columns to factors, picking up on a lot of edge cases:
+
+```{r}
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| code-summary: "PISA_factorise() function"
+#| 
+# take an SPSS PISA dataframe and convert it to R factors
+
+PISA_factorise <- function(df){
+  # TODO: use SPSS types to make this more efficient
+  # attr(df$x,"format.spss")
+  
+  # PISA data has almost everything labelled!
+  # but not quite everything
+  lbls <- map(df, function(x){
+    attr(x, "label")
+  })
+
+  # label names for dud data
+  dodgy_labels <- c(99995, 99997, 99998, 99999,
+                    99999995, 99999997, 99999998, 99999999,
+                    995, 997, 998, 999)
+  dodgy <- c("Valid Skip", "Not Applicable", "Invalid", "No Response")
+  dodgy2 <- c("N/A", "Invalid", "Missing")
+  
+  dfc <- df %>% # head(100) %>% #select(any_of(c("ST04Q01", "SCHOOLID", "TC002Q01NA"))) %>%
+    mutate(across(everything(), 
+                  function(x){
+                    x_lbls <- attr(x, "labels")
+                    x_lbl <- attr(x, "label")
+                    
+                    # outputs the current column name
+                    message(cur_column())
+
+                    # if it doesn't have labels to start with e.g. CNTSCHID
+                    # do a direct copy
+                    if(is.null(x_lbls)){
+                      tmp <- x
+                    }else if(cur_column() %in% c("ST03Q02", "ST03Q01") & 
+                             "character" %in% class(x) &
+                             grepl("Month", x_lbl)){
+                      # for 2006/12 when date is a character?!
+                        message("2006/12 - converting Month of birth character date to numeric")
+                        tmp <- as.numeric(ifelse(grepl("^\\d+$", x), x, NA))
+                        tmp[as.numeric(tmp) == 99] <- NA
+                        tmp <- month.name[tmp]
+                        tmp <- factor(tmp, levels=c(
+                          "January", "February", "March", "April",
+                          "May", "June", "July", "August",
+                          "September", "October", "November", "December"
+                        ))
+                    }else if(cur_column() %in% c("ST03Q03", "ST03Q02") & 
+                             "character" %in% class(x) &
+                             grepl("Year", x_lbl)){
+                      # for 2006/12 when date is a character?!
+                      message("2006/12 - converting Year of birth character date to numeric")
+                      tmp <- as.numeric(ifelse(grepl("^\\d+$", x), x, NA))
+                      tmp[as.numeric(tmp) == 99] <- NA
+                    }else if(cur_column() %in% c("CLCUSE301", "CLCUSE302", "Deffort") & 
+                             "character" %in% class(x)){
+                      # for 2012 when Effort-real  is a character?!
+                      message("2012 - converting Effort-real/Deffort character to numeric")
+                      tmp <- as.numeric(ifelse(grepl("^\\d+$", x), x, NA))
+                      tmp[as.numeric(tmp) == 99] <- NA
+                    }else if(cur_column() %in% c("VER_STU")){
+                      # attr(,"format.spss")
+                      # [1] "A7"
+                      message("dealing with plain text from 2012 VERSTU")
+                      tmp <- as.character(x)
+                    }
+                    else{
+                      if(is.null(names(x)[1])){
+                        first_name <- ""
+                      }else{
+                        first_name <- names(x)[1]
+                      }
+                      
+                      if(first_name %in% c("SCHOOLID","StIDStd", "ST03Q01")){
+
+                        #grepl("[a-zA-Z]", x[1]) # check to see if text contains character
+                        
+                        message(glue(">> {names(x)[1]} for 2012 so... character?"))
+                        tmp <- x %>% as.character() %>% as.numeric()
+                        
+                        # filter out the dodgy NA values
+                        tmp <- ifelse(as.numeric(tmp) %in% x_lbls,NA, tmp)
+                        
+                        # tmp <- x # can't convert to numeric?!
+                        range(tmp, na.rm=TRUE)
+                        
+                      # if the labels are only for missing data set them to NA
+                      }else if(setequal(names(x_lbls), dodgy)){
+                        # replace any labelled data with NA
+                       message(">> only missing labels, going numeric")
+                       message(x[1:40])
+                       tmp <- ifelse(as.numeric(x) %in% x_lbls,NA, x)
+                        
+                      # check that levels only contain 90s, if so likely numeric!
+                      }else if(sum(as.numeric(x_lbls) >= 90 & 
+                             as.numeric(x_lbls) < 100, na.rm=TRUE) == length(x_lbls)){
+                        message(">> converting to numeric")
+                        tmp <- ifelse(x >= 90,NA, x)
+                      }else if(sum(as.numeric(x_lbls) %in% dodgy_labels) == length(x_lbls)){
+                        message(">> weird LMINS etc")
+                        tmp <- ifelse(x %in% dodgy_labels,NA, x)
+                      }else{
+                        message(">> normal factor")
+                        tmp <- haven::as_factor(x)
+                      }
+                    }
+                    # re attach label to each column
+                    attr(tmp,"label") <- lbls[cur_column()][[1]]
+                    message()
+                    return(tmp)
+                  }
+    ))
+ return(dfc) 
+}
+```
+
+Finally, load the `.sav` file into R, run the conversion function, and save back to `.parquet` format:
+
+```{r}
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| code-summary: "conversion code"
+# G:\My Drive\Kings\Code\PISR\code\
+
+library(tidyverse)
+library(glue)
+library(openxlsx)
+library(labelled)
+library(haven)
+
+base_folder <- "where/the/sav/files/are/stored/"
+
+loc <- glue("{base_folder}pisa_student_2022.sav")
+df <- read_spss(loc) # using haven
+
+PISA_2022 <- PISA_factorise(df) # custom conversion code
+write_parquet(PISA_2022, glue("{base_folder}pisa_student_2022.parquet"))
+```
+
+# Common issues
+
+The PISA datasets can be absolutely huge and might bring your computer to its knees; if you are using a computer with less than 16GB of RAM you might not be able to load some tables at all. Tables such as the *Cognitive* dataset have hundreds of thousands of rows and thousands of columns, loading them directly might lead to an error similar to this: `Error: cannot allocate vector of size 2.1 Gb`. This means that R can't find enough RAM to load the dataset and has given up. You can see a rough estimate of how much RAM R is currently using the top Environment panel:
+
+![](/images/environment-RAM.png)
+
+To get around this issues you can try to clean your current R environment using the brush tool:
+
+![](/images/environment-brush.png)
+
+This will drop all the current dataframes, objects, functions and packages that you have loaded meaning you will have to reload packages such as `library(tidyverse)` and `library(haven)` before you can attempt to reload the PISA tables.
+
+A lack of RAM might also be the result of lots of other programs running concurrently on your computer. Try to close anything that you don't need, web browsers can be particularly RAM hungry, so close them or as many tabs as you can.
+
+If none of the above works, then please get in touch with the team, letting them know which table you need from which year, with which fields and for which countries. We will be able to provide you with a cutdown dataset.
+
+# Publishing your PISA analysis
+
+So far you have been dealing with a subset of the data and the `PV1` fields. Published analysis of PISA data, as with many other large scale data sets involves the _weighted_ use of _plausible values_. In a nutshell the raw student sample from each country might not be a perfect representation of that country's student population and the results of some students need to carry more _weight_ than others to give you a proper picture of how that country is performing. Within a country, students won't be able to complete every test element in the PISA question bank, so a range of _plausible values_ are produced that predict how a students might have done if they had sat all the questions, based on their answers for the questions that they did sit. Due to these reasons, and others, you should always look at publications that refer to PISA with a certain degree of skepticism. A useful place to feed your skepticism is Jerrim's 2020 video on [Should the PISA findings be trusted?](https://www.youtube.com/watch?v=Yrud2pi5NOQ)
+
+> "Almost nobody knows exactly where the OECD numbers come from" - Jerrim 2020
+
+## Plausible Values {#sec-PV}
+
+In the PISA dataset, the outcomes of student tests are reported as plausible values, for example, in the variables of the science test (`PV1SCIE`, `PV2SCIE`, `PV3SCIE`, `PV3SCIE`, and `PV5SCIE`). It might seem counter intuitive that there are five or ten values for a score on a test. (note PISA published five plausible values before 2015, when they increased the number of plausible values to ten)
+
+Plausible values (PVs) are a way of expressing the error in a measurement. The number of questions in the full PISA survey is very large, so students are randomly allocated to take a subset of questions (and even then, the test still takes two hours!). As no student completes the full set of questions - only 40% of students even answer questions in reading, science and mathematics [@OECD2014technical] - estimating how a student would have performed on the full question set involves some error. Plausible values are a way of expressing the uncertainty in the estimation of student scores.
+
+One way of thinking of the PV scores is that they represent five or ten different estimates of students' abilities based on the questions they have answered. To decrease measurement error, five different approaches are applied to create five different estimates, the PV scores.
+
+The PISA Data Analysis Manual suggests:
+
+> Population statistics should be estimated using each plausible value separately. The reported population statistic is then the average of each plausible value statistic. For instance, if one is interested in the correlation coefficient between the social index and the reading performance in PISA, then five correlation coefficients should be computed and then averaged
+>
+> Plausible values should never be averaged at the student level, i.e. by computing in the dataset the mean of the five plausible values at the student level and then computing the statistic of interest once using that average PV value. Doing so would be equivalent to an EAP estimate, with a bias as described in the previous section.
+>
+> [@monseur2009pisa, p.100]
+
+The actual PV values can differ substantially from each, for example if we work out the scaled (normalised) value for a PV value, that is how many standard deviations from the mean of other PV values a student gets we can see large fluctuations. For student 5, PV1SCIE is 0.147 standard deviations _lower_ than the average of all students, but when we look at their PV2SCIE score, we see it is 1.10 standard deviations _higher_:
+
+```{r}
+#| eval: true
+#| echo: true
+
+PISA_2022 %>% 
+  mutate(PV1SCIE_z = scale(PV1SCIE),
+         PV2SCIE_z = scale(PV2SCIE)) %>%
+  select(PV1SCIE, PV2SCIE,
+         PV1SCIE_z, PV2SCIE_z)
+
+```
+
+These differences make analysis at an individual student level hard to justify, though overall population or sub population scores will be more reliable. One approach that we could take to resolve the issue with using a single PV values would be to to look at using the average (here, taken to be the _mean_) of several PV scores. To calculate the mean of ten PV values, do the following (it might take some time to complete this calculation!):
+
+```{r}
+#| eval: false
+#| echo: true
+
+PISA_2022 %>% 
+  rowwise() %>%
+  mutate(PV_SCIE_m = mean(c_across(matches("PV[0-9]+SCIE"))),
+         PV_MATH_m = mean(c_across(matches("PV[0-9]+MATH"))),
+         PV_READ_m = mean(c_across(matches("PV[0-9]+READ")))) %>%
+  ungroup() %>% # to get rid of the rowwise operator
+  select(PV_SCIE_m, PV_MATH_m, PV_READ_m)
+```
+
+This isn't a perfect solution, and below we will take you through using Plausible Values correctly. 
+
+## What are weights
+
+The PISA data set contains two weighting variables that allow you to look at student outcomes that represent a country population accurately, and to compare countries against each other. When running our analysis, if we want it to be representative of the population, and allow for comparisons between countries, we should really be looking at the weighted scores. Luckily this can be easily done in R.
+
+### Student weights
+
+The _student weight_, `W_FSTUWT`, represents the probability of an individual student being selected within a given country. For example, if PISA only sampled students from England for the UK results, then taking the mean Maths scores from these students probably wouldn't be a representative score for all students in the _UK_ including those from Wales, Scotland and Northern Ireland. In pratice PISA tries to sample students from all over a country, but it's unlikely that the likelihood of a student being sampled in each region will be equal, it might also be the case that other factors are skewed, e.g. students from cities are more likely to be sampled than those from the countryside, or more affluent schools are more likely to be sampled than impoverished ones. To try and provide an accurate representation of the responses for different types of students across a whole country, PISA uses weights to increase or decrease the impact of individual students on overall results. 
+
+In the UK, students in Scotland had a higher likelihood of being sampled than those in England. With 4,763	students sampled in England and 3,257 sampled in Scotland; as a proportion, the Scottish population is too large. The school population of England (~9.1 million) is much larger than Scotland (~790 thousand), so we need to use weighting to decrease the impact of each Scottish student on the overall UK results, otherwise they would be over represented:
+
+```{r}
+#| echo: true
+#| code-fold: true
+PISA_2022 %>% 
+  filter(CNT == "United Kingdom") %>%
+  group_by(REGION) %>%
+  summarise(n=n(),
+            W_FSTUWT_mean = mean(W_FSTUWT)) %>%
+  gt() %>%
+  fmt_number(columns = "n", decimals = 0) %>%
+  fmt_number(columns = "W_FSTUWT_mean", decimals = 2) %>%
+  cols_align(columns = "REGION", align="left")
+```
+
+The ratio of students in England to students in Scotland is roughly 9,100,100 : 790,000 or 910 : 79, i.e. for every 910 English students, there should be 79 Scottish students; i.e. for every Scottish student there should be _11.5_ English students. Applying the PISA students weights for students from England and Scotland we get:
+
+```{r}
+#| echo: true
+(4763 * 131.04) / (3257 * 15.91)
+```
+
+This is close to 11.5 but not quite the same as the population ratio. The reason might be that there are other factors that influence the student weighting, including situations where certain school types are under represented and other types over represented, for example there being more urban schools in the sample than in the population, this would then require students in rural schools to be given a greater weighting than students in urban schools. Allocating weights can be a complex process.
+
+```{r}
+#| echo: true
+#| code-fold: true
+PISA_2022 %>% 
+  filter(CNT == "United Kingdom") %>%
+  group_by(REGION, W_FSTUWT) %>%
+  count() %>%
+  ungroup() %>%
+  mutate(weight_label = ifelse(W_FSTUWT > 400, "Heavyweight!", NA)) %>%
+  ggplot() + 
+  geom_point(aes(x=W_FSTUWT, y=n, colour = W_FSTUWT < 400)) +
+  geom_text(aes(x=W_FSTUWT-35, y=n-2, label=weight_label)) +
+  facet_wrap(REGION~.) +
+  theme_bw() +
+  theme(legend.position = "none")
+```
+
+We can see that _all_ students in England have a heavier weight attached to them than every student in Scotland, Wales and Northern Ireland. There is also a group of 9 students that have weightings of over 400, these are students that are very under represented in the sample. The weighting of these students is very high, and they will have a large impact on the overall results, potentially skewing results. For example, if the occupation of one of these student's mothers (`OCOD3`) was as a butcher, then it would look like a lot of students in the UK had butchers as mothers, when in fact only one student in the sample did. This is a problem with weighting, and it is important to be aware of it when interpreting results.
+
+So why are PISA sampling so many students from Scotland, Northern Ireland and Wales when each only forms a small part of the UK? By providing representative samples for each of these regions, it allows PISA to report for the UK as a whole and also to provide representative samples of students for each region of a country, allowing for the UK government (and us) to compare the performance of students under the different educational jurisdictions of the four nations. 
+
+So how do you use student weights in a calculation? Let's look at some examples. 
+
+#### Numeric fields
+
+We can find the mean poverty level of country, by looking at `HOMEPOS`. Calculating this without the weights gives us the following:
+
+```{r}
+#| echo: true
+#| code-fold: true
+df <- PISA_2022 %>% 
+  group_by(CNT) %>%
+  summarise(HOMEPOS_m = mean(HOMEPOS, na.rm=TRUE),
+            HOMEPOS_md = median(HOMEPOS, na.rm=TRUE)) %>%
+  arrange(HOMEPOS_m)
+
+df
+```
+
+Now we can adjust this code to apply weights - students in each country will have their `HOMEPOS` score multiplied by their weight, the mean of these weighted `HOMEPOS` values calculated and the result of this divided by the mean weights for each country.
+
+```{r}
+#| echo: true
+#| code-fold: true
+PISA_2022 %>% 
+  group_by(CNT) %>%
+  summarise(HOMEPOS_m_weight = 
+              mean(HOMEPOS * W_FSTUWT, na.rm=TRUE) / 
+              mean(W_FSTUWT)
+            ) %>%
+  arrange(HOMEPOS_m_weight) %>% 
+  left_join(df) %>%
+  mutate(weight_diff = abs((HOMEPOS_m - HOMEPOS_m_weight) / HOMEPOS_m))
+```
+
+The mean values `HOMEPOS_m` are very close to the non weighted mean results, but note that some of the countries have now swapped places, with Thailand now making the bottom ten countries for this measure. In a world where people take international PISA rankings very seriously, weighting can make a big difference!
+
+#### Categorical fields 
+
+If you want to work out the weighting of categorical fields you can do the following: (WARNING: check what to do with REGION)
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| eval: true
+
+# create a symbol of the focus_name
+# allows you to adjust the focus of this code
+# by changing the value in focus_name
+focus_name <- "IC180Q01JA"
+focus <- sym(focus_name)
+
+df_weight <- PISA_2022 %>% 
+  group_by(CNT, {{focus}}) %>%
+  summarise(foc_weight = sum(W_FSTUWT)) %>%
+  group_by(CNT, is.na({{focus}})) %>%
+  mutate(foc_weight_pct = foc_weight / sum(foc_weight))
+
+df_weight
+```
+
+```{r}
+#| echo: false
+#| eval: false
+# model to recreate programming chart, by region?
+
+focus_name <- "IC182Q02JA"
+focus <- sym(focus_name)
+
+df_weight <- PISA_2022 %>% 
+  group_by(CNT, REGION, {{focus}}) %>%
+  summarise(foc_weight = n() * mean(W_FSTUWT)) %>%
+  filter(!is.na({{focus}})) %>%
+  group_by(CNT, REGION) %>%
+  mutate(foc_weight_pct = foc_weight / sum(foc_weight))
+
+plt_data <- df_weight %>% 
+  pivot_wider(id_cols = -foc_weight,
+               names_from = all_of(focus_name),
+               values_from ="foc_weight_pct") %>%
+  mutate(agree = 100*(Agree +`Strongly agree`)) %>%
+  mutate(disagree = 100*(`Strongly disagree` + Disagree)) %>%
+  select(-`Strongly disagree`, -Disagree, -Agree, -`Strongly agree`)
+
+ggplot(plt_data) + 
+  geom_bar(stat="identity",
+           aes(reorder(REGION, agree), y=agree)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+#### T-tests
+
+When performing t-tests, you can use the `wtd.t.test()` function from the `weights` package. This function allows you to perform a t-test with weights applied to the data. The `wtd.t.test()` function takes the following arguments:
+
+```{r}
+#| echo: true
+#| eval: false
+library(weights)
+wtd.t.test()
+```
+
+#### Correlations
+
+If you're looking to run a correlation test you're going to need to adjust the number of observations depending on the weight of each student entry. For example if a student had a `W_FSTUWT` of 5, then you need to create 5 instances of that student, using the `rep` command, if another student had a weight of 105, you'd create 105 instances of that student; and so on. You then need to run the `cor` command on the enlarged data set. Note that we use the round command in the rep function as we need whole numbers for the weightings, this will lead to some potential, albeit very small, error in the final models.
+
+```{r}
+#| echo: true
+#| eval: true
+
+cor_data <- PISA_2022 %>% 
+  filter(CNT == "United Kingdom") %>%
+  select(PV1MATH, ESCS, W_FSTUWT) %>%
+  na.omit()
+
+# create enlarged data set 
+pv1math_weighted <- rep(cor_data$PV1MATH, 
+                  times = round(cor_data$W_FSTUWT, 0))
+
+escs_weighted <- rep(cor_data$ESCS, 
+                  times = round(cor_data$W_FSTUWT, 0))
+
+# run correlation test using weighted data
+cor(pv1math_weighted, escs_weighted)
+```
+
+If we run the correlation test on the original data set you can see that the correlation co-efficient is marginally different. Again, this might make the difference between something being statistically important or not.
+
+```{r}
+#| echo: true
+#| eval: true
+cor(cor_data$PV1MATH, cor_data$ESCS)
+```
+
+If you do lots of correlations you could build your own function to perform this weighted test. Using the `scale_weight` parameter allows us to scale up the weighting value, so we can alleviate the issues of losing accuracy when rounding. For example if a weight for a student was 3.49 this would have been rounded down to 3, to fix this we could set `scale_weight` to 100, which would adjust the weight to 349 and would dissipate most of the rounding error.
+
+```{r}
+#| echo: true
+#| eval: true
+corr_weighted <- function(data, fld1, fld2, 
+                          fldweight = "W_FSTUWT", 
+                          scale_weight = 1){
+  cor_data <- data %>% 
+    select(all_of(c(fld1, fld2, fldweight))) %>%
+    na.omit()
+
+  # create enlarged data set 
+  fld1_weighted <- rep(cor_data[[fld1]], 
+                    times = round(cor_data[[fldweight]] * scale_weight, 0))
+
+  fld2_weighted <- rep(cor_data[[fld2]], 
+                   times = round(cor_data[[fldweight]] * scale_weight, 0))
+
+  # run correlation test using weighted data
+  cor(fld1_weighted, fld2_weighted)
+}
+
+
+corr_weighted(data = PISA_2022, 
+              fld1 = "PV1SCIE", 
+              fld2 = "HOMEPOS",
+              fldweight = "W_FSTUWT")
+
+# we can just focus on females in France
+corr_weighted(data = PISA_2022 %>% filter(CNT == "France", ST004D01T == "Female"), 
+              fld1 = "PV1SCIE", 
+              fld2 = "PV1MATH",
+              fldweight = "W_FSTUWT")
+
+# we can also omit the fldweight as the name is given
+# by default in the function definition.
+# by setting scale_weight to 100 we can get a slightly
+# more accurate outcome
+corr_weighted(data = PISA_2022 %>% filter(CNT == "France", ST004D01T == "Female"), 
+              fld1 = "PV1SCIE", 
+              fld2 = "PV1MATH",
+              scale_weight = 100)
+```
+
+#### Linear models
+
+When performing linear models, you can use the inbuilt `weights` argument in the `lm()` function. This is a simple way of applying weights to your model. The `weights` argument takes a vector of weights (in our case the column `W_FSTUWT`), which should be the same length as the number of rows in your data set.
+
+```{r}
+#| echo: false
+#| eval: false
+lm(formula, data, weights)
+```
+
+
+
+```{r}
+#| echo: true
+#| eval: true
+lm(PV1MATH ~ PV1READ + ST004D01T,
+   data = PISA_2022,
+   weights = PISA_2022$W_FSTUWT) %>% 
+  summary()
+```
+
+```{r}
+#| echo: true
+#| eval: true
+lm(PV1MATH ~ PV1READ + ST004D01T,
+   data = PISA_2022) %>% 
+  summary()
+```
+
+If you are performing a linear regression on a subset of the data, you can use the `filter()` function to select the rows you want to include in your analysis. The `weights` argument will still work as long as the weights vector refers to the rows you have in your filtered data set. For example, if you want to run a linear regression on the UK data only, you can do the following:
+
+```{r}
+#| echo: true
+#| eval: true
+lm(PV1MATH ~ PV1READ + ST004D01T,
+   data = PISA_2022 %>% filter(CNT == "United Kingdom"),
+   weights = PISA_2022 %>% filter(CNT == "United Kingdom") %>% pull(W_FSTUWT)) %>% 
+  summary()
+```
+
+If we run the same model without the weights, we get a slightly different result. 
+
+```{r}
+#| echo: true
+#| eval: true
+lm(PV1MATH ~ PV1READ + ST004D01T,
+   PISA_2022 %>% filter(CNT == "United Kingdom")) %>% 
+  summary()
+```
+
+By default, above, the `lm()` function is treating all observations equally, regardless of their weights. Whilst the two models look very similar, a slight change in a p-value, or a change in the coefficient of a variable can have a big impact on the interpretation of a model.
+
+### Senate weights
+
+The data set contains another weighting variable, the _senate weight_ [`COL_ID`]. To ensure that countries make equal contributions to regression models when they have different response rates, senate weights are published [@jerrim2017weight]. Senate weights renormalise the weights within each country so that the total for a country sums to a constant value, giving each country the same weight in an overall analysis [@rijmen2011hierarchical].
+
+```{r}
+# Using weights to work out means
+```
+
+
+## How do I use the plausible values and weights correctly?
+
+To simplify our teaching, we focus on using a single PV value, `PV1___` in our calculations. This is not the recommended use, but simplifies our introduction to the PISA data. Here we set out how to perform a more complete analysis.
+
+The first step in analysis is to apply the weights. In the code below, we select the needed columns, country, the student weight column (`W_FSTUWT`) and the ten PV values (in this case for math). The `mutate(across(...` line multiples each of the ten PV values by the value in `W_FSTUWT`, the student weight, and adds new columns with `_weighted` appended. 
+
+```{r}
+#| eval: false
+#| echo: true
+PISA_2022 %>%
+  select(CNT, W_FSTUWT, PV1MATH:PV10MATH) %>%
+  mutate(across(PV1MATH:PV10MATH, ~ .x * W_FSTUWT, .names = "{.col}_weighted"))
+```
+
+Next we `group_by(CNT)` and summarise to get a `total_weight` for each country, by adding all the individual student weights (`W_FSTUWT`). To get a mean PV1, PV2, etc score for each country, we then sum all the weighted PV1 scores and divide by the total weight, and do the same for PV2, Pv3 etc. These are given the names `PV1MATH_weighted_mean`, `PV2MATH_weighted_mean`, etc.
+
+```{r}
+#| eval: false
+#| echo: true
+PISA_2022 %>%
+  select(CNT, W_FSTUWT, PV1MATH:PV10MATH) %>%
+  mutate(across(PV1MATH:PV10MATH, ~ .x * W_FSTUWT, .names = "{.col}_weighted")) %>%
+  group_by(CNT) %>%
+  summarise(
+    total_weight = sum(W_FSTUWT, na.rm = TRUE),
+    across(PV1MATH_weighted:PV10MATH_weighted, ~ sum(.x, na.rm = TRUE) / total_weight, .names = "{.col}_mean"))
+```
+
+Finally, we calculated the mean of the `PV1MATH_weighted_mean`, `PV2MATH_weighted_mean`, ...  `PV10MATH_weighted_mean` columns. I have arranged the results in descending order.
+
+```{r}
+#| eval: true
+#| echo: true
+PISA_2022 %>%
+  select(CNT, W_FSTUWT, PV1MATH:PV10MATH) %>%
+  mutate(across(PV1MATH:PV10MATH, ~ .x * W_FSTUWT, .names = "{.col}_weighted")) %>%
+  group_by(CNT) %>%
+  summarise(
+    total_weight = sum(W_FSTUWT, na.rm = TRUE),
+    across(PV1MATH_weighted:PV10MATH_weighted, ~ sum(.x, na.rm = TRUE) / total_weight, .names = "{.col}_mean")) %>%
+  rowwise() %>%
+  mutate(PV_mean_weighted = mean(c_across(ends_with("_mean")), na.rm = TRUE)) %>%
+  select(CNT, PV_mean_weighted) %>%
+  mutate(PV_mean_weighted = round(PV_mean_weighted, digits = 1)) %>%
+  arrange(desc(PV_mean_weighted))
+
+```
+
+This output matches the PISA published values for 2022.
+
+Add @ http://repec.ioe.ac.uk/REPEc/pdf/qsswp1704.pdf 
+
+When performing tests (for example, t-tests or linear regressions) the recommended approach is to:Rubin's rules for multiple imputation as recommended by the OECD [@rubin1987multiple, @OECD2009tech] : a) estimate a statistic multiple times, once each for each plausible value; b) average the values produced; c) estimate the magnitude of the imputation error; and d) calculate the final standard error from the sampling error and the imputation error.
+
+Hence, if you were performing a linear model you should a) weight the raw scores you intend to use; b) run the model ten times, once each for each of the plausible values; c) calculate the average outcome metrics. For example, your code might look like this:
+
+```{r}
+#| eval: true
+#| echo: true
+
+# a function that returns the models for a given formula
+# formula must include exactly one PV
+multi_pv_lm <- function(model_data,
+                        pv_formula,
+                        pv_vals = 1:10,
+                        weight_id = "W_FSTUWT"){
+
+  pv_focus_orig <- str_extract(pv_formula, "PV[0-9]+[A-Z]{4}")
+  pv_focus <- pv_focus_orig %>% str_remove("PV[0-9]*")
+  message("focusing on ", pv_focus)
+
+  if(weight_id %in% names(model_data)){
+    message(glue("Weighting by {weight_id}"))
+  } else {
+    message(glue("No {weight_id} weight variable found"))
+    return(NULL)
+  }
+  
+  # List of plausible value column names
+  pv_columns <- paste0("PV", pv_vals, pv_focus)
+  
+  results <- map_dfr(pv_columns, \(pv){
+    pv_formula_map <- str_replace(pv_formula, pv_focus_orig, pv)
+
+    message(pv)
+    # run model
+    model <- lm(as.formula(pv_formula_map), 
+                data = model_data, 
+                weights = model_data[[weight_id]])
+    # extract summary
+    model_summary <- summary(model)
+    
+    # return rows
+    broom::tidy(model_summary) %>% 
+      mutate(R2 = model_summary$r.squared) %>%
+      mutate(PV = pv)
+  })
+  
+  results_flat <- results %>% 
+    mutate(term = ifelse(str_detect(term, "PV[0-9]+[A-Z]{4}"), 
+                         glue("PV_{pv_focus}"), 
+                         term)) %>%
+    group_by(term) %>% 
+    summarise(estimate_mean = mean(estimate),
+              estimate_sd = sd(estimate),
+              std_error_mean = mean(std.error),
+              std_error_sd = sd(std.error),
+              statistic_mean = mean(statistic),
+              statistic_sd = sd(statistic),
+              p_value_mean = mean(p.value),
+              p_value_sd = sd(p.value),
+              r2 = max(R2))
+  
+  return(list(results=results, 
+              results_flat=results_flat))
+}
+
+# we can call the model comparison, like so:
+mdl_pvs_math <- multi_pv_lm(PISA_2022, "PV1MATH ~ HOMEPOS + ESCS")
+
+# You can then access the full model responses through:
+mdl_pvs_math$results
+
+# or the mean values for model outcomes with:
+mdl_pvs_math$results_flat
+
+mdl_pvs_read <- multi_pv_lm(PISA_2022, "ESCS ~ HOMEPOS + PV1READ")
+
+# TODO: https://bookdown.org/mwheymans/bookmi/rubins-rules.html
+```
+
+# Questions
+
+## Where can I find examples of PISA test items?
+
+The OECD do not release the full question set used in the PISA science, reading and mathematics tests in order to allow questions to be reused across cycles to allow valid inferences. However, you can find a document of items used in PISA 2000, 2003, 2006 and [some test items here](https://www.oecd.org/en/publications/take-the-test_9789264050815-en.html) which give a flavour of the nature of the tests.
+
+
+## Why are some countries OECD countries and others aren't?
+
+The Organisation for Economic Co-operation and Development (OECD) has 38 member states. PISA is run by the OECD and its member states normally take part in each PISA cycle, but other countries are allowed to take part as *Partners*. You can find more details on participation [here](https://www.oecd.org/pisa/aboutpisa/pisa-participants.htm).
+
+Results for OECD members are generally higher than for Partner countries:
+
+```{r}
+#| echo: true
+#| eval: true
+PISA_2022 %>% 
+  group_by(OECD) %>% 
+  summarise(country_n = length(unique(CNT)),
+            math_mean = mean(PV1MATH, na.rm=TRUE),
+            math_sd = sd(PV1MATH, na.rm=TRUE),
+            students_n = n())
+```
+
+## Why are the PV grades pivoting around the \~500 mark?
+
+The scores for students in mathematics, reading and science are scaled so that the mean of students in OECD countries is roughly 500 points with a standard deviation of 100 points. To see this, run the following code:
+
+```{r}
+#| echo: true
+#| eval: true
+PISA_2022 %>% 
+  filter(OECD=="Yes") %>% 
+  summarise(math_mean = mean(PV1MATH, na.rm=TRUE),
+            math_sd = sd(PV1MATH, na.rm=TRUE),
+            scie_mean = mean(PV1SCIE, na.rm=TRUE),
+            scie_sd = sd(PV1SCIE, na.rm=TRUE),
+            read_mean = mean(PV1READ, na.rm=TRUE),
+            read_sd = sd(PV1READ, na.rm=TRUE))
+```
+
+## But the mean PV score isn't 500?!
+
+The OECD's initial plan (in the 2000 study) was that the mean PC score for OECD countries should be 500 and the standard deviation 100 [@pisa2018results]. However, after the 2000 study, scores were scaled to be comparable with the first cycle of data, resulting in means differing from 500 [@pulkkinen2022correspondence]. For example, by 2015, the mean for science had fallen to 493 in science and reading, and 490 in mathematics.
+
+## Why are the letters TA and NA used in some field names?
+
+## How do I find fields that are numeric?
+
+```{r}
+#| echo: true
+#| eval: false
+# using the following code!
+
+nms <- PISA_2022 %>% select(where(is.numeric)) %>% names()
+lbls <- map_dfr(nms,\(nme){
+  message(nme)
+  lbl <- attr(PISA_2022[[nme]], "label")
+  row <- c(nme, lbl)
+  names(row) <- c("name", "label")
+  return(row)
+})
+```
+
+## How are schools and students selected to take part in PISA?
+
+The students who take part in the PISA study are aged between 15 years and 3 (completed) months and 16 years and 2 (completed) months at the beginning of the testing period [@OECD2018technical]. A number of classes of students can be excluded from data collection, up to 5% of all sampled students:
+
+-   Students classed as 'functionally disabled' so that they cannot participate in the test.
+-   Judged by teachers to have cognitive, emotional or behavioural difficulties that mean they cannot participate.
+-   The student lacks language abilities to take the test in the assessment language.
+-   There are no test material available in the student's language
+-   Another agreed reason
+
+The OECD expect that 85% of schools in their original sample participate - non participating schools can be replaced with a substitute, 'replacement' school. These replacement schools are similar in terms of a set of observable characteristics, that can be different depending on the country, for example in Canada this includes school funding and public/private school type<!--https://youtu.be/Yrud2pi5NOQ?si=0lwBkvWRDFYGjt5Y&t=1440-->. A minimum weighted response rate of 80% is required within schools.
+
+The sampling strategy for PISA is a stratified two-stage sample design. That is schools are sampled to represent proportional distribution by size (referring to the number of enrolled 15-year-olds) sampling. Within schools, students are sampled with equal probability.
+
+Schools are allowed to exclude students from their cohorts, based on the criteria given above. In 2015 the median exclusion rate from the sample was 3% for all OECD schools, with South Korea excluding 1% of students, and the UK excluding 8%. <!--https://youtu.be/Yrud2pi5NOQ?si=5bLRMicEI9fic6x1&t=1260  -->
+
+@Jerrim2020 argues that countries stretching the sampling rules above might allow for a country to lose 50% of eligible students from its sample and still be within the PISA rules for inclusion in the data set(!). In 2015, 91% of eligible student population in Japan were covered by the sampling, for the UK this was 69%, and for Canada, the top performing country for reading in that year's study, the sample covered only 53% of the eligible student population. <!--https://youtu.be/Yrud2pi5NOQ?si=abMiS6_PC4H0KZGR&t=1860-->
+
+Add Christian Bokhove papers https://bokhove.net/r-materials/
+
+From the data, you can see that 50% of schools entered fewer than 30 students into PISA.
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| eval: true
+PISA_2022 %>% 
+  group_by(CNTSCHID) %>%
+  summarise(size = n()) %>%
+  mutate(quartile = ntile(size, 4)) %>%
+  group_by(quartile) %>%
+  summarise(Qmax = max(size),
+            Qmedian = median(size),
+            Qmean = mean(size))
+
+ggplot(PISA_2022 %>% 
+  group_by(CNTSCHID) %>%
+  summarise(size = n()), aes(x=size)) +
+  geom_density()
+```
+
+## What are the PISA test questions like?
+
+You can view sample PISA science, reading and mathematics questions [here](https://www.oecd.org/pisa/test/).
+
+## How can I find the ethnicity or race of a student taking the PISA test?
+
+This data isn't collected by PISA. Instead they collect information on the language spoken at home (`LANGN`) and the language of the test (`LANGTEST_QQQ`), as well as the immigration status and country of birth (`COBN_S` student, `COBN_M` mother, `COBN_F` father). Details on ethnicity and outcomes in the England are published through the [country specific research report](https://assets.publishing.service.gov.uk/media/5f20293fd3bf7f1b0fa79fa3/PISA_2018_England_national_report_accessible.pdf) for 2018. Note that Chinese students are categorised under "Other" rather than "Asian" in UK data sets.
+
+## What are the PISA domains?
+
+Every PISA test has included test items measuring literacy, numeracy and science. In each cycle, one of three areas is the focus of study (the major domain). In addition, extra domains have been added to cycles (for example, creative thinking and collaborative problem solving). The additional domains are shown in the table below.
+
+| Year     | Major Domain     | Minor Domains                                                |
+|----------------|----------------|-----------------------------------------|
+| **2000** | Reading literacy | Mathematics, Science                                         |
+| **2003** | Mathematics      | Reading literacy, Science, Cross-curricular problem solving  |
+| **2006** | Science          | Reading literacy, Mathematics                                |
+| **2009** | Reading literacy | Mathematics, Science                                         |
+| **2012** | Mathematics      | Reading literacy, Science, Creative problem solving          |
+| **2015** | Science          | Mathematics, Reading literacy, Collaborative problem solving |
+| **2018** | Reading literacy | Mathematics, Science, Global Competence                      |
+| **2022** | Mathematics      | Reading literacy, Science, Creative thinking                 |
+| **2025** | Science          | Mathematics, Reading literacy, Learning in the Digital World |
+
+## Why is China given the `CNT` value `B-S-J-Z (China)` (2018) or `B-S-J-G (China)` (2015)?
+
+B-S-J-G/Z (China) is an acronym for Beijing, Shanghai, Jiangsu and Guangdong/Zhejiang, the four provinces/municipalities of the People's Republic of China that take part in PISA data collection. Zhejiang took the place of Guangdong in the 2018 dataset. Several authors (including [@du2019science]) comment that sampling only from some of the most developed regions of China means the country's data is unlikely to be nationally representative.
+
+## Where is mainland China in PISA 2022?
+
+> Chinese provinces/municipalities (Beijing, Shanghai, Jiangsu and Zhejiang) and Lebanon are participants in PISA 2022 but were unable to collect data because schools were closed during the intended data collection period. - [PISA 2022 participants](https://www.oecd.org/pisa/aboutpisa/pisa-2022-participants.htm)
+
+## How do I calculate weighted means of the PV scores?
+
+You can use a function written by Miguel Diaz Kusztrick, here is his slightly tidied function for calculating weighted means and standard deviations ([original link](https://web.archive.org/web/20230208113351/http://software-tecnico-libre.es/en/article-by-topic/all-sections/all-topics/all-articles/pisa-database-plausible-values-r-code)):
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Copyright Miguel Diaz Kusztrick
+wght_meansd_pv <- function(sdata, pv, weight, brr) {
+	mmeans  <- c(0, 0, 0, 0)
+	names(mmeans) <- c("MEAN","SE-MEAN","STDEV","SE-STDEV")
+	
+	mmeanspv <- rep(0,length(pv))
+	stdspv   <- rep(0,length(pv))
+	mmeansbr <- rep(0,length(pv))
+	stdsbr   <- rep(0,length(pv))
+	sum_weight <- sum(sdata[,weight])
+	
+	for (i in 1:length(pv)) {
+		mmeanspv[i] <- sum(sdata[,weight]*sdata[,pv[i]])/sum_weight
+		stdspv[i]   <- sqrt((sum(sdata[,weight]*(sdata[,pv[i]]^2))/swght)-mmeanspv[i]^2)
+		for (j in 1:length(brr)) {
+			sbrr<-sum(sdata[,brr[j]])
+			mbrrj<-sum(sdata[,brr[j]]*sdata[,pv[i]])/sbrr
+			mmeansbr[i]<-mmeansbr[i] + (mbrrj - mmeanspv[i])^2
+			stdsbr[i]<-stdsbr[i] + (sqrt((sum(sdata[,brr[j]]*(sdata[,pv[i]]^2))/sbrr)-mbrrj^2) - stdspv[i])^2
+		}		
+	}
+	mmeans[1] <- sum(mmeanspv) / length(pv)
+	mmeans[2] <- sum((mmeansbr * 4) / length(brr)) / length(pv)
+	mmeans[3] <- sum(stdspv) / length(pv)
+	mmeans[4] <- sum((stdsbr * 4) / length(brr)) / length(pv)
+	ivar <- c(0,0)
+	
+	for (i in 1:length(pv)) {
+		ivar[1] <- ivar[1] + (mmeanspv[i] - mmeans[1])^2;
+		ivar[2] <- ivar[2] + (stdspv[i] - mmeans[3])^2;
+	}
+	ivar = (1 + (1 / length(pv))) * (ivar / (length(pv) - 1));
+	mmeans[2] <- sqrt(mmeans[2] + ivar[1]);
+	mmeans[4] <- sqrt(mmeans[4] + ivar[2]);
+	return(mmeans);
+}
+```
+
+# PISA quirks
+
+## Empty fields
+
+GROSAGR	Growth Mindset (WLE) seems to be completely missing for all countries:
+
+All 2022 school responses to questions about the clubs and extra curricular activities run in a school `SC053Q____` are coded as `NA`, as are `SC207____`. It's not clear why this data is included in the dataset or whether this data should have values but doesn't. These (albeit empty) fields are included in the full `PISA_school_2022.parquet` file linked above.
+
+```{r}
+#| code-fold: true
+#| eval: false
+#| echo: true
+club_flds <- c("SC053Q01TA","SC053Q02TA","SC053Q03TA","SC053Q04TA","SC053Q05NA",
+               "SC053Q06NA","SC053Q07TA","SC053Q08TA","SC053Q09TA","SC053Q10TA")
+
+PISA_2022_school %>% 
+  select(c("CNT", starts_with("SC053Q"), starts_with("SC207"))) %>% 
+  group_by(CNT) %>%
+  pivot_longer(-CNT, 
+               names_to = "club",
+               values_to = "present") %>%
+  filter(!is.na(present)) %>%
+  pull(club) %>% 
+  unique()
+
+# Note: SC053D11TA is present:
+# <This academic year>,follow. activities/school offers<national modal grade for 15-year-olds>? <country specific item>
+
+
+```
+
+Additionally, _creativity_ fields stored in `ST334_____`, `ST340_____`, `ST341_____`, `PA185_____` and `CREA____` on the student questionnaire are missing answers for all countries:
+
+```{r}
+#| code-fold: true
+#| eval: false
+#| echo: true
+PISA_2022 <- read_feather(glue("{pisa_data}2022/PISA_student_2022.feather")) 
+PISA_2022 %>% 
+  select(c("CNT", 
+           starts_with("ST334"),
+           starts_with("ST340"), 
+           starts_with("ST341"),
+           starts_with("PA185"),
+           starts_with("CREA"))) %>% 
+  mutate(across(everything(), as.numeric)) %>%
+  group_by(CNT) %>%
+  pivot_longer(-CNT, 
+               names_to = "creativity",
+               values_to = "present") %>%
+  filter(!is.na(present)) %>%
+  pull(creativity) %>% 
+  unique()
+```
+
+## Cyprus present but missing
+
+Cyprus is still present in the levels of `CNT` even though PISA hasn't recorded [data on Cyprus](https://www.oecd.org/pisa/aboutpisa/cyprus-pisa.htm) since 2012. Other countries that didn't participate in the 2022 round have been removed from the levels, e.g. China.
+
+```{r}
+#| code-fold: true
+#| eval: false
+#| echo: true
+countries <- PISA_2022 %>% pull(CNT) %>% unique()
+country_lvls <- PISA_2022 %>% pull(CNT) %>% levels()
+setdiff(country_lvls, countries)
+```
+
+## Great Britain vs the United Kingdom
+
+The _United Kingdom_ is the country referred to when correctly combining the results of England, Scotland, Wales and Northern Ireland. However, the _regions_ of the United Kingdom listed by the OECD are _"Great Britain:"_ followed by England, Scotland, Wales and Northern Ireland. Northern Ireland isn't part of [Great Britain](https://en.wikipedia.org/wiki/Great_Britain).
+
+```{r}
+#| code-fold: true
+#| eval: true
+#| echo: true
+PISA_2022 %>% select(CNT, REGION) %>% 
+  filter(grepl("Great Britain", REGION)) %>% distinct()
+```
+
+## How to spell "Ukrainian"
+
+PISA records the language of the test sat by students in Ukraine `LANGTEST_QQQ` as "Ukranian" and the language they speak at home `LANGN` as "Ukrainian"
+
+```{r}
+#| code-fold: true
+#| eval: true
+#| echo: true
+PISA_2022 %>%
+  filter(CNT == "Ukrainian regions (18 of 27)") %>%
+  group_by(LANGTEST_QQQ, LANGN) %>%
+  count()
+```
+
+
+
+# Interesting papers and reading on PISA
+
+**There are a number of useful OECD reports including**:
+
+-   PISA Data Analysis Manual: SPSS second edition @pisadat2009manual;
+-   The PISA 2018 technical report @pisa2019technical
+-   PISA 2018 results @pisa2018results
+-   [PISA Adjusted 2021 design](https://www.oecd.org/pisa/pisaproducts/PISA-2021-Adjusted-Design.pdf)
+-   [The PISA 2025 draft framework](https://pisa-framework.oecd.org/science-2025/assets/docs/PISA_2025_Science_Framework.pdf)
+
+**John Jerrim and colleagues** have written a number of papers which provide commentary on PISA analysis
+
+-   PISA 2012: how do results for the paper and computer tests compare? @jerrim2016pisa
+-   To weight or not to weight?: The case of PISA data @jerrim2017weight
+-   PISA 2015: how big is the 'mode effect' and what has been done about it? @jerrim2018pisa
+-   PISA 2018 in England, Northern Ireland, Scotland and Wales: Is the data really representative of all four corners of the UK? @jerrim2021pisa
+-   Is Canada really an education superpower? The impact of non-participation on results from PISA 2015 @anders2021canada
+-   Has Peak PISA passed? An investigation of interest in International Large-Scale Assessments across countries and over time @jerrim2023peak
+-   Conditioning: how background variables can influence PISA scores @zieger2022conditioning
+
+**Other PISA Papers of Interest**
+
+<!-- -->
+
+-   PISA according to PISA: Does PISA keep what it promises? @cordingley2008research
+-   The policy impact of PISA: An exploration of the normative effects of international benchmarking in school system performance @breakspear2012policy
+-   A call for a more measured approach to reporting and interpreting PISA results @rutkowski2016call
+-   PISA data: Raising concerns with its use in policy settings @gillis2016pisa
+-   Differential item functioning in PISA due to mode effects @feskens2019differential
+-   The measure of socio-economic status in PISA: A review and some suggested improvements @avvisati2020measure
+-   Conditioning: How background variables can influence PISA scores @zieger2022conditioning
+-   A critique of how socio-economic status is measured in PISA @avvisati2020measure
+
+# Copyright
+
+> All PISA products are published under the [Creative Commons Attribution - NonCommercial - ShareAlike 3.0 IGO](https://creativecommons.org/licenses/by-nc-sa/3.0/igo/) (CC BY-NC-SA 3.0 IGO)
+
+This includes the `.feather` and `.parquet` formatted data sets linked in this book.

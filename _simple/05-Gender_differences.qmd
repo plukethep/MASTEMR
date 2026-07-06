@@ -1,0 +1,141 @@
+---
+title: "5 Gender differences"
+# bibliography: references.bib
+---
+
+```{r}
+#| eval: true
+#| warning: true
+#| echo: false
+
+# only load this code if testing this file independently of overall project
+if(!exists("test")){
+  warning("RUNNING LOCAL FILE LOAD")
+  
+  library(glue)
+  proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
+  proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  
+  node <- Sys.info()
+  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
+    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
+    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
+  }
+
+  source(glue("{proj_folder}MASTEMR_setup.R"))
+}
+```
+
+## Statistical analysis
+
+There are probably statistical libraries in R to do every sort of test you will ever need, from the typical ANOVA to cutting edge machine learning. The full list of R packages sits on the [cran server](https://cran.r-project.org/web/packages/available_packages_by_name.html) and you can load packages as and when you need them at no cost. R comes pre-packaged with some common statistical tools, for example, the `t.test()` and linear model regression `lm()`. For other stats tools you'll need to install the package and load it (see @sec-load-run-pckges) before you can use the functions.
+
+# T-tests
+
+## Task 1
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+
+```
+
+## Task 2
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+
+```
+
+## Task 3
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+
+```
+
+### Doing t-tests in R
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/KdhAcLPq5B4?start=3" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+
+</iframe>
+
+You can find the code from the video below:
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+
+# Introduction to t-tests in R
+#
+# Download data from /Users/k1765032/Library/CloudStorage/GoogleDrive-richardandrewbrock@gmail.com/.shortcut-targets-by-id/1c3CkaEBOICzepArDfjQUP34W2BYhFjM4/PISR/Data/PISA/subset/Students_2018_RBDP_none_levels.rds
+# You want the file: Students_2018_RBDP_none_levels.rds
+# and place in your own file system
+# change loc to load the data directly. Loading into R might take a few minutes
+install.packages("nortest")
+
+library(tidyverse)
+library(nortest)
+loc <- "/Users/k1765032/Library/CloudStorage/GoogleDrive-richardandrewbrock@gmail.com/.shortcut-targets-by-id/1c3CkaEBOICzepArDfjQUP34W2BYhFjM4/PISR/Data/PISA/subset/Students_2018_RBDP_none_levels.rds"
+PISA_2018 <- read_rds(loc)
+
+# Are there differences between the mean scores of UK boys and girls in PISA mathematics?
+#
+# Select the gender (ST004D01T) and math score columns (PV1MATH)
+# Filter the data to select UK responses
+
+MaleUK<-PISA_2018 %>%
+  select(CNT,ST004D01T, PV1MATH) %>%
+  filter(CNT=='United Kingdom') %>%
+  filter(ST004D01T=='Male')
+
+FemaleUK<-PISA_2018 %>%
+  select(CNT,ST004D01T, PV1MATH) %>%
+  filter(CNT=='United Kingdom') %>%
+  filter(ST004D01T=='Female')
+
+# The conditions to do a t-test include that the data are normally distributed
+# and there is homogeneity (similarity) of the variances (the squared standard deviations)
+# Let us check the conditions are met by calculating first if the data sets are normally
+# distributed using the Pearson test of normality from the nortest package
+
+pearson.test(as.numeric(MaleUK$PV1MATH))
+pearson.test(as.numeric(FemaleUK$PV1MATH))
+
+# The p-values are over 0.05 so both distriburtions are normal
+# Pearson chi-square normality test
+#
+# data:  as.numeric(MaleUK$PV1MATH)
+# P = 75.714, p-value = 0.1936
+# Pearson chi-square normality test
+#
+# data:  as.numeric(FemaleUK$PV1MATH)
+# P = 74.06, p-value = 0.2589
+#
+# We will then check the variances of the two data sets
+
+VarM<-var(MaleUK$PV1MATH)
+VarF<-var(FemaleUK$PV1MATH)
+VarM/VarF
+
+# The variance ratio is close to 1 (1.1)
+# So our two conditions are met and can we can perform the t-test
+
+t.test(MaleUK$PV1MATH, FemaleUK$PV1MATH)
+
+# The p-value is <0.05 (4.061e-08) suggesting there are statistically
+# differences between boys and girls
+```

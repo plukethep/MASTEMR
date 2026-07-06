@@ -1,0 +1,127 @@
+---
+title: "Quantitative methods in the context of STEM education research"
+subtitle: "MA STEM Education"
+toc: true
+number-sections: true
+bibliography: references/mastemr.bib
+crossref:
+  chapters: true
+format:
+  # pdf:
+  #   code-line-numbers: true
+  #https://quarto.org/docs/authoring/callouts.html
+  html:
+    code-line-numbers: true
+    code-link: true
+css: css/CRESTEMR.css
+execute:
+  cache: false
+editor:
+  mode: source
+---
+
+```{r setup}
+#| include=FALSE
+folder_images <- "images"
+source(paste0(getwd(),"/MASTEMR_setup.R"))
+# source(paste0(getwd(),"/scratch.R"))
+
+test <- FALSE
+options(max.print=40)
+
+```
+
+```{r}
+#| error: false
+#| eval: false
+#| echo: false
+```
+# Introduction to quantitative methods
+
+{{< include chapters/_01-Intro_to_quant_methods.qmd >}}
+
+# Introduction to R
+
+{{< include chapters/_02-1-Intro_to_analysis_software.qmd >}}
+{{< include chapters/_02-2-Intro_to_analysis_software.qmd >}}
+{{< include chapters/_02-3-Intro_to_analysis_software.qmd >}}
+
+# Introduction to graphs
+
+{{< include chapters/_02-4-Intro_to_graphs.qmd >}}
+
+# Group performance in STEM
+
+{{< include chapters/_03-Differing_performance_in_STEM.qmd >}}
+
+# Presentations
+
+{{< include chapters/_04-Presentations.qmd >}}
+
+# Gender differences
+
+{{< include chapters/_05-Gender_differences.qmd >}}
+
+# Maths anxiety
+
+{{< include chapters/_06-Maths_anxietyVer2.qmd >}}
+
+# Inquiry learning in science
+
+{{< include chapters/_07-Inquiry_learning_in_science_RB_version.qmd >}}
+
+# Writing a Quantitative Report
+
+{{< include chapters/_08-Science_capital.qmd >}}
+
+# Assignment tutorials
+
+{{< include chapters/_09-Assignment_3_tutorials.qmd >}}
+
+# Correlation and Regression
+
+{{< include chapters/_10-teachers_relationships_and_STEM_achievement.qmd >}}
+
+# Selecting statistical tools
+
+{{< include chapters/_11-selecting_statistical_tools.qmd >}}
+
+# Effective international STEM education
+
+{{< include chapters/_12-effective_international_STEM_ed.qmd >}}
+
+```{r}
+#| error: false
+#| eval: false
+#| echo: false
+
+## TIMSS
+
+#{{< include chapters/_A3-TIMSS_analysis.qmd >}}
+```
+
+# Practice tasks
+
+{{< include chapters/_A5-Self_Study_Tasks.qmd >}}
+
+# Datasets
+
+The examples shown in this booklet use a range of freely available datasets. We would like to encourage you to use one of these datasets in your own analysis, but you are welcome to use other datasets if agreed with your supervisor. This section will take you through the process of downloading, understanding and using these datasets.
+
+## PISA
+
+{{< include chapters/_A1-PISA_analysis.qmd >}}
+
+## English Department for Education
+
+{{< include chapters/_A2-DfE_analysis.qmd >}}
+
+## Other datasets
+
+{{< include chapters/_A4-Other_datasets.qmd >}}
+
+# Questions and answers
+
+{{< include chapters/_QandA.qmd >}}
+
+# References

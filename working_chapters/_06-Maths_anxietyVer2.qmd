@@ -1,0 +1,785 @@
+---
+# title: "6 Maths anxiety"
+# bibliography: ./references/mastemr.bib
+# bibliography: references.bib
+---
+
+```{r}
+#| eval: true
+#| warning: true
+#| echo: false
+
+# only load this code if testing this file independently of overall project
+if(!exists("test")){
+  warning("RUNNING LOCAL FILE LOAD")
+  
+  library(glue)
+  proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
+  proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  
+  node <- Sys.info()
+  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
+    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
+    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
+  }else if(node["nodename"] == "PETES_PC"){ #Pete's NEW Laptop
+    proj_folder <- r"(C:\Users\Peter\Google Drive\Kings\Code\MASTEMR\)"
+}else if(node["nodename"] == "Amys-MacBook-Air.local"){ #Amy's NEW Laptop
+    proj_folder <- r"(/Users/amyobrien/Google Drive/My Drive/MASTEMR/)"
+}
+  source(glue("{proj_folder}MASTEMR_setup.R"))
+}
+```
+
+## Chi-square tests
+
+Chi squared ($\chi^2$) tests are *non-parametric* tests, this means that the test isn't expecting the underlying data to be distributed in a certain way. Chi-squared determines how well the frequency distribution for a sample fits the population distribution and will let you know when things aren't distributed as expected. For example you might expect girls and boys to have the same coloured dogs, a chi squared test can tell you whether the null hypothesis, that there is no difference between the colours of dogs owned by girls and boys, is true or not.
+
+In more mathematical terms, chi squared examines differences between the categories of an independent variable with respect to a dependent variable measured on a nominal (or categorical) scale. A nominal scale has values that aren't ordered, or continuous, for example gender or favourite flavour of icecream.
+
+Chi-square tests can be categorised in two groups:
+
+-   *A test of goodness of fit* - this is a form of hypothesis test which determines whether a sample fits a wider population. For example, does the pattern of exam results in one school fit the national distribution?
+
+-   *A test of independence* - allows inference to be made about whether two categorical variables in a population are related. For example, are there differences in the uptake of careers by gender?
+
+In the example below you will be loading data about Ofsted inspections to see if the Ofsted grade of a state secondary school varies dependent on whether the school is all boys, all girls or mixed.
+
+## An example: Are schools with more students from socio-economically deprived backgrounds scored in the same as schools with more affluent students by Ofsted?
+
+::: callout-tip
+In England, the Office for Standards in Education, Children's Services and Skills (Ofsted), inspects schools to judge the quality of education. They categorise schools into five categories: Outstanding, Good, Requires Improvement, Inadequate, and Special Measures.
+
+Free School Meals refers to support for students who receive free meals at school - this funding is available for students whose parents or carers receive certain government benefits, typically due to relatively low income. It is taken, by some policy makers and researchers, as a marker of socioeconomic disadvantage
+:::
+
+## Loading the data
+
+The data for this example come from the DfE edubase system. This system is updated almost daily with information on all education providers in the country.
+
+::: callout-tip
+Note, we will use the term 'providers' rather than, for example, schools, as some of the institutions in the data set are not schools, but providers of education also inspected by Ofsted, such as childminders
+:::
+
+The snapshot below was taken in 2018, you are welcome to [download](https://www.get-information-schools.service.gov.uk/Downloads) a later copy.
+
+```{r}
+#| eval: false
+#| code-fold: false
+#| code-summary: "Show the code"
+# Download data on all educational providers in England
+# with details on FSM and Ofsted inspections
+
+library("tidyverse")
+library("openxlsx")
+
+DfE_schools_2018 <- read.xlsx("https://drive.google.com/uc?export=download&id=1tp9xe3dS__eg7RrXf0T_oMxcrz_TbMdM",
+                      sheet="Schools")
+
+```
+
+## Categorising the data
+
+The dataset is very large, about 60Mb of data about 50,000 educational providers, both historic and current. For this exercise, we will filter the data set to state secondary schools that are currently open. As Chi-squared uses categorical variables, we will sort the schools into three categories (high, medium and low) based on the number of students receiving free school meals. The proportion of students receiving free school meals is sometimes taken as a proxy variable for social disadvantage (though that assumption has been critiqued @taylor2018reliability).
+
+```{r}
+#| eval: true
+#| label: load 2018 school set
+
+# note that 2018 data doesn't have inadequate
+
+Ofsted_ratings <- DfE_schools_2018 %>%
+  filter(Open == "Open",
+         EstablishmentGroup != "Independent schools",
+         Phase == "Secondary",
+         OfstedRating %in% c("Outstanding", "Good",
+                             "Requires improvement","Inadequate",
+                             "Special Measures")) %>%
+  mutate(FSM_group = ntile(FSM, n=3)) %>%
+  mutate(FSM_group = ifelse(FSM_group == 3,
+                            "High",
+                            ifelse(FSM_group == 2,
+                                   "Medium",
+                                   "Low")))
+```
+
+## Contingency tables
+
+To get a feel for what the data looks like we can build a contingency table. A contingency table is a table which shows the frequency of occurrence of different groups.
+
+In our example, the contingency table, will show the number of providers that match each combination of of the two groupings we are looking at, OfstedRating and the FSM_group. To make a contingency table, we will first `count` each `group` of `OfstedRating` and `FSM_group`. This makes a list of the number of instances of each group:
+
+```{r}
+#| eval: true
+# to get a frequency table of the above we can use group_by
+
+Ofsted_ratings_freq <- Ofsted_ratings %>%
+  group_by(OfstedRating, FSM_group) %>%
+  count()
+
+print(Ofsted_ratings_freq)
+
+```
+
+To put this into a contingency table we can use `pivot_wider` (see below), this will keep the `FSM_group` and by fetching `names_from = OfstedRating`, it will create a new column for each `OfstedRating` and will then show how many instances of each combined `OfstedRating` and `FSM_group` there are.
+
+```{r}
+# build a contingency table of Ofsted rating
+contingency_table <- Ofsted_ratings_freq %>% 
+  pivot_wider(names_from = OfstedRating,
+              values_from = n)
+print(contingency_table)
+```
+
+::: callout-tip
+An important step in using `chisq.test` (and many statistical functions in R) is getting the data into the right format to pass to `chisq.test`. As you can see, most of the steps above involve formatting the data so it is in a form the function expects. R tends to use a long format, whereas in the real world we tend to use a wide format.
+
+The wide format looks like this (there are multiple measurements per row and the school names don't repeat):
+
+|          | Math | English | Science |
+|----------|------|---------|---------|
+| School A | 82   | 91      | 88      |
+| School B | 52   | 56      | 57      |
+| School C | 23   | 31      | 32      |
+
+The long format has values that repeat in the first column
+
+|          | Subject | Avg Score |
+|----------|---------|-----------|
+| School A | Math    | 82        |
+| School A | English | 91        |
+| School A | Science | 88        |
+| School B | Math    | 52        |
+| School B | English | 56        |
+
+The `pivot_wider` and `pivot_longer` functions switch between the two forms of table
+
+**Using `pivot_wider`**
+
+`pivot_wider` is a function that turns a table in wide form into long form. The inputs of pivot wider are first, the names of the columns you want to turn into a single column. For example, to produce the long form of the table of results above, I want to turn the three columns of `Math`, `English` and `Science` scores into a single column.
+
+The first information I pass `pivot_wider` is the names of those columns: `cols=c("Math", "English", "Science")`. Second, when I stack those values, I will end up with two new columns, one with the names of the subjects, and one with the values of the scores. I tell `pviot_wider` what I want the titles of the new column to be: `names_to= "subject"` with the values stored in a column called `values_to= "scores"`.
+
+```{r}
+
+
+# Imagine you start with this table of data on students
+#
+# | Student | Math | English | Science |
+# |---------|------|---------|---------|
+# | A       | 27   | 31      | 21      |
+# | B       | 81   | 92      | 78      |
+#
+# pivot_longer can convert this table into a long form table:
+#
+# | Student | Subject | Score
+# | A       | Math    | 27
+# | A       | English | 31
+# | A       | Science | 21
+# | B       | Math    | 81
+# | B       | English | 92
+# | B       | Science | 78
+# 
+# 
+#
+
+library(tidyverse)
+results <- data.frame(student=c("A","B"),    # Create the data.frame of the table above
+                     Math=c(27,81),
+			               English=c(31,92),
+				             Science=c(21,78))
+print(results)                            # Display the wide form of the table
+
+longresults <- results %>% 
+  pivot_longer(cols=c("Math", "English", "Science"),  
+                        # indicates we want to stack these 3 columns
+  names_to= "Subject",  # gives the name of the new, longer label column
+  values_to= "Score")  # gives the name of the new, longer values column
+                        
+print(longresults)     # Print the wide form of the table
+```
+:::
+
+## Plotting the chi-square relationships
+
+The numbers in the contingency table are hard to interpret - it is challenging to see how far out the numbers for each row are from each other. Alternatively, we can visualise the data from the contingency table by building a mosaic plot, a form of stacked bar chart. Mosaic plots can be a useful visulations before running a chi-squared test.
+
+To create a mosaic plot, you are going to need to install and load the `ggmosaic` package. See @sec-load-run-pckges for more details on how to do this. To create the mosaic plot we use `ggplot`, as we used for previous graphs. As before, we first pass the data (in this case `Ofsted_ratings`) to `ggplot`. Then, to create the graph, `geom_mosaic` is used. `geom_mosaic` does not have a direct mapping of input to x and y variable so we need to pass it what we want plotted on the y-axis (`OfstedRating`) and x-axis (`FSM_group`) within the `product` function. We can also specify how we want the rectangles to be coloured (in our case, by `OfstedRating`).
+
+```{r}
+#| warning: false
+ # install.packages("ggmosaic")
+library(ggmosaic)
+# plot results
+ggplot(data = Ofsted_ratings) +
+  geom_mosaic(aes(x = product(OfstedRating, 
+                              FSM_group), 
+                  fill = OfstedRating))
+```
+
+You can see in the example above, that the order of the axes is not what we would normally expect. The y-axis goes from requires improvement, to outstanding, and then to good. The x-axis runs: high, low, medium.
+
+The order of the x and y axis on the table are defined by the *levels* of the data. This is an R-specific concept. Where R stores categorical variables, for example, high, medium and low, to save space, the variables are converted to numbers, e.g. low=0, medium=1, high=2. These values are known as factors and can be ordered or unordered (for more information about factors see @sec-factors). To reorder the factors in the axes, we can reorder the factors, by creating a vector that sets out the order we want (`rdr <- c("Outstanding", "Good", "Requires improvement", "Special Measures")`). We then use `mutate` to make the change to the `data.frame`. In the case of the FSM_groups, rather than defining a new vector (as we did for `Ofsted_rating,` e.e. the vector `rdr`), we set the new order directly in the `mutate` function: `FSM_group = factor(FSM_group, levels=c("Low", "Medium", "High"))`
+
+```{r}
+#| warning: false
+# install.packages("ggmosaic")
+library(ggmosaic)
+
+# add order to the factors involved in the mosaic
+rdr <- c("Outstanding", "Good", "Requires improvement", "Special Measures") 
+
+Ofsted_ratings <- Ofsted_ratings %>% 
+  mutate(OfstedRating = factor(OfstedRating, 
+                               levels=rdr),
+        FSM_group = factor(FSM_group, 
+                           levels=c("Low", "Medium", "High")))
+
+# plot results
+ggplot(data = Ofsted_ratings) +
+  geom_mosaic(aes(x = product(OfstedRating, 
+                              FSM_group), 
+                  fill = OfstedRating))
+
+
+```
+
+## Running Chi square tests
+
+Now we have the providers that we want, we can start to build a chi-square test. This is very easy in R and it follows the following structure:
+
+    chisq.test(<column_one>, <column_two>)
+
+For the data above, we are comparing the combinations of entries for `OfstedRating` and `FSM_group`:
+
+```{r}
+
+chisq.test(Ofsted_ratings$OfstedRating, Ofsted_ratings$FSM_group)
+# summary(chisq.test(Ofsted_ratings$OfstedRating, Ofsted_ratings$FSM_group))
+```
+
+In the case of a goodness of fit test, we can set the two columns to the observed populations and the expected probabilities. The expected vector should be of the form of probabilities and so add to one. With a goodness of fit, the null hypothesis is that the sample is part of the population. A p-value of greater than 0.05 implies that the null hypothesis should be accepted and that the sample fits well with the population as a whole.
+
+For example, imagine we want to determine whether the biology a-level results of a school match, the national scores. We can look up the national levels of performance and express them as probabilities:
+
+| Grade | Percentage nationally (in 2022) | Probability nationally | Observed numbers in school |
+|-----------------|---------------------|-----------------|------------------|
+| A\*   | 13.3%                           | 0.133                  | 10                         |
+| A     | 21.6                            | 0.216                  | 15                         |
+| B     | 21.6                            | 0.216                  | 20                         |
+| C     | 19.5                            | 0.195                  | 5                          |
+| D     | 14.2                            | 0.142                  | 1                          |
+| E     | 7.6                             | 0.076                  | 0                          |
+| U     | 2.2                             | 0.022                  | 0                          |
+
+We need to define an `expectedbio` vector which contains the probabilities of gaining a particular grade. We create the `observedbio` vector with the actual numbers getting a grade in school. Then pass the vectors to `chisq.test`:
+
+```{r}
+#| warning: false
+expectedbio<-c((13.3/100), (21.6/100), (21.6/100), (19.5/100), (14.2/100),(7.6/100), (2.2/100))
+observedbio<-c(10,15,20,5,1,0,0)
+chisq.test(observedbio, expectedbio)
+
+
+```
+
+The test here returns a p-value of 0.3079. This implies there is no statistically significant deviation from the null hypothesis. Hence, the null hypothesis, that the school sample matches the national population can be accepted.
+
+## Seminar Tasks
+
+### Activity 1 - Uptake of single science in a school
+
+For the initial activity, we will replicate the chi-square goodness of fit test in example on in the lecture. By goodness of fit test, we mean to determine if the data in a sample match the whole population (that is, is a there a good fit between the sample and the whole population?). In this activity we ask, does the number of students taking single or combined science in a particular school matches the national pattern.
+
+::: callout-tip
+In England, studying science till the age of sixteen is compulsory. However, schools and students can decide on the depth of material they wish to study.
+
+Students opting for the lowest level, take a course called single science. Those wanting to learn more about science can take double science (and the highest level of study is triple science, where students study the three sciences, physics, biology, and chemistry as separate courses).
+
+A school has a frequency count of 129 students taking combined sciences and 111 opting for single science. The national total for combined sciences was 424,704 and for single sciences was 164,944. Use a chi squared test (as a goodness of fit test) to determine whether the proportion of students taking combined and single science in the school is inline or not with the national average.
+
+! Hint - look at the example above. Make two vectors, an expected vector, for the country and an observed vector for the school. Recall you can simply use the `<-` operator to put data into a vector (e.g. `observed<-c(50,100)`) . You will need to calculate percentages for the expected values.
+:::
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+#Find totals
+TotalSchool <- sum(129,111)
+TotalNational <- sum(424704,164944)
+#create contingency tables
+observed <- c(129,111)
+expected <- c(424704/TotalNational,164944/TotalNational) 
+#For R, the expected must total 1, so you find the percentage expected not the total
+#Check you've done the calculation correctly for expected by printing
+print(expected)
+#run the chi-square test
+chisq.test(x=observed,p=expected)
+#Chi-squared test for given probabilities
+
+#data:  observed
+#X-squared = 39.79, df = 1, p-value = 2.828e-10
+
+#since p<0.05 we reject H0 (the null hypothesis), so accept H1 (the alternative hypothesis) that the school does not fit the national pattern
+```
+
+### Activity 2 - Vocational schools and gender in the PISA dataset
+
+For these activities, we will first use the PISA 2018 data set.You can load the `PISA_2018` data set using these steps. Click here to download the parquet file: [PISA_2018.parquet](https://drive.google.com/open?id=17Owl5F5fmuOWiAXQomVfQMr_9CYDHoBC)
+
+To load the data, use the code below:
+
+```{r}
+#| eval: false
+#| warning: false
+install.packages("arrow") # if you haven't already
+library(arrow)
+library(tidyverse)
+PISA_2018 <- read_parquet("<location of the downloaded PISA_2018.parquet file>")
+```
+
+::: question
+We will now use the the chi-squared test as a test of independence.
+
+We want to see if there are more boys or girls in vocational schools than might be expected. That is, we want to test if the variables of gender and school orientation are independent.
+
+The null hypothesis in this case is: gender and school orientation are independent.
+
+Recall that a p-value greater than 0.05 suggest the null hypothesis is accepted (i.e. there is no statistically significant difference in gender distribution by school orientation). If p is less than 0.05, then the null hypothesis can be rejected, and we assume there are statistically significant differences in the gender distribution by school orientation.
+
+Determine if the distribution of genders (`ST004D01T)` and school orientation (`ISCEDO)` (Pre-vocational, Vocational, General) is independent or not, for:
+
+a\) the whole data set,
+
+b\) the UK,
+
+c\) Germany,
+
+d\) a country of your choice.
+
+`ST004D01T` is the gender variable (Male, Female) and `ISCEDO` is a categorical variable (Vocational, General, Pre-Vocational).
+
+Complete the following steps to help answer the question:
+
+a\) Create a table to display sets of data for each case and use this to check for any issues with the data such as missing frequency counts. Note that R requires the two vectors passed to chisq.test to be the same length. if a particular type of school is missing in your table, you will need to add it in to make sure the two vectors are the same length. You can add another row, with zeros using: `add_row(ISCEDO="Modular", type=0)` Note that, ISCEDO and type are the names of the two columns.
+
+b\) Run the chi-square test.
+
+c\) Write down the p-value and the result of your chi-square test in the context of the question.
+
+d\) Extension- Display the data using `geom_mosaic`
+:::
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+
+# Are there differences in the type of school by gender
+# ST004D01T is the gender variable (Male, Female)
+# ISCEDO is a categorical variable (Vocational, General, Pre-Vocational)
+
+#i) a)
+#Sort data and table
+
+Totalchidata <- PISA_2018 %>%
+  select(ST004D01T,ISCEDO)%>%
+  drop_na()
+
+table(Totalchidata$ST004D01T, Totalchidata$ISCEDO)
+
+#i) b)
+# run the test
+chisq.test(Totalchidata$ST004D01T, Totalchidata$ISCEDO)
+
+#check expected values
+chisq.test(Totalchidata$ST004D01T, Totalchidata$ISCEDO)$expected
+
+#i) c)
+# p-value < 2.2e-16, so reject H0 and accept H1 that proportion of gender is related to institution type
+
+#i) d)
+library(ggmosaic)
+ggplot(data = Totalchidata) +
+  geom_mosaic(aes(x = product(ST004D01T, 
+                              ISCEDO), 
+                  fill = ISCEDO), check_overlap=TRUE)+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+#ii) a)
+
+UKchidata <- PISA_2018 %>%
+  select(CNT,ST004D01T,ISCEDO)%>%
+  filter(CNT=="United Kingdom")%>%
+  drop_na()
+
+table(UKchidata$ST004D01T,UKchidata$ISCEDO)
+
+#ii)b)
+# run the test
+chisq.test(UKchidata$ST004D01T, UKchidata$ISCEDO)
+
+#check expected values
+chisq.test(UKchidata$ST004D01T, UKchidata$ISCEDO)$expected
+#note than one value is <5, but over 80% cells are >5 so OK. Perhaps consider removing one variable
+
+#ii)c)
+
+#p-value = 0.9956 so >0.05 so accept H0 that proportion of gender is independent of school type.
+
+#ii)d)
+ggplot(data = UKchidata) +
+  geom_mosaic(aes(x = product(ST004D01T, 
+                              ISCEDO), 
+                  fill = ISCEDO))+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+# iii)a)
+Gerchidata <- PISA_2018 %>%
+  select(CNT,ST004D01T,ISCEDO)%>%
+  filter(CNT=="Germany")%>%
+  drop_na()
+
+table(Gerchidata)
+
+#iii)b)
+# run the test
+chisq.test(Gerchidata$ST004D01T, Gerchidata$ISCEDO)
+
+#check expected values
+chisq.test(Gerchidata$ST004D01T, Gerchidata$ISCEDO)$expected
+
+#iii)c)
+#p-value = 6.892e-07, so <0.05, therefore reject H0 and accept H1 that gender proportion is related to school type
+
+#iii)d)
+ggplot(data = Gerchidata) +
+  geom_mosaic(aes(x = product(ST004D01T, 
+                              ISCEDO), 
+                  fill = ISCEDO))+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+### Activity 3 - Are the number of students in vocational and general schools in Germany proportionate to the whole PISA 2018 data set?
+
+::: question
+Complete the following steps to determine if the number of students in general and vocational schools in Germany are proportionate to the whole PISA 2018 data set.
+
+a)  Create the expected vector with the proportions of General, Pre-Vocational, Vocational and Modular schools out of the overall total.
+
+b)  Create the observed vector the total number of General, Pre-Vocational, Vocational and Modular schools in Germany.
+
+c)  Calculate the chi-square test p-value.
+
+d)  State the p-value and interpret the result in the context of the question.
+:::
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+#a)
+Totalchidata2<- PISA_2018 %>% 
+  select(ISCEDO) %>% 
+  drop_na() %>% 
+  mutate(total = n()) %>% 
+  group_by(ISCEDO) %>% 
+  summarise(type = n(), per = type /unique(total))
+
+Totalexpected<-c(Totalchidata2$per)
+
+#b)
+Gerchidata2 <- PISA_2018 %>% 
+  select(CNT,ISCEDO)%>% 
+  filter(CNT=="Germany")%>% 
+  drop_na()%>% 
+  mutate(total = n()) %>% 
+  group_by(ISCEDO) %>% 
+  summarise(type = n())
+
+Gerchidata3 <- Gerchidata2%>% add_row(ISCEDO="Modular", type=0)
+Totalobserved<-c(Gerchidata3$type)
+
+#c)
+chisq.test(x=Totalobserved,p=Totalexpected)
+
+#d) p-value < 2.2e-16, so p<0.05, therefore reject H0 and accept H1
+```
+
+### Activity 4 - Create your own question that uses the chi-square test from the PISA Dataset
+
+::: question
+Create your own question that investigates the PISA data using either the chi-square test for independence or chi-square goodness of fit test.
+:::
+
+### Activity 5 - Determine if admissions type in LAs are proportionate to national averages
+
+::: callout-tip
+To join together two vectors you can use the `rbind` function to join two vectors together
+
+```{r}
+Vector1<-data.frame(Names=c("A","B","C"))
+Vector2<-data.frame(Names=c("D","E","F"))
+Vector3<-rbind(Vector1,Vector2)
+print(Vector3)
+```
+:::
+
+::: question
+Looking at the [DfE Data set](https://drive.google.com/uc?export=download&id=1tp9xe3dS__eg7RrXf0T_oMxcrz_TbMdM), choose a Local Authority (I suggest Dorset) and determine if the proportion of selective and non-selective schools are statistically similar or different to the national average. Comment on any potential issues with the data or the approach.
+:::
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+
+# Load the file for the task
+loc<-"https://drive.google.com/uc?export=download&id=1tp9xe3dS__eg7RrXf0T_oMxcrz_TbMdM"
+DfE_schools_2018 <- read.xlsx(loc,sheet="Schools")
+# Create a dataframe of the admission policies of Dorset schools
+DorsetschAd<-DfE_schools_2018 %>%
+  select(LA,AdmissionsPolicy)%>%
+  filter(LA=="Dorset")
+# Create a dataframe of the admission policies of all non-Dorset schools (note LA! means
+# not equal to)
+OtherUKSch<-DfE_schools_2018 %>%
+  select(LA,AdmissionsPolicy)%>%
+  filter(LA!="Dorset")
+# OtherUKSchs are labelled by LA so reset all these names just to UK
+OtherUKSch$LA<-"UK"
+# Join the two frames to give one long list
+AllSch<-rbind(OtherUKSch, DorsetschAd)
+# To check what test to do print the frequency table
+table(AllSch)
+# And a percentage version
+(100*prop.table(table(AllSch)))
+# Expected values are fine so use the Chi squared test
+# AdmissionsPolicy
+# LA       Non-selective Not applicable    Selective
+# Dorset   0.059974356    0.349505729  0.006204244
+# UK      16.075195434   81.718161889  1.790958349
+# Note 
+chisq.test(AllSch$LA, AllSch$AdmissionsPolicy, simulate.p.value = TRUE)
+
+```
+
+### Activity 6 - Determine if Ofsted rating and gender of school are independent
+
+::: question
+Looking again at the DfE Data set, compare Ofsted rating of the school against gender to determine if these are independent or not. You may wish to focus on a particular phase (such as secondary) and only include certain Ofsted ratings. Comment on any issues with the data.
+:::
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+#| # Task 3
+# Is there a relationship between school gender and Ofsted Rating?
+
+chisq.test(DfE_schools_2018$Gender,DfE_schools_2018$OfstedRating, simulate.p.value = TRUE)
+# Yes!
+# Pearson's Chi-squared test with simulated p-value (based on 2000 replicates)
+#
+# data:  DfE_schools_2018$Gender and DfE_schools_2018$OfstedRating
+# X-squared = 675.4, df = NA, p-value = 0.0004998
+
+```
+
+### Activity 7 - Create your own problem
+
+::: question
+Using the DfE Data set (or otherwise), create a research question which requires one of the chi-square tests to answer the question. State clearly what your null and alternative hypothesis are, what you are using as the significance level, what the chi-square calc and/or p-values for the test are, what conclusion you make, and any issues you think there are with the test.
+:::
+
+### Activity 8 - Checking chi-square test in a research paper
+
+```{r}
+#| eval: true
+#| echo: false
+#| warning: false
+
+#### prepare the anxiety data for display
+# read in the anxiety data
+anx3_data <- read_csv(glue("{loc_amy}Amy/anx_table_3.csv"))
+
+anx3_table <- anx3_data %>% 
+  group_by(Gender, name) %>% 
+  summarise(n=n()) %>%
+  pivot_wider(names_from = name,
+              values_from = n)  %>% 
+  ungroup()
+
+# add total column
+anx3_table <- anx3_table %>% 
+  mutate(Total = 
+           rowSums(
+              anx3_table %>% select(-Gender)))
+# alternatively
+# anx3_table <- anx3_table %>% 
+#   mutate(Total = sum(c_across(where(is.numeric))))
+
+# add total row
+anx3_table <- rbind(anx3_table, 
+                    c("Total", colSums(
+                      anx3_table %>% select(-Gender))))
+
+anx3_table_out <- gt(anx3_table) %>%   
+  tab_source_note(
+    source_note = "Source: Table 3, Mutodi, P. and Ngirande, H. (2014) The influence of studentsperceptions on Mathematics performance. A case of a selected high school in South Africa. Mediterranean Journal of Social Sciences")
+
+# anx3_table_out <- gt(anx3_table) %>% 
+#   summary_rows(
+#     columns=-Gender,
+#     fns=list(Total=~sum(.)),
+#     formatter = fmt_number)
+
+```
+
+In this activity you are going to look at the data presented in a paper by @mutodi2014influence. They present the relationships between a number of demographic factors and maths anxiety. For example, table 3 in the paper looks at the relationship between gender and maths anxiety.
+
+```{r}
+anx3_table_out
+```
+
+The raw survey data is available in a two column csv format, with each row equal to one survey response. The first column being the demographic data; in the case below, `Gender`, and the second column listing the student's answer to the questions about maths anxiety, listed here as `name`:
+
+```{r}
+anx3_data %>% head(3)
+```
+
+::: question
+-   Using the gender and maths anxiety [dataset](https://drive.google.com/file/d/1jkRJwDGw6pcK9Jw7gjFmR2CrX0US2QWh/view?usp=share_link), `group` the `Gender` and `name` fields, counting the number of responses in each group.
+-   Comment on any issues you find with the data, the methodological or the calculations.
+-   repeat this for [Table 4](https://drive.google.com/file/d/1jldvEU_IfLYO9vI-v3rNPSoVY-eSB3Ig/view?usp=share_link) (HINT: you won't be grouping by Gender this time!)
+-   repeat this for [Table 5](https://drive.google.com/file/d/1rvqH1XhiBixMlqMpo13tJIG0oAg6_H37/view?usp=share_link)
+
+Now you have had a brief explore of the data we need to conduct some chi-square tests to check whether the results between groups are
+:::
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+# Load the csv files for the three tables
+loc<-"<your HDD>/anx_table_3.csv"
+anxiety_table_3 <- read_csv(loc)
+
+loc<-"<your HDD>/anx_table_4.csv"
+anxiety_table_4 <- read_csv(loc)
+
+loc<-"<your HDD>/anx_table_5.csv"
+anxiety_table_5 <- read_csv(loc)
+
+
+# This section gets the data into the correct format for the square test in R
+# The Count tables are turned back into a long list of entries like this:
+# A tibble: 120 × 2
+#Gender name                 
+#<chr>  <chr>                
+# 1 Male   High level of anxiety
+# 2 Male   High level of anxiety
+# 3 Male   High level of anxiety
+#
+# That is done by 
+# 1) Select(-total) removes the total column which we don't need 
+# 2) filter(Gender !="Total") removes the row that stores totals
+#    leaving just the rows storing actual data
+# 3) pivot_longer turns the table into a long dataframe, -Gender
+#    ignores/keeps the Gender column and converts all the other
+#    columns into one column, with the heading and matching value 
+#    making up new rows
+# 4) uncount turns the counts stored in value in the table into 
+#    individual entries, e.g. Male, No anxiety, 45 would create 
+#    45 rows with "Male, No anxiety"
+
+anx_3 <- Anxietytable3 %>% 
+  select(-Total) %>% 
+  filter(Gender != "Total") %>%
+  pivot_longer(-Gender) %>% 
+  uncount(value)
+
+anx_4 <- Anxietytable4 %>% 
+  select(-Total) %>% 
+  filter(Age != "Total") %>%
+  pivot_longer(-Age) %>% 
+  uncount(value)
+
+anx_5 <- Anxietytable5 %>% 
+  select(-Total) %>% 
+  filter(HomeLang != "Total") %>%
+  pivot_longer(-HomeLang) %>% 
+  uncount(value)
+
+# save long dataframes
+# write.csv(anx_3, glue("{loc_amy}Amy/anx_table_3.csv"), row.names = FALSE)
+# write.csv(anx_4, glue("{loc_amy}Amy/anx_table_4.csv"), row.names = FALSE)
+# write.csv(anx_5, glue("{loc_amy}Amy/anx_table_5.csv"), row.names = FALSE)
+
+# conduct chi-square tests
+chisq.test(anx_3$Gender, anx_3$name)
+chisq.test(anx_4$Age, anx_4$name)
+chisq.test(anx_5$HomeLang, anx_5$name)
+
+# conduct - Kruskal-Wallis tests
+kruskal.test(anx_3$Gender, anx_3$name)
+kruskal.test (anx_4$Age, anx_4$name)
+kruskal.test (anx_5$HomeLang, anx_5$name)
+
+
+```
+
+### Doing Chi-Square tests in R
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/qnZX0G1M29E" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+
+</iframe>
+
+You can find the code used in the video below
+
+```{r}
+#| eval: false
+#| warning: true
+#| echo: true
+# Introduction to Chi-square
+#
+# Download data from /Users/k1765032/Library/CloudStorage/GoogleDrive-richardandrewbrock@gmail.com/.shortcut-targets-by-id/1c3CkaEBOICzepArDfjQUP34W2BYhFjM4/PISR/Data/PISA/subset/Students_2018_RBDP_none_levels.rds
+# You want the file: Students_2018_RBDP_none_levels.rds
+# and place in your own file system
+# change loc to load the data directly. Loading into R might take a few minutes
+
+loc <- "https://drive.google.com/open?id=14pL2Bz677Kk5_nn9BTmEuuUGY9S09bDb&authuser=richardandrewbrock%40gmail.com&usp=drive_fs"
+PISA_2018 <- read_rds(loc)
+
+# Are there differences between how often students change school?
+# ST004D01T is the gender variable (Male, Female)
+# SCCHANGE is a categorical variable (No change / One change / Two or more changes)
+
+chidata <- PISA_2018 %>%
+  select(CNT,ST004D01T,SCCHANGE) %>%
+  filter(CNT=="United Kingdom")
+
+chidata<-chidata[-c(1)]
+chidata<-drop_na(chidata)
+
+ chidata <- PISA_2018 %>%
+   filter(CNT=="United Kingdom")
+   select(ST004D01T,SCCHANGE) %>% 
+   drop_na()
+# Above is the approiach I took in the video
+# An alternative, Pete suggests, which is more elegant, is below
+# Note he drops the country varibale, within the piped section
+# using: elect(-CNT)
+#    
+# chidata <- PISA_2018 %>%
+#   select(CNT,ST004D01T,SCCHANGE) %>%
+#   filter(CNT=="United Kingdom") %>%
+#   select(-CNT) %>% 
+#   drop_na()
+
+# run the test
+chisq.test(chidata$ST004D01T, chidata$SCCHANGE)
+  
+
+```

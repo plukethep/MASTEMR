@@ -1,0 +1,255 @@
+---
+title: "05 Introduction to PISA"
+# bibliography: references.bib
+---
+
+```{r}
+#| eval: true
+#| warning: true
+#| echo: false
+
+# only load this code if testing this file independently of overall project
+if(!exists("test")){
+  warning("RUNNING LOCAL FILE LOAD")
+  
+  library(glue)
+  proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
+  proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  
+  node <- Sys.info()
+  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
+    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
+    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
+  }else if(node["nodename"] == "PETES_PC"){ #Pete's NEW Laptop
+    proj_folder <- r"(C:\Users\Peter\Google Drive\Kings\Code\MASTEMR\)"
+  }
+
+  source(glue("{proj_folder}MASTEMR_setup.R"))
+}
+```
+
+## Seminar activities
+
+### Discussion activity
+
+### Tasks
+
+**Getting set up**
+
+Ensure you have the PISA 2018 data set loaded. If you can see the PISA_2018 data frame in your enviroment window (at the top right of your screen), there is no need to reload.
+
+```{r}
+#| eval: false
+#| code-fold: false
+#| code-summary: "Loading the data"
+# Load the PISA data set.
+
+library(arrow)
+library(tidyverse)
+
+PISA_2018 <- read_parquet(r"[<folder>PISA_2018_student_subset.parquet]")
+```
+
+### Task1
+
+::: question
+-   Use geom_density to plot distributions
+Plot the distribution of Japanese and UK mathematics scores - what patterns do you notice
+
+```{r}
+#| eval: true
+#| code-fold: false
+#| code-summary: "Loading the data"
+
+JPUKMath<-PISA_2018%>%
+  select(CNT, PV1MATH)%>%
+  filter(CNT=="United Kingdom"|CNT=="Japan")
+
+ggplot(data=JPUKMath,
+       aes(x=PV1MATH, fill=CNT, alpha=0.5))+
+  geom_density()
+
+```
+-   Examine gender differences
+
+```{r}
+#| eval: true
+#| code-fold: false
+#| code-summary: "Loading the data"
+
+UKMathGender<-PISA_2018%>%
+  select(CNT, PV1MATH, ST004D01T)%>%
+  filter(CNT=="United Kingdom")
+
+ggplot(data=UKMathGender,
+       aes(x=PV1MATH, fill=ST004D01T, alpha=0.5))+
+  geom_density()
+
+```
+-   Facet wrap gender differences across countries
+
+```{r}
+#| eval: true
+#| code-fold: false
+#| code-summary: "Loading the data"
+
+MathGender<-PISA_2018%>%
+  select(CNT, PV1MATH, ST004D01T)%>%
+  filter(CNT=="United Kingdom"|CNT=="United States"|CNT=="Japan"| CNT=="Korea"|CNT=="Finland")
+
+ggplot(data=UKMathGender,
+       aes(x=PV1MATH, fill=ST004D01T, alpha=0.5))+
+  geom_density()+
+  facet_wrap(.~CNT)
+
+```
+::: 
+
+
+::: question
+-   Examine patterns of mathematics achievement by wealth
+
+```{r}
+#| eval: true
+#| code-fold: false
+#| code-summary: "Loading the data"
+
+Wealthdata<-PISA_2018%>%
+  select(CNT, WEALTH, PV1MATH)%>%
+  group_by(CNT)%>%
+  summarise(MeanWealth=mean(WEALTH, na.rm = TRUE),
+            MeanMath=mean(PV1MATH, na.rm = TRUE))
+
+ggplot(data=Wealthdata,
+       aes(x=MeanWealth, y=MeanMath, alpha=0.5))+
+  geom_point()+
+  xlab("Wealth")+
+  ylab("Mathematics score")
+
+```
+Add colour to outliers
+
+
+```{r}
+#| eval: true
+#| code-fold: false
+#| code-summary: "Loading the data"
+
+Wealthdata<-PISA_2018%>%
+  select(CNT, WEALTH, PV1MATH)%>%
+  group_by(CNT)%>%
+  summarise(MeanWealth=mean(WEALTH, na.rm = TRUE),
+            MeanMath=mean(PV1MATH, na.rm = TRUE))%>%
+  mutate(label=ifelse(MeanMath>550, "Red", "Blue"))
+
+ggplot(data=Wealthdata,
+       aes(x=MeanWealth, y=MeanMath, colour=label))+
+  geom_point()+
+  xlab("Wealth")+
+  ylab("Mathematics score")
+
+```
+
+Add label to outliers
+
+
+```{r}
+#| eval: true
+#| code-fold: false
+#| code-summary: "Loading the data"
+
+Wealthdata<-PISA_2018%>%
+  select(CNT, WEALTH, PV1MATH)%>%
+  group_by(CNT)%>%
+  summarise(MeanWealth=mean(WEALTH, na.rm = TRUE),
+            MeanMath=mean(PV1MATH, na.rm = TRUE))%>%
+  mutate(label=ifelse(MeanMath>550, "Red", "Blue"))%>%
+  mutate(labelname=ifelse(MeanMath>550, as.character(CNT), NA))
+  
+
+ggplot(data=Wealthdata,
+       aes(x=MeanWealth, y=MeanMath, colour=label))+
+  geom_point()+
+  geom_text(aes(label=labelname), 
+            colour="black", 
+            check_overlap = TRUE)+
+  xlab("Wealth")+
+  ylab("Mathematics score")
+
+```
+
+Examine Likert responses by country using Facet plot
+
+`ST125Q01NA` - How old were you when you started early childhood education? 
+
+```{r}
+#| eval: true
+#| code-fold: false
+#| code-summary: "Loading the data"
+
+Culturedata<-PISA_2018%>%
+  select(CNT, ST125Q01NA)%>%
+  group_by(CNT)
+  
+ggplot(data=Culturedata,
+       aes(x=ST125Q01NA))+
+  geom_bar()+
+  xlab("How old were you when you started early childhood education?")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+```
+Then use faceting to split the plots by country
+
+```{r}
+#| eval: true
+#| code-fold: false
+#| code-summary: "Loading the data"
+
+Culturedata<-PISA_2018%>%
+  select(CNT, ST125Q01NA)%>%
+  filter(CNT=="United Kingdom"|CNT=="Germany" | CNT=="Belgium"|   CNT=="Austria"| CNT=="France" | CNT=="Poland" | CNT=="Estonia" | CNT=="Finland"| CNT=="Italy")
+  
+ggplot(data=Culturedata,
+       aes(x=ST125Q01NA, fill=CNT))+
+  geom_bar()+
+  xlab("How old were you when you started early childhood education?")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  facet_wrap(. ~ CNT)
+
+```
+
+Categorising Variables
+
+```{r}
+#| eval: true
+#| code-fold: false
+#| code-summary: "Loading the data"
+
+WealthSci<-PISA_2018%>%
+  select(CNT, WEALTH, PV1SCIE)%>%
+  filter(CNT=="United Kingdom"|CNT=="Germany")%>%
+  mutate(WTHCTG=ifelse(WEALTH>0, ifelse(WEALTH>1, "Very high", "High"), "Low"))%>%
+  mutate(SciCat=ifelse(PV1SCIE>460, "Below Average","Above Average"))%>%
+  group_by(CNT)%>%
+  droplevels()
+
+WealthSci<-as.data.frame(table(WealthSci))
+
+
+  
+ggplot(data=Culturedata,
+       aes(x=ST125Q01NA, fill=CNT))+
+  geom_bar()+
+  xlab("How old were you when you started early childhood education?")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  facet_wrap(. ~ CNT)
+
+```
+
+:::
+
+::: callout-tip
+
+:::
+

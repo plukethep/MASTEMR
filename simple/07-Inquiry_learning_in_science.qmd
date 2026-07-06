@@ -1,0 +1,226 @@
+```{r}
+library("easystats") # Load the package every time you want to use these tools
+library(glue)
+library(lsr)
+library(multcomp)
+library(tidyverse)
+
+loc <- glue("C:/Users/k1345925/OneDrive - King's College London/R stats/PISA2015studentbz2levelsDP2.rds")
+message("LOADING: PISA 2015 data")
+PISA_2015 <- read_rds(loc)
+names(PISA_2015)
+
+#lapply(names(sessionInfo()$loadedOnly), require, character.only = TRUE)
+#invisible(lapply(paste0('package:', names(sessionInfo()$otherPkgs)), detach, character.only=TRUE, unload=TRUE, force=TRUE))
+
+```
+
+<!--https://www.r-bloggers.com/2022/01/how-to-perform-eta-squared-in-r/-->
+
+```{r}
+#| code-fold: true
+#| code-summary: inquiry preparation code
+#| eval: true
+
+# mapping used
+# c(1 = "In all lessons",
+#  2 = "In most lessons",
+#  3 = "In some lessons",
+#  4 = "Never or hardly ever",
+#  NA = "Valid Skip",
+#  NA = "Not Reached",
+#  NA = "Not Applicable",
+#  NA = "Invalid",
+#  NA = "No Response")
+
+inquiry_data <- PISA_2015 %>%
+  select(CNT, OECD, ST098Q10NA, ST098Q07TA, ST098Q05TA, 
+         ST098Q02TA, PV1SCIE, IBTEACH, TDTEACH) %>%
+  mutate(ST098Q10NA = as.numeric(ST098Q10NA),
+         ST098Q07TA = as.numeric(ST098Q07TA),
+         ST098Q05TA = as.numeric(ST098Q05TA),
+         ST098Q02TA = as.numeric(ST098Q02TA)) %>%
+  drop_na() %>%
+    mutate(inquiry_levels =  ifelse(
+                ST098Q10NA > 2 & ST098Q07TA > 2 & ST098Q05TA > 2 & ST098Q02TA > 2, 0,
+              ifelse(
+                ST098Q10NA > 2 & ST098Q07TA > 2 & ST098Q05TA > 2 & ST098Q02TA < 3, 1,
+              ifelse(
+                ST098Q10NA > 2 & ST098Q07TA > 2 & ST098Q05TA < 3 & ST098Q02TA < 3, 2,
+              ifelse(
+                ST098Q10NA > 2 & ST098Q07TA < 3 & ST098Q05TA < 3 & ST098Q02TA < 3, 3,
+              ifelse(
+                ST098Q10NA < 3 & ST098Q07TA < 3 & ST098Q05TA < 3 & ST098Q02TA < 3, 4,
+              99)))))) %>%
+  mutate(inquiry_levels = as.factor(inquiry_levels)) %>%
+  filter(inquiry_levels != "99")
+
+#Pete, Could you add a box for the following filter as it's the one the students will need to edit to run analyses beyond USA; heading "Focusing on the PISA 2015 data for the USA" etc:
+inquiry_data_US <- inquiry_data %>% filter(CNT == "United States")
+```
+
+## Running the ANOVA and checking its assumptions
+
+Now we can run the ANOVA with inquiry levels as the independent variable to see how much variance it explains in science achievement with the first probable value as the dependent variable. We can also do a quick visual check that the ANOVA assumptions of normality and equality of variance are met.
+
+```{r}
+
+res_aov_US <- aov(PV1SCIE ~ inquiry_levels,
+               data = inquiry_data_US)
+
+tidy(res_aov_US$residuals)
+
+#Visual check for normality
+hist(res_aov_US$residuals)
+
+# ggplot way of doing this
+# plot_data <- data.frame(res_aov_US$residuals)
+# names(plot_data) <- "residuals"
+# ggplot(data= plot_data,
+#        aes(x = residuals)) + 
+#   geom_histogram(binwidth = 50, 
+#                  fill="lightblue", 
+#                  colour="black")
+
+
+#Visual check for equality of variance
+# boxplot(inquiry_data$PV1SCIE ~ inquiry_data$inquiry_levels)
+ggplot(inquiry_data, 
+       aes(x=inquiry_levels, y=PV1SCIE)) + 
+  geom_violin() +
+  geom_boxplot(width = 0.5)
+
+```
+
+### Reporting the ANOVA and Tukey HSD post hoc test
+
+Then we can use the summary command to report the results of the ANOVA. Since ANOVA is an omnibus test of difference (ie whether there is a difference between groups or in this case levels of scientific inquiry), we can use a post hoc test to analysis differences between each pairing of inquiry levels. Since we don't have a reference group (ie one group against which comparisons should be made, such as a control group against which intervention groups should be compared), we will opt for the Tukey HSD (honestly significant difference) post hoc test rather than the Dunnett post hoc test.
+
+```{r}
+
+summary(res_aov_US)
+
+TukeyHSD(res_aov_US)
+
+#Pete we need a separate section for the plotting, I think? See below loose text (sorry!).
+```
+
+We can then plot the results:
+
+```{r}
+plot(TukeyHSD(res_aov_US))
+
+# ggplot equivalent
+# plot_data <- data.frame(TukeyHSD(res_aov_US)$inquiry_levels) %>% 
+#   mutate(compare = rownames(.))
+# 
+# ggplot(data= plot_data, aes(x=compare)) +
+#   geom_boxplot(stat = "identity",
+#                aes(lower = lwr,
+#                    upper = upr,
+#                    middle = diff,
+#                    ymin = pmax(lwr - 1.5 * IQR),
+#                    ymax = pmin(upr + 1.5 * IQR)))
+
+
+```
+
+### Using an alternative Tukey HSD command as a basis for plotting
+
+This is an alternative command for Tukey HSD. It is a more complex command but it reports essentially the same results.
+
+```{r}
+post_test <- glht(res_aov_US,
+                  linfct = mcp(inquiry_levels = "Tukey"))
+summary(post_test)
+```
+
+### Plotting the results
+
+However, this command gives a clearer presentation of the results using the plot command. Here we are looking for "contrasts" between inquiry levels (1-4) where the confidence interval doesn't cross zero - in other words where we can be confident that there is a difference in science achievement between different levels of inquiry. Which level of inquiry appears to be the best for science achievement?
+
+-   Could we have a ggplot version of this \[too?\]?
+
+```{r}
+plot(post_test)
+```
+
+### Reporting ANOVA with effect size using eta squared
+
+To put ANOVA in a format for reporting we can use the `easystats` package. Easystats is a collection of tools to help you statistically analyse data and present your findings. One you have installed and loaded `easystats` you can then use the `report(<stats_model>)` command to format your results for a paper you are writing.
+
+Note how these results include not only ANOVA but also eta squared which can be interpreted as the proportion of variance in the dependent variable explained by the independent variable. Eta squared therefore goes beyond ANOVA in providing a measure not only of difference between groups, or in this case between levels of scientific inquiry, but also a measure of degree of difference as measured by the dependent variable, in this case science achievement.
+
+```{r}
+report(res_aov_US)
+
+etaSquared(res_aov_US)
+```
+
+## Seminar tasks
+
+### Activity 1: run ANOVA tests exploring the relationship between science inquiry levels and attainment beyond the USA
+
+Edit or remove the USA filter \[see new section to be added above - number the sections?\] to explore the relationship between the science inquiry levels `inquiry_levels` and attainment in science `PV1SCIE` in a country of your choice or in a range of countries. Note that as an alternative to the country (`CNT`) variable, the `OECD` variable may also be useful here.
+
+```{r}
+#| code-fold: true
+#| code-summary: answers
+inquiry_data_UK <- inquiry_data %>% filter(CNT == "United Kingdom")
+
+# Or
+
+inquiry_data_OECD <- inquiry_data %>% filter(OECD == "Yes")
+
+```
+
+### Activity 2: run the Tukey HSD post hoc test on your ANOVA results
+
+Using your new country filter, now trying running the Tukey HSD post hoc test and reporting and graphing the results, and compare your results with those for the USA.
+
+```{r}
+#| code-fold: true
+#| code-summary: answers
+res_aov_OECD <- aov(PV1SCIE ~ inquiry_levels,
+               data = inquiry_data_OECD)
+
+report(res_aov_OECD)
+
+#Visual check for normality
+hist(res_aov_OECD$residuals)
+
+#Visual check for equality of variance
+boxplot(inquiry_data$PV1SCIE ~ inquiry_data$inquiry_levels)
+
+
+post_test <- glht(res_aov_OECD,
+                  linfct = mcp(inquiry_levels = "Tukey"))
+summary(post_test)
+plot (post_test)
+
+```
+
+### Activity 3: use other variables to explain variance in scientific inquiry
+
+Now let's try something different. In previous analyses, we used `inquiry_levels` as the independent variable explaining variance in science attainment `PV1SCIE` as the dependent variable. What results do you get if you choose one of the inquiry level items as the dependent variables and use something relating to the backgrounds of students as the independent variable (e.g. socioeconomic status `ESCS` or which countries they are in `CNT`)? Note as an alternative to one of the items, you could use one of the PISA scales based on the wider sets of relevant items as the dependent variable (i.e. `IBTEACH` - inquiry-based science teaching and learning practices or `TDTEACH` - teacher-directed science instruction).
+
+REPEAT? (ie repeat year - need to add to `ifelse` inquiry_data code)
+
+```{r}
+#| code-fold: true
+#| code-summary: answers
+# code solution to go here
+res_aov_IBTEACH_CNT <- aov(IBTEACH ~ CNT,
+               data = inquiry_data_OECD)
+
+report(res_aov_IBTEACH_CNT)
+
+tidy(res_aov_IBTEACH_CNT)
+
+#NOT SURE WHY THE FOLLOWING IS NOT WORKING ONLY IN THIS INSTANCE:
+post_test <- glht(res_aov_IBTEACH_CNT,
+                  linfct = mcp(inquiry_levels = "Tukey"))
+summary(post_test)
+plot (post_test)
+
+```

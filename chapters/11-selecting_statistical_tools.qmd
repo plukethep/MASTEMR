@@ -1,0 +1,491 @@
+---
+title: "10 Selecting statistical tools"
+---
+
+```{r setup}
+#| eval: true
+#| warning: false
+#| echo: false
+
+# only load this code if testing this file independently of overall project
+if(!exists("test")){
+  warning("RUNNING LOCAL FILE LOAD")
+  
+  library(glue)
+  proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
+  proj_folder <- r"(C:\Users\peter\OneDrive - King's College London\Code\MASTEMR\)"
+  
+  node <- Sys.info()
+  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
+    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
+    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
+  }
+
+  source(glue("{proj_folder}MASTEMR_setup.R"))
+}
+```
+
+# Pre-session tasks
+
+## Pre-session reading
+
+Look over the test selection flow chart:
+
+```{r}
+#| eval: true
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show the code"
+library(DiagrammeR)
+grViz("
+      digraph Random{
+      graph [layout = dot,
+      overlap =T,
+      bgcolor='white',
+      splines=line]#controls l type setup
+      node [shape = box,style='filled',
+      fillcolor='skyblue',
+      fontSize=30,fontcolor='darkgrey',
+      fontname= 'Arial']
+     a [label = 'What do you want to do?']
+     b [label = 'Test a hypothesis - on what kind of data?']
+     c [label = 'Examine a relationship']
+     d [label = 'Continuous'];
+     e [label = 'Normally Distribured/Parametric'];
+     f [label = '1 Group'];
+     g [label = 'One sample t-test', fillcolor='lightyellow'];
+     h [label = 'Do a test of normality'];
+     i [label = 'qqplot', fillcolor='lightyellow'];
+     j [label = 'Tests on skewed distributions', fillcolor='lightyellow'];
+     k [label = 'Discrete / Categorical'];
+     l [label = '2 Groups'];
+     m [label = 'Unpaired groups'];
+     n [label = 'Expected counts more than 5\nin more than 75 per cent of cells'];
+     o [label = 'Chi-squared', fillcolor='lightyellow'];
+     p [label = 'Expected counts more than 5\n in less than 75 per cent of cells'];
+     q [label = 'Fisher exact test', fillcolor='lightyellow'];
+     r [label = 'Continuous variables'];
+     s [label = 'Linear Regression', fillcolor='lightyellow'];
+     t [label = '2 groups']
+     u [label = 'Paired groups']
+     v [label = 'Unpaired groups']
+     w [label = 'Paired t-test', fillcolor='lightyellow']
+     x [label = 'Unpaired t-test', fillcolor='lightyellow']
+     y [label = '3 groups or more']
+     z [label = 'anova', fillcolor='lightyellow']
+     aa [label = 'Not normally distributed'] 
+     a -> b
+     a -> c
+     b -> d
+     d -> h
+     h -> i
+     i -> aa
+     aa -> j
+     i -> e
+     e -> f
+     f -> g
+     b -> k
+     k -> l
+     l -> m
+     m -> n
+     n -> o
+     m -> p
+     p -> q
+     c -> r
+     r -> s
+     e -> t
+     t -> u
+     t -> v
+     u -> w
+     v -> x
+     e -> y
+     y -> z
+      }")
+```
+
+## Pre-session task - Loading the data
+
+We will continue to use the PISA_2022 dataset, make sure it is loaded.
+
+```{r}
+#| eval: false
+#| code-fold: false
+#| code-summary: "Show the code"
+#| echo: true
+# Load PISA data
+
+library(arrow)
+library(tidyverse)
+
+PISA_2022 <- read_parquet(r"[<folder>PISA_2022_student.parquet]")
+
+```
+
+# Choosing appropriate quantitative tests
+
+In the lecture, this flow chart was introduced (which us produced using R code here - unfold the code to see how this is done using the `DiagrammeR` package)
+
+```{r }
+#| eval: true
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show the code"
+grViz("
+      digraph Random{
+      graph [layout = dot,
+      overlap =T,
+      bgcolor='white',
+      splines=line]#controls l type setup
+      node [shape = box,style='filled',
+      fillcolor='skyblue',
+      fontSize=20,fontcolor='darkgrey',
+      fontname='Arial']
+     a [label = 'What do you want to do?']
+     b [label = 'Test a hypothesis - on what kind of data?']
+     c [label = 'Examine a relationship']
+     d [label = 'Continuous'];
+     e [label = 'Normally Distribured/Parametric'];
+     f [label = '1 Group'];
+     g [label = 'One sample t-test', fillcolor='lightyellow'];
+     h [label = 'Do a test of normality'];
+     i [label = 'qqplot', fillcolor='lightyellow'];
+     j [label = 'Tests on skewed distributions', fillcolor='lightyellow'];
+     k [label = 'Discrete / Categorical'];
+     l [label = '2 Groups'];
+     m [label = 'Unpaired groups'];
+     n [label = 'Expected counts more than 5\nin more than 75 per cent of cells'];
+     o [label = 'Chi-squared', fillcolor='lightyellow'];
+     p [label = 'Expected counts more than 5\n in less than 75 per cent of cells'];
+     q [label = 'Fisher exact test', fillcolor='lightyellow'];
+     r [label = 'Continuous variables'];
+     s [label = 'Linear Regression', fillcolor='lightyellow'];
+     t [label = '2 groups']
+     u [label = 'Paired groups']
+     v [label = 'Unpaired groups']
+     w [label = 'Paired t-test', fillcolor='lightyellow']
+     x [label = 'Unpaired t-test', fillcolor='lightyellow']
+     y [label = '3 groups or more']
+     z [label = 'anova', fillcolor='lightyellow']
+     aa [label = 'Not normally distributed'] 
+     a -> b
+     a -> c
+     b -> d
+     d -> h
+     h -> i
+     i -> aa
+     aa -> j
+     i -> e
+     e -> f
+     f -> g
+     b -> k
+     k -> l
+     l -> m
+     m -> n
+     n -> o
+     m -> p
+     p -> q
+     c -> r
+     r -> s
+     e -> t
+     t -> u
+     t -> v
+     u -> w
+     v -> x
+     e -> y
+     y -> z
+
+      }")
+```
+
+That chart will help you choose the test to use for the tasks below. \# Seminar Tasks
+
+## Task 1 Plot a graph of mean science scores by country
+
+Imagine we wish to compare the mean scores of students on the science element of PISA by plotting a bar graph. First you need to use the `sumarise` function to calculate means by countries. Then use ggplot with `geom_col` to create the graph. ***Extension task:*** add error bars for the standard deviations of science scores.
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+# Task 1: Plot a graph of mean science scores by country
+# Create a variable avgscience - for every country (Group_by(CNT)) calculate the mean
+# science score (PV1SCIE) and ignore NA (na.rm=TRUE)
+
+avgscience <- PISA_2022 %>%                                  # <1>
+  group_by(CNT) %>%                                          # <2>
+  summarise(mean_sci = mean(PV1SCIE, na.rm = TRUE)) %>%      # <3>  
+  arrange(desc(mean_sci))                                    # <4>  
+
+
+# Plot the data  x=CNT (reorder to ascending order), mean science score on the y
+# Change the fill colour to red, rotate the text, locate the text and reduce the font size
+ggplot(data = avgscience,                                    # <5>
+       aes(x = reorder(CNT, - mean_sci), y = mean_sci)) +    # <6>
+geom_col(fill = "red") +                                     # <7>
+theme(axis.text.x = element_text(angle = 90, hjust = 0.95,   # <8> 
+                                 vjust = 0.2, 
+                                 size = 5))+
+  labs(x = "Country", y = "Mean Science Score")              # <11>
+    
+# Extension version: added summarise to find standard deviation 
+
+avgscience <- PISA_2022 %>% 
+  group_by(CNT) %>%
+  summarise(mean_sci = mean(PV1SCIE, na.rm = TRUE),
+            sd_sci = sd(PV1SCIE, na.rm = TRUE)) %>%          # <15>
+  arrange(desc(mean_sci))
+
+# Extension version: geom_errorbar added with aes y=mean_sci (the centre of the bar) and then the maximum and minimum set to the mean plus or minus the standard deviation (ymin=mean_sci-sd_sci, ymax=mean_sci+sd_sci) 
+
+ggplot(data = avgscience, 
+       aes(x = reorder(CNT, -mean_sci), y = mean_sci)) +
+geom_col(fill = "red") +
+theme(axis.text.x = element_text(angle = 90, hjust = 0.95, vjust = 0.2, 
+                                 size = 5))+
+  labs(x="Country", y = "Mean Science Score")+
+  geom_errorbar(aes(y = mean_sci, ymin = mean_sci - sd_sci,  # <22>
+                    ymax = mean_sci + sd_sci),               # <23>
+                width = 0.5, colour='black', size = 0.5)     # <24>
+
+  
+```
+1.  line 1 - pipe the transformed `PISA_2022` data frame into a new data frame `avgscience `
+2.  line 2 - perform the next steps in groups of countries
+3.  line 3 - calculate the mean science (`PV1SCIE`) score, using `summarise` ignoring NAs (`na.rm = TRUE`) - put the result in a column called `mean_sci`
+4.  line 4 - arrange in descending order of `mean_sci`
+5.  line 5 - plot the `avgscience` data frame
+6.  line 6 - set `mean_sci` as the y-axis and set put countries on the x-axis, ordering the countries in descending order of `mean_sci`: `x=reorder(CNT, -mean_sci)`
+7.  line 7 - plot a column graph, setting the fill to red
+8.  line 8 - rotate the x-axis text
+11.  line 11 - set axis labels  
+15.  line 15 - add the standard deviation results using `sd` within `summarise`
+22.  line 22 - add error bars with `geom_errorbar` - set the lower value of the bars to `ymin = mean_sci - sd_sci` that the `mean_sci` score minus one standard deviation
+23.  line 23 - set the upper value of the bars to `ymax = mean_sci + sd_sci` that the `mean_sci` score plus one standard deviation.
+24.  line 24 -set the colour and width of the bars
+
+## Task 2 Are there differences in science scores by gender for the total data set?
+
+Consider the kinds of variables that represent the science score. What is an appropriate test to determine differences in the means between the two groups? Create two vectors, for boys and girls, that you can feed into the `t.test` function.
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+# Task 2: Are there differences in Science scores by gender for the total data set? (Yes)
+# A comparison of means of two continuous variables, use a t-test.
+
+MaleSci <- PISA_2022 %>%                   # <1>
+  select(ST004D01T, PV1SCIE) %>%           # <2>
+  filter(ST004D01T == "Male")              # <3>
+
+# Choose the  gender (ST004D01T) and science score columns (PV1SCIE) from  2022 data, filter for females 
+# Put that data into FemaleSci
+
+FemaleSci <- PISA_2022 %>%                 # <4>
+  select(CNT, ST004D01T, PV1SCIE) %>% 
+  filter(ST004D01T == "Female")
+
+#Do a t-test comparing MaleSci and FemaleSci
+t.test(MaleSci$PV1SCIE, FemaleSci$PV1SCIE) # <7>
+# p-value is < 2.2e-16 which is less than 0.05 so statistically significant differences exist
+```
+1.  line 1 - Pipe the data into a new data frame `MaleSci`
+2.  line 2 - Choose the  gender (ST004D01T) and science score columns (PV1SCIE) from  2022 data
+3.  line 3 - filter for males 
+4.  line 4 - repeat for females, creating a data frame `FemaleSci`
+7.  line 7 - perform a t-test between `MaleSci` and `FemaleSci`
+
+## Task 3 Are there differences in science scores by gender for UK students?
+
+As above, but include a filter by country.
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+# Task 3: Are there differences in Science scores by gender for UK students? (No)
+# A comparison of means of two continuous variables, use a t-test.
+# Choose the country (CNT), gender (ST004D01T) and science score columns (PV1SCIE) from  2022 data, filter for males and the UK
+# Put that data into UKMaleSci
+
+UKMaleSci <- PISA_2022 %>% 
+  select(CNT, ST004D01T, PV1SCIE) %>% 
+  filter(ST004D01T == "Male")  %>% 
+  filter(CNT == "United Kingdom")
+
+# Choose the country (CNT), gender (ST004D01T) and science score columns (PV1SCIE) from  data, filter for females and the UK
+# Put that data into UKFemaleSci
+UKFemaleSci <- PISA_2022 %>% 
+  select(CNT, ST004D01T, PV1SCIE) %>% 
+  filter(ST004D01T == "Female") %>% 
+  filter(CNT == "United Kingdom")
+
+# Do a t-test comparing UKMaleSci and UKFemaleSci
+t.test(UKMaleSci$PV1SCIE, UKFemaleSci$PV1SCIE)
+
+# the p-value is 0.1267 over, 0.05, so statistically significant differences between males and females
+
+```
+
+## Task 4 For the whole data set, is there a correlation between students' science score and reading scores?
+
+Reflect on the appropriate test to show correlation between two scores. This test can be carried out quite simply using a couple of lines of code. ***Extensions:*** a) perform the same analysis, but consider the impact of gender; b) Find the correlations between reading and science core by country, and rank from most highly correlated to least.
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+# Task 4: For the whole data set, is there a correlation between students’ science score reading score? (Yes, significant 0.77)
+
+# Do the regression test between science score (PV1SCIE) and reading score (PV1READ) on the PISA_2022 data
+lmSciRead <- lm(PV1SCIE ~ PV1READ, data = PISA_2022)               # <1>
+summary(lmSciRead)
+
+# Extension 1: Add Gender:
+lmSciRead <- lm(PV1SCIE ~ PV1READ + ST004D01T, data = PISA_2022)   # <3>
+summary(lmSciRead)
+
+# Extension 2: Rank by correlation
+CNTPISA <- PISA_2022 %>%
+  select(CNT, PV1SCIE, PV1READ) %>%                                # <5>
+  group_by(CNT)%>%                                                 # <6>
+  summarise(MeanSci = mean(PV1SCIE),                               # <7>
+            MeanRead = mean(PV1READ),
+            Cor=cor(PV1SCIE, PV1READ)) %>%                          # <9>
+  arrange(desc(Cor))                                               # <10>
+
+
+```
+1.  line 1 - Run a linear model, predicting `PV1SCIE` with `PV1READ`, based on PISA_2022 data, then summarise
+3.  line 3 - Run a linear model, predicting `PV1SCIE` with `PV1READ` and gender `ST004D01t`, based on PISA_2022 data, then summarise
+5.  line 5 - create a new data frame CNTPISA, and PISA_2022 into it selecting country, science and reading score
+6.  line 6 - group by country
+7.  line 7 - `summarise` to find mean science scores, in the column `MeanSci`, and mean reading scores in `MeanRead`
+9.  line 9 - For each country, find the correlation between science and reading scores, put in the column `Cor`
+10.  line 10 - sort the data frame in descending order of the column `Cor` the correlation scores
+
+## Task 5 Plot a representation of UK students' science score against reading score, with a linear best fit line.
+
+It will help here to create a `data.frame` that contains a filtered version of the whole dataset you can pass to `ggplot`.
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+# Task 5: Plot a representation of UK students’ science score against reading score.
+ 
+# Choose the three variables of interest, science score (PV1SCIE), reading score (PV1READ) and country (CNT)
+# and filter for the UK. Put the values into regplotdata
+regplotdata <- PISA_2022 %>%                                #<1>
+  select(PV1SCIE, PV1READ, CNT) %>%                         #<2>
+  filter(CNT == "United Kingdom")                           #<3>
+
+# Plot the data in regplotdata, set the science score on the x-xis and reading on y-axis, set the size, colour and alpha (transparency)
+# of points and add a linear ('lm') black line
+
+ggplot(data = regplotdata, 
+       aes(x = PV1SCIE, y = PV1READ)) +                     #<5>
+    geom_point(size = 0.5, colour = "red", alpha = 0.3) +   #<6>
+    geom_smooth(method = "lm", colour="black")+             #<7>
+    labs(x = "Science Score", y = "Reading score")          #<8> 
+```
+1.  line 1 - Create a new data frame for plotting `regplotdata`
+2.  line 2 - Select the variables we need: `PV1SCIE`, `PV1READ` and  `CNT`.
+3.  line 3 - filter for UK results
+5.  line 5 - plot the `regplotdata` data
+6.  line 6 - set the x-axis as science scores, and y axis as reading scores
+7.  line 7 - use `geom_point` to plot a scatter graph, set the point colour to red, and transparency (alpha) to 0.3
+8.  line 8 - add labels
+
+## Task 6 Do girls and boys in the UK have different preferences for maths?
+
+The PISA 2022 data set includes the variable `MATHPREF` (Preference of Math over other core subjects). Determine if the data for girls and boys are homogenous (i.e. if the null hypothesis that girls and boys have similar preferences for maths). Note the possible responses are: `0` No preference for mathematics over other subjects and `1` Preference for mathematics over other subjects
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+# Task 6: Is there a relationship between UK boys' and girls' mathematics preferences
+  
+chi_data <- PISA_2022 %>%                                        # <1>
+  select(CNT, ST004D01T, MATHPREF) %>%                           # <2>
+  filter(CNT == "United Kingdom")  %>%                           # <3>
+  droplevels() %>%                                               # <4>
+  na.omit()                                                      # <5>
+
+# We wish to compare two categorical variables, gender (Male/Female) and preference for maths (0 = No Preference for maths/ 1= Preference for maths)
+# Create a frequency table
+
+Mathpreftable <- xtabs(data = chi_data, ~ ST004D01T + MATHPREF)   # <6>
+
+# Perform the chisq.test on the data
+
+chisq.test(Mathpreftable)                                         # <7>
+
+# p-value= 4.554e-08 - reject the null hypothesis - boys and girls have different preferences for mathematics
+```
+1.  line 1 - Pipe `PISA_2022` to a new data frame to test: `chi_data`
+2.  line 2 - Select the variables we need: gender (`ST004D01T`), country (`CNT`), and math preference (`MATHPEF`).
+3.  line 3 - filter for UK results
+4.  line 4 - drop unneeded levels for other countries
+5.  line 5 - drop NAs
+5.  line 6 - create a contingency table of gender (`ST004D01T`) by maths preference (`MATHPREF`)
+7.  line 7 - perform the chi-square test
+
+## Task 7 Does mathematics preferences explain variation in mathematics score for UK students?
+
+Arguments have been made the students who know more science, might engage in more environmental activism. Determine what percentage of variation in UK mathematics scores is explained by a) the variable `MATHPREF` (Preference of Math over other core subjectsn); b) `MATHEASE` (Perception of Mathematics as easier than other subjects); and c) `MATHMOT` (Motivation to do well in mathematics ).
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+# Task 7: How much variability in mathematics score is explained by attitude to maths variables for UK respondents
+
+UK_data <- PISA_2022 %>%
+  select(CNT, PV1MATH, MATHPREF, MATHMOT, MATHEASE) %>%     # <1>
+  filter(CNT == "United Kingdom")  %>%                      # <2>
+  na.omit()                                                 # <3>
+
+# Perform the anova test
+resaov <- aov(data = UK_data,                               # <4>
+              PV1MATH ~ MATHPREF + MATHMOT + MATHEASE)      # <5>
+summary(resaov)                                             # <6>
+#> Significant differences exist for MATHPREF and MATHEASE, but not for MATHMOT (Motivation to do well in mathematics)
+
+# Determine the % of variation explained
+library(lsr)                                                # <7>
+eta <- etaSquared(resaov)                                   # <8>
+eta <- 100*eta                                              # <9>
+eta                                                         # <10>
+# MATHPREF explains only 0.54% of the variance, and MATHEASE, 0.26% (MATHMOT is not significant)
+
+```
+1.  line 1 - select the variables of interest, country, maths scores, maths prefernce, maths motivation, and perception of easiness of maths
+2.  line 2 - filter for country of interest - i.e. the UK
+3.  line 3 - drop any NAs in the data
+4.  line 4 - use `aov` to perform the anova calculation. We set the data we are passing (`data = UK_data`) - we put the output into a new variable `resaov`
+5.  line 5 -and set that we want to determine the variance in maths scores by math preference, motivation and ease (`PV1MATH ~ MATHPREF + MATHMOT + MATHEASE`) 
+6.  line 6 - produce a summary of `resaov`
+7.  line 7 - load the `lsr` library for the `etaSquared` function
+8.  line 8 - use `etaSquared(resaov)` to find the eta squared value. We convert this to a data frame so we can perform the next steps
+9.  line 9 - to convert the eta squared value into a percentage of variance explained, we multiply by 100   
+10.  line 10 - print the result

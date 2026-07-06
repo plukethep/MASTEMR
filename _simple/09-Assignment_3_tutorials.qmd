@@ -1,0 +1,10 @@
+---
+title: "9 Assignment 3 tutorials"
+---
+
+Stoet and Geary
+
+
+```{r}
+
+```

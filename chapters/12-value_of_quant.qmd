@@ -1,0 +1,45 @@
+---
+title: "12 The value of quantitative methods"
+# bibliography: references.bib
+---
+
+In this seminar we will reflect on advantages and disadvantages of using quantitative methods education research.
+
+> "These are intemperate terms and, though perhaps rightly arguing against aspects of public policy making which are ill-informed by evidence, undermine alternative, legitimate sources and kinds of evidence (Davies, 1999; Sebba, 1999; Curriculum Evaluation and Management Centre, 2000c: 1), e.g. survey, ethnography, naturalistic and qualitative research. To claim that there is only one path to salvation is dangerous and doctrinaire" [@morrison2001randomised, p.71]
+
+> "Cacophonous claims about effective practices abound. But we will later see that their technical warrant is generally weak when evaluated by the most widely accepted causal methods in statistics and across the social sciences as a whole, as opposed to the standards currently operating in large parts of the educational research community" [@gorard2007, p.309]
+
+# Pre-reading - The value of quantitative methods
+
+Download the EEF report: 'Testing the impact of preparing for, applying for and participating in STEM-related work experience' ([EEF report](https://d2tic4wvo1iusb.cloudfront.net/documents/pages/projects/Gen-STEM-evaluation-report.pdf?v=1632431063))
+-   Read the summary on page 4
+
+# Seminar tasks
+## Task 1 - The Education Endowment Fund
+
+Based on your reading of the summary of the EEF report, page 4:
+-   To what extent is the EEF project useful research for teachers?
+-   Should interventions that receive low ratings, for example the work experience programme of the form evaluated, be rejected?
+-   Should all practices in schools undergo testing of this form?
+-   Given the low effect size of many educational interventions are randomised control trials a helpful approach for providing policy recommendations?
+
+## Task 2 - Useful quantification? Visible Learning
+
+Look at the representations of effect sizes developed by Hattie:
+
+![](images/11%20Hatie%20Barometer-01.png)
+
+![](images/11%20Hatie%20Comparison%20Chart.png)
+
+-   Consider this discussion of how Hattie developed these tables: [Effect Size](https://www.illuminateed.com/blog/2017/06/effect-size-educational-research-use/)
+-   Is effect size a useful value for teachers to consider when deciding what approaches to adopt?
+-   Are meta-analyses of different classroom interventions practically useful? Can they guide practice in a meaningful manner? What questions might be asked about a meta-analysis before adopting its findings?
+-   What artefacts (findings that don't reflect the underlying situation) might arise from meta-analyses that combine the results of different studies?
+-   Can interventions be ranked in a way that is meaningful for schools and teachers?
+
+## Task 3 The value of quantitative educational research
+
+-   From the analyses that we have carried out on the course, report any findings that you think are of value for teaching in your discipline
+-   What barriers currently exist to the development of quantitative research that is useful to STEM teachers?
+-   Given the issues with EEF, what might policy makers do to support the meaningful development and use of quantitative education research?
+-   Is a dichotomy (e.g. a separation in the value and the researchers who conduct the work) between qualitative and quantitative work useful?

@@ -1,0 +1,164 @@
+---
+title: "Twitter"
+---
+
+```{r setup}
+library(tidyverse)
+library(arrow)
+library(glue)
+
+fld <- "G:\\My Drive\\junk\\"
+
+# load the twitter dataset
+# twts <- read_parquet(glue("{fld}edutweets.parquet"))
+# 
+# lng <- nrow(twts)
+# 
+# tmp <- map(names(tweets), \(x){
+# 
+#   # x <- "lon"
+#   x <- sym(x)
+#   missing <- twts %>% filter(is.na({{x}})) %>% pull({{x}}) %>% length
+#   present <- lng - missing
+#   message(x, " : ", present, "/", lng, " (", round(100*present / lng, 1), "%)")
+# })
+# 
+# 
+# tweets <- twts %>% 
+#   select(-any_of(c("id_str", "truncated", "in_reply_to_screen_name", "in_reply_to_status_id_str", "in_reply_to_user_id_str", "place_type", "place_name", "place_id", "lat", "lon", "expanded_url", "time_zone", "user_lang", "utc_offset", "country_code", "user_url", "geo_enabled", "protected", "favorited", "retweeted", "name"))) %>% 
+#   filter(!is.na(text)) %>%
+#   mutate(place_lon = signif(place_lon, 3),
+#          place_lat = signif(place_lat, 3)) %>%
+#   mutate(source_present = !is.na(source),
+#         source = str_extract(source, 
+#                 "(iPhone|Android|Twitter Web App|iPad|TweetDeck$|Hootsuite|Buffer|twittbot|SocialFlow|CareerArc|SocialNewsDesk|IFTTT|dlvr|Sprout Social|TweetDeck Web App)"),
+#         source = ifelse(is.na(source), ifelse(source_present, "Other", "Missing"), source)) %>%
+#   select(-source_present)
+#     
+# write_parquet(tweets, glue("{fld}edutweets_smaller.parquet"))
+
+# tmp <- tweets %>% group_by(user_id_str) %>% count() %>% arrange(desc(n))
+# tmp <- tweets %>% group_by(name) %>% count() %>% arrange(desc(n))
+
+fld <- "G:\\My Drive\\junk\\"
+fld <- "C:\\Users\\Peter\\Google Drive\\junk\\"
+tweets <- read_parquet(glue("{fld}edutweets_smaller.parquet"))
+
+users <- unique(tweets$user_id_str) %>% length
+
+# location data
+missing <- tweets %>% filter(is.na(place_lon)) %>% pull(place_lon) %>% length
+present <- lng - missing
+missing_per <- round(100*present / lng, 1)
+# message(x, " : ", present, "/", lng, " (", round(100*present / lng, 1), "%)")
+```
+
+# Loading the dataset
+The twitter dataset includes `r nrow(tweets)` tweets by `r users` users that include the word "teacher", "educator", "teach" or "teaching". This data covers anyone who tweeted in a short timeframe in April 2023.
+
+# Where are the tweets coming from
+
+First note that not everyone provides a location for their tweets, the actual number is quite low `r paste0(present, "/", lng, " (",missing_per,"%)")` this is hardly representative of all tweets happening. The data includes columns that tell you about where the tweets come from, including: `place_lon`, `place_lat`, `country`, `location`, `full_name`. Using the longitude and latitude data we can plot the `r present` tweeters:
+
+```{r}
+ggplot(data=tweets) + #%>% head(800000)) +
+  geom_point(aes(x=place_lon, y=place_lat))
+```
+
+To get a table of countries we can get:
+
+```{r}
+tweets %>% filter(!is.na(country)) %>%
+  group_by(country) %>% 
+  count() %>% 
+  arrange(desc(n)) %>% gt()
+```
+
+``` question
+Using the twitter fields for location (`place_lon`, `place_lat`, `country`, `location`, `full_name`), find out which city had the most tweets
+```
+
+# Use of language
+
+R has a range of corpus analysis tools, we are going to be looking at `quanteda` (you'll need to install it)
+
+```{r}
+#| error: false
+#| eval: false
+#| echo: false
+
+library(quanteda)
+
+# Most common words used
+corp_tweets <- corpus(tweets$text)  # build a new corpus from all the tweets
+summary(corp_tweets)
+
+# add other data to the corpus
+docvars(corp_tweets, "fav") <- tweets$favorite_count
+docvars(corp_tweets, "retweets") <- tweets$retweet_count
+docvars(corp_tweets, "followers") <- tweets$follower_count
+
+summary(corp_tweets)
+
+# we need to save this summary dataframe so we can plot the data
+tweet_tokens <- summary(corp_tweets, n=length(tweets$favorite_count))
+
+ggplot(data = tweet_tokens %>% head(50000), 
+       aes(x = Tokens, y = retweets)) +
+    geom_point(alpha=0.1)
+```
+
+# most common two word phrases
+
+To turn our dataset into tokens that we can group, count and analyse relationships between, we use the `tokens` command
+
+```{r}
+#| error: false
+#| eval: false
+#| echo: false
+
+data_tokens<- tokens(corp_tweets)
+```
+
+We can now start to analyse the tokens. As this dataset was built to look at tweets about teaching, don't be surprised to see some of words around teaching. `tokens`, by default, gives you everything back, including emojis and words such as `a` and `and`. To show all the tokens, use:
+
+
+```{r}
+#| error: false
+#| eval: false
+#| echo: false
+
+We can now 
+kwic(data_tokens, pattern = "terror")
+
+# remove unnecessary tokens
+simple_data_tokens <- tokens(data_tokens, remove_numbers = TRUE, remove_punct = TRUE)
+
+# make a matrix of all the word frequencies
+simple_data_tokens_dfm <- simple_data_tokens %>% dfm()
+
+topfeatures(simple_data_tokens_dfm, 20)
+
+```
+
+
+
+```{r}
+#| error: false
+#| eval: false
+#| echo: false
+
+simple_data_tokens <- tokens_remove(simple_data_tokens, stopwords("en"))
+
+simple_data_tokens_dfm <- simple_data_tokens %>% dfm()
+
+topfeatures(simple_data_tokens_dfm, 20)
+
+
+
+```
+
+# does popularity mean you swear more?
+
+
+# Use of emojis

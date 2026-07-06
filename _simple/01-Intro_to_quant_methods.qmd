@@ -1,0 +1,58 @@
+---
+title: "1 Introduction"
+---
+
+
+This session will introduce you to the assumptions that underpin quantitative research.
+
+## Seminar Tasks
+
+### Task 1
+
+In the seminar we will consider this paper:
+
+@pasha-zaidi2016
+
+Reflect on:
+
+-   What values are implied by and issues arise from the authors' construction of quantitative variables of 'teacher professionalism' and 'teacher warmth'?
+-   To what extent does the authors' survey validly probe the variables of 'teacher professionalism' and 'teacher warmth'?
+
+![](images/Intro%20Pasha%20Tool.png){fig-align="left"}
+
+-   What other critiques of the study can you propose?
+
+### Task 2
+
+The second task considers this paper: @gibson1984
+
+For the purpose of discussion, teacher efficacy has been defined as "the extent to which the teacher believes he or she has the capacity to affect student performance" [@berman1977 pp.137]
+
+### Tool
+
+![](images/01%20Gibson%20Dembo%20Tool.png){fig-align="left"}
+
+[@gibson1984 pp. 573]
+
+### Findings
+
+![](images/01%20Intro%20Gibson%20Findings.png)
+
+[@gibson1984 pp. 577]
+
+### To discuss
+
+-   Does teacher efficacy measure a discrete aspect of teachers' beliefs? Does that matter?
+-   Does the construct have validity? I.e., does the questionnaire measure what it claims to?
+-   What issues arises from quantifying teacher efficacy?
+-   What alternatives are there to quantitative measures of teacher efficacy? What are their advantages and limitations?
+
+## Activity 3: A false dualism?
+
+> "'Quantitative' and 'qualitative' are frequently seen in opposition.... The contrast is drawn between the objective world (out there independently of our thinking about it) and the subjective worlds (in our heads, as it were, and individually constructed); between the public discourse and private meanings; between reality unconstructed by anyone and the 'multiple realities' constructed by each individual. The tendency to dichotomise in this way is understandable but misleading." [@pring2000, p. 248]
+
+### Discussion Questions
+
+-   What are the differing assumptions of qualitative and quantitative educational research?
+-   Are the two 'paradigms' completely distinct? Is the distinction helpful?
+-   How should a researcher choose what approach to use?

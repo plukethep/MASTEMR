@@ -1,0 +1,23 @@
+---
+title: "TIMSS, PIRLS and ICILS"
+---
+
+# What is TIMSS?
+
+Trends in International Mathematics and Science Study (TIMSS) is a set of assessments comparing international achievement in mathematics and science. TIMSS is run by the International Association for the Evaluation of Educational Achievement (IEA) an international group of national research institutions and governments working to research and improve education. TIMSS launched in 2015
+
+The study surveys both 9-10-year-old and 13-14-year-old students, across 64 countries (in 2019). Contextual data about schools, teachers and parents is collected in the survey. TIMSS advanced (running since 1995) collects data on students in their final year of secondary schooling.
+
+You can read more about TIMSS, and download data sets, from the TIMSS website: [TIMSS](https://timssandpirls.bc.edu/timss-landing.html)
+
+# What is PIRLS?
+
+PIRLS (Progress in International Reading Literacy Study) is the IEA'S parallel study to TIMSS which focuses on international literacy. The study samples 9-10-year old students and has taken place every five years since 2001.
+
+You can read more about PIRLS, and download data sets, from the PIRLS website: [TIMSS](https://timssandpirls.bc.edu/timss-landing.html)
+
+# International Computer and Information Literacy Study (ICILS)
+
+ICILS is the IEA international comparative assessment of students' computing and IT literacy. First conducted in 2013, the study assesses computer and information literacy (CIL) and computational thinking (CT) of 13-14-year-old students. The assessment takes place every 5 years.
+
+Learn more about ICILS, and download data sets, from the ICILS website: [ICILS](https://www.iea.nl/studies/iea/icils)

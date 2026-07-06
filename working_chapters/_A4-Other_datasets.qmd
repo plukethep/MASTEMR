@@ -1,0 +1,247 @@
+---
+# title: "Other datasets"
+---
+
+### What other datasets are there?
+
+There exist thousands of datasets that you can freely analyse. This section covers a few of the major ones for education, or that might fruitfully be combined with educational datasets such as PISA.
+
+#### Gender equality indices
+
+There are several international datasets for studying gender equality. These have been used by researchers to look at the impact of gender equality on student attitudes and outcomes. For example @stoet2018gender use the Global Gender Gap Index (GGGI) too look at PISA science self-efficacy and science outcomes for females.
+
+##### Global Gender Gap Index (GGGI)
+
+The world economic forum produces the Global Gender Gap Index (GGGI), this index combines female and male outcomes on Economic participation and opportunity, educational attainment, health and survival, and political empowerment.
+
+Reports for: [2022](https://www.weforum.org/reports/global-gender-gap-report-2022/), [2021](https://www.weforum.org/reports/global-gender-gap-report-2021), [2020](https://www.weforum.org/reports/gender-gap-2020-report-100-years-pay-equality),[2018](https://www.weforum.org/reports/the-global-gender-gap-report-2018),[2017](https://www.weforum.org/reports/the-global-gender-gap-report-2017),[2016](https://www.weforum.org/reports/the-global-gender-gap-report-2016), [2015](https://www.weforum.org/reports/global-gender-gap-report-2015/)
+
+It has proven difficult to find the 2015 dataset used by Stoet & Geary, the 2013 dataset is [here](https://data.humdata.org/dataset/29f2f52f-a9c2-4ff9-a99e-42b894dc18e9/resource/a8fe8c72-1359-4ce3-b8cc-03d9e5e85875/download/table-3b-detailed-rankings-2013.csv)
+
+##### United Nations
+
+The UN reports on two gender specific indexes:
+
+**Gender Inequality Index (GII)**
+
+The [Gender Inequality Index](https://hdr.undp.org/data-center/thematic-composite-indices/gender-inequality-index#/indicies/GII) is a index incorporating data on reproductive health, empowerment and the labour market. Values range from 0 - full equality for men and women, to 0, full inequality.
+
+**Gender Development Index (GDI)**
+
+The [Gender Development Index](https://hdr.undp.org/gender-development-index#/indicies/GDI) measures inequalities in human development, combining data on female and male life expectancy, years of schooling and earned income. Values of 1 indicate equality, with values of less than 1 showing males performing better, and values over 1 showing females doing better.
+
+Downloads for the GII and GDI are [here](https://hdr.undp.org/data-center/documentation-and-downloads)
+
+```{r}
+#| code-fold: true
+#| code-summary: code to match to PISA 2018 data
+
+
+# see page 6 and 7 of this
+# https://eprints.leedsbeckett.ac.uk/id/eprint/4753/6/symplectic-version.pdf
+# scores<- c(364, 411, 344)
+# c(364, 411, 344) - mean(scores)
+
+```
+
+#### UNESCO
+
+http://data.uis.unesco.org "Distribution of tertiary graduates" STEM degree entry by country
+
+#### ONS
+https://www.ons.gov.uk/census/2011census/2011censusdata
+
+https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/populationandhouseholdestimatesenglandandwalescensus2021
+
+#### OECD
+
+The OECD offers over 1,6000 datasets on the countries that it covers, including data on patents, education, mortality and the environment. You can combine these datasets with PISA etc, to explore national trends. To access the OECD database collection use [https://stats.oecd.org/](https://stats.oecd.org/). There is [catalogue of datasets](https://data.oecd.org/searchresults/?hf=20&b=0&r=f/type/datasets/api+access&l=en)
+
+Whilst it is possible to access the datasets [directly](https://data.oecd.org/api/sdmx-json-documentation/#d.en.330346) you might find it easier to use the R `OECD` [package](https://cran.r-project.org/web/packages/OECD/OECD.pdf) that converts the `sdmx` files in R dataframes:
+
+```{r}
+#| eval: false
+# installing and loading OECD
+
+# install OECD library
+install.packages("OECD")
+library("OECD")
+get_dataset("EPL_OV")
+```
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: list datasets and load one
+# list all the datasets available
+datasets <- get_datasets()
+
+datasets
+
+# download a dataset
+df <- get_dataset("EPL_OV")
+```
+
+The OECD R package currently has a bug in it and you need to overwrite the `get_data_structure`, by running all the code below:
+
+```{r}
+#| code-fold: true
+#| code-summary: fix the get_data_structure function
+#| eval: false
+
+install.packages("rsdmx")
+library(rsdmx) # loads the sdmx reader
+library(OECD)
+
+# get the fields in a dataset
+# current implementation broken
+get_data_structure <- function(dataset="DUR_D"){
+    url <- paste0("https://stats.oecd.org/restsdmx/sdmx.ashx/GetDataStructure/", 
+        dataset)
+    # data_structure <- readsdmx::read_sdmx(url)
+    data_structure <- rsdmx::readSDMX(url)
+    variable_desc <- data.frame(data_structure@concepts)
+    variable_desc[] <- lapply(variable_desc, as.character)
+    variable_desc$en[is.na(variable_desc$en)] <- variable_desc$Name.en[!is.na(variable_desc$Name.en)]
+    names(variable_desc)[length(names(variable_desc))] <- "description"
+    variable_desc <- variable_desc[, c("id", "description")]
+    code_names <- data_structure@codelists@codelists
+    code_names <- vapply(code_names, function(x) x@id, "character")
+    code_list <- lapply(code_names, function(x) {
+        df <- as.data.frame(data_structure@codelists, codelistId = x)
+        try({
+            df <- df[, c("id", "label.en")]
+            names(df)[2] <- "label"
+        }, silent = TRUE)
+        df
+    })
+    names(code_list) <- gsub(paste0("CL_", dataset, "_"), "", 
+        code_names)
+    full_df_list <- c(VAR_DESC = list(variable_desc), code_list)
+    full_df_list
+}
+```
+
+You can then list the field descriptors for each dataset by running:
+
+```{r}
+#| eval: false
+get_data_structure("EPL_OV")
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: load OECD datasets
+#| eval: false
+
+# http://stats.oecd.org/SDMX-JSON/data/<dataset identifier>/<filter expression>/<agency name>[ ?<additional parameters>]
+
+# install OECD library
+library("OECD")
+library(rsdmx)
+
+# list all the datasets available
+datasets <- get_datasets()
+
+# download a dataset
+df <- get_dataset("EPL_OV")
+
+# get the fields in a dataset
+# current implementation broken
+get_data_structure <- function(dataset="DUR_D"){
+    url <- paste0("https://stats.oecd.org/restsdmx/sdmx.ashx/GetDataStructure/", 
+        dataset)
+    # data_structure <- readsdmx::read_sdmx(url)
+    data_structure <- rsdmx::readSDMX(url)
+    variable_desc <- data.frame(data_structure@concepts)
+    variable_desc[] <- lapply(variable_desc, as.character)
+    variable_desc$en[is.na(variable_desc$en)] <- variable_desc$Name.en[!is.na(variable_desc$Name.en)]
+    names(variable_desc)[length(names(variable_desc))] <- "description"
+    variable_desc <- variable_desc[, c("id", "description")]
+    code_names <- data_structure@codelists@codelists
+    code_names <- vapply(code_names, function(x) x@id, "character")
+    code_list <- lapply(code_names, function(x) {
+        df <- as.data.frame(data_structure@codelists, codelistId = x)
+        try({
+            df <- df[, c("id", "label.en")]
+            names(df)[2] <- "label"
+        }, silent = TRUE)
+        df
+    })
+    names(code_list) <- gsub(paste0("CL_", dataset, "_"), "", 
+        code_names)
+    full_df_list <- c(VAR_DESC = list(variable_desc), code_list)
+    full_df_list
+}
+# get_data_structure <- function(dataset="DUR_D"){
+  # url <- paste0("https://stats.oecd.org/restsdmx/sdmx.ashx/GetDataStructure/",
+  #   dataset)
+  # data_structure <- readsdmx::read_sdmx(url)
+#   # data_structure <- rsdmx::readSDMX(url)
+#   return(data_structure)
+# }
+df_struct <- get_data_structure("DUR_D")
+
+#############################
+#############################
+
+# Database names
+# CWB - children wellbeing
+### B2_1 - Children (0- to 2-year-olds) participating in early childhood education and care (%)
+# NCC - Net childcare costs for parents using childcare facilities
+# RPERS - Educational personnel
+# EAG_FIN_NATURE - Educational expenditure by Nature
+# EAG_FIN_SOURCE - Educational expenditure by Source and destination
+
+```
+
+```{r}
+#| eval: false
+#| echo: false
+
+#### Find out about B2_1 - Children (0- to 2-year-olds) participating in early childhood education and care (%)
+fields <- get_data_structure("CWB")
+df <- get_dataset("CWB")
+
+tbl_early_child <- df %>% 
+  filter(IND == "B2_1", Time %in% seq(1950, 2023,1)) %>%
+  mutate(Year = as.numeric(Time),
+         percentage = as.numeric(ObsValue))
+
+#### C1_1 Public expenditure on families, per child (0- to 14-year-olds), USD 2015 PPP
+tbl_early_child <- df %>% 
+  filter(IND == "C1_1", Time %in% seq(1950, 2023,1)) %>%
+  mutate(Year = as.numeric(Time),
+         percentage = as.numeric(ObsValue))
+
+#### C4_2 Typical net childcare costs for parents using centre-based care, two children in full-time care, two-earner couple on low earnings, in % of average earnings
+
+tbl_early_child <- df %>% 
+  filter(IND == "C4_2", Time %in% seq(1950, 2023,1)) %>%
+  mutate(Year = as.numeric(Time),
+         percentage = as.numeric(ObsValue))
+
+
+ggplot(tbl_early_child %>% filter(COU %in% c("FIN", "GBR", "USA")), 
+       aes(x=Year, y=percentage, colour=COU, group=COU)) + 
+  geom_point() +
+  geom_line() +
+  scale_x_continuous(breaks = 
+                         seq(min(tbl_early_child$Year), 
+                             max(tbl_early_child$Year), 
+                             by = 1))
+
+##   RPERS
+fields <- get_data_structure("RPERS")
+df <- get_dataset("RPERS")
+
+df <- get_dataset("EPL_OV",
+                  filter = list(c("DEU", "FRA"),
+                  c("EPRC_V1", "EPRC_V2")),
+                  start_time = 2008, end_time = 2010)
+
+```
+
+#### Ofsted
+
+https://public.tableau.com/app/profile/ofsted/viz/Dataview/DataViewsurvey

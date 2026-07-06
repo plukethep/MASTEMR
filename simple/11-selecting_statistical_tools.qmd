@@ -1,0 +1,285 @@
+---
+title: "11 Selecting statistical tools"
+---
+
+```{r}
+#| eval: true
+#| warning: false
+#| echo: false
+
+# only load this code if testing this file independently of overall project
+if(!exists("test")){
+  warning("RUNNING LOCAL FILE LOAD")
+  
+  library(glue)
+  proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
+  proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  
+  node <- Sys.info()
+  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
+    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
+    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
+  }
+
+  source(glue("{proj_folder}MASTEMR_setup.R"))
+}
+```
+
+## Choosing appropriate quantitative tests
+
+In the lecture, this flow chart was introduced:
+
+![](images/011%20Selecting%20a%20test-01.pdf){width="20cm" height="15cm"}
+
+That chart will help you choose the test to use for the tasks below.
+
+## Seminar Tasks
+
+Use the reduced [PISA 2018 dataset](https://drive.google.com/open?id=1goZwdHOrwW70-zqQpOK-9NvxI1qowRxT&authuser=richardandrewbrock%40gmail.com&usp=drive_fs)
+
+We will store the location of the file in loc and then use read-rds to import the file. This is a cut down version of the PISA 2018 student dataset.
+
+Load the data from there dataset:
+
+```{r}
+#| eval: false
+install.packages("tidyverse")
+library(tidyverse)
+
+# Download data from /Users/k1765032/Library/CloudStorage/GoogleDrive-richardandrewbrock@gmail.com/.shortcut-targets-by-id/1c3CkaEBOICzepArDfjQUP34W2BYhFjM4/PISR/Data/PISA/subset/Students_2018_RBDP_none_levels.rds
+# You want the file: Students_2018_RBDP_none_levels.rds
+# and place in your own file system
+# change loc to load the data directly. Loading into R might take a few minutes
+
+loc <- "/Users/k1765032/Library/CloudStorage/GoogleDrive-richardandrewbrock@gmail.com/.shortcut-targets-by-id/1c3CkaEBOICzepArDfjQUP34W2BYhFjM4/PISR/Data/PISA/subset/Students_2018_RBDP_none_levels.rds"
+ PISA_2018 <- read_parquet(loc)
+```
+
+### Task 1 Plot a graph of mean science scores by country
+
+Imagine we wish to compare the mean scores of students on the science element of PISA by plotting a bar graph. First you need to use the `sumarise` function to calculate means by countries. Then use ggplot with `geom_col` to create the graph. ***Extension task:*** add error bars for the standard deviations of science scores.
+
+```{r}
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+# Task 1: Plot a graph of mean science scores by country
+# Create a variable avgscience - for every country (Group_by(CNT)) calcuate the mean
+# science score (PV1SCIE) and ignore NA (na.rm=TRUE)
+avgscience <- PISA_2018 %>% 
+  group_by(CNT) %>%
+  summarise(mean_sci = mean(PV1SCIE, na.rm=TRUE)) %>%
+# Arrange in descending order  
+  arrange(desc(mean_sci))
+
+
+# Plot the data in avgscience, x=CNT (reorder to ascending order), mean science score on the y
+# Change the fill colour to red, rotate the text, locate the text and reduce the font size
+ggplot(data = avgscience, 
+       aes(x= reorder(CNT, -mean_sci), y=mean_sci)) +
+geom_col(fill="red") +
+theme(axis.text.x = element_text(angle = 90, hjust=0.95, vjust=0.2, size=5))+
+  labs(x="Country", y="Mean Science Score")
+    
+# Extension version: added summarise to find standard deviation 
+avgscience <- PISA_2018 %>% 
+  group_by(CNT) %>%
+  summarise(mean_sci = mean(PV1SCIE, na.rm=TRUE),
+            sd_sci=sd(PV1SCIE, na.rm=TRUE)) %>%
+  arrange(desc(mean_sci))
+
+# Extension version: geom_errorbar added with aes y=mean_sci (the centre of the bar) and then the maximum and minimum set to the mean plus or minus the standard deviation (ymin=mean_sci-sd_sci, ymax=mean_sci+sd_sci) 
+ggplot(data = avgscience, 
+       aes(x= reorder(CNT, -mean_sci), y=mean_sci)) +
+geom_col(fill="red") +
+theme(axis.text.x = element_text(angle = 90, hjust=0.95, vjust=0.2, size=5))+
+  labs(x="Country", y="Mean Science Score")+
+  geom_errorbar(aes(y=mean_sci, ymin=mean_sci-sd_sci, 
+                    ymax=mean_sci+sd_sci), 
+                width=0.5, colour='black', size=0.5)
+
+  
+```
+
+### Task 2 Are there differences in science scores by gender for the total data set?
+
+Consider the kinds of variables that represent the science score. What is an appropriate test to determine differences in the means between the two groups? Create two vectors, for boys and girls, that you can feed into the `t.test` function.
+
+```{r}
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+# Task 2: Are there differences in Science scores by gender for the total data set? (No)
+# A comparision of means of two continuous variables, use a t-test.
+# Choose the  gender (ST004D01T) and science score columns (PV1SCIE) from  2018 data, filter for males 
+# Put that data into MaleSci
+MaleSci <- PISA_2018 %>% 
+  select(ST004D01T, PV1SCIE) %>% 
+  filter(ST004D01T == "Male")
+
+# Choose the  gender (ST004D01T) and science score columns (PV1SCIE) from  2018 data, filter for females 
+# Put that data into FemaleSci
+FemaleSci <- PISA_2018 %>% 
+  select(CNT, ST004D01T, PV1SCIE) %>% 
+  filter(ST004D01T == "Female")
+
+#Do a t-test comparing MaleSci and FemaleSci
+t.test(MaleSci$PV1SCIE, FemaleSci$PV1SCIE)
+```
+
+### Task 3 Are there differences in science scores by gender for UK students?
+
+As above, but include a filter by country.
+
+```{r}
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+# Task 3: Are there differences in Science scores by gender for UK students? (No)
+# A comparision of means of two continuous variables, use a t-test.
+# Choose the country (CNT), gender (ST004D01T) and science score columns (PV1SCIE) from  2018 data, filter for males and the UK
+# Put that data into UKMaleSci
+UKMaleSci <- PISA_2018 %>% 
+  select(CNT, ST004D01T, PV1SCIE) %>% 
+  filter(ST004D01T == "Male")  %>% 
+  filter(CNT=="United Kingdom")
+
+# Choose the country (CNT), gender (ST004D01T) and science score columns (PV1SCIE) from  2018 data, filter for females and the UK
+# Put that data into UKFemaleSci
+UKFemaleSci <- PISA_2018 %>% 
+  select(CNT, ST004D01T, PV1SCIE) %>% 
+  filter(ST004D01T == "Female") %>% 
+  filter(CNT=="United Kingdom")
+
+# Do a t-test comparing UKMaleSci and UKFemaleSci
+t.test(UKMaleSci$PV1SCIE, UKFemaleSci$PV1SCIE)
+
+```
+
+### Task 4 For the whole data set, is there a correlation between students' science score and reading scores?
+
+Reflect on the appropriate test to show correlation between two scores. This test can be carried out quite simply using a couple of lines of code. ***Extensions:*** a) perform the same analysis, but consider the impact of gender; b) Find the correlations between reading and science core by country, and rank from most highly correlated to least.
+
+```{r}
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+# Task 4: For the whole data set, is there a correlation between students’ science score reading score? (Yes, significant 0.77)
+
+# Do the regression test between science score (PV1SCIE) and reading score (PV1READ) on the PISA_2018 data
+lmSciRead <- lm(PV1SCIE ~ PV1READ, data=PISA_2018)
+summary(lmSciRead)
+
+# Extension 1: Add Gender:
+# lmSciRead <- lm(PV1SCIE ~ PV1READ + ST004D01T, data=PISA_2018)
+# summary(lmSciRead)
+
+# Extentions 2: Rank by correlation
+# CNTPISA<-PISA_2018%>%
+#  select(CNT, PV1SCIE, PV1READ)%>%
+#  group_by(CNT)%>%
+#  summarise(MeanSci=mean(PV1SCIE),
+#            MeanRead=mean(PV1READ),
+#            Cor=cor(PV1SCIE,PV1READ)) %>%
+#  arrange(desc(Cor))
+
+
+```
+
+### Task 5 Plot a representation of UK students' science score against reading score, with a linear best fit line.
+
+It will help here to create a `data.frame` that contains a filtered version of the whole dataset you can pass to `ggplot`.
+
+```{r}
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+# Task 5: Plot a representation of UK students’ science score against reading score.
+ 
+# Choose the three variables of interest, science score (PV1SCIE), reading score (PV1READ) and country (CNT)
+# and filter for the UK. Put the values into regplotdata
+regplotdata<- PISA_2018 %>% 
+  select(PV1SCIE, PV1READ, CNT) %>% 
+  filter(CNT=="United Kingdom")
+
+# Plot the data in regplotdata, set the science score on the x-xis and reading on y-axis, set the size, colour and alpha (transparency)
+# of points and add a linear ('lm') black line
+  ggplot(data = regplotdata, 
+         aes(x=PV1SCIE, y=PV1READ)) +
+    geom_point(size=0.5, colour="red", alpha=0.3) + 
+    geom_smooth(method = "lm", colour="black")+
+    labs(x="Science Score", y="Reading score")
+```
+
+### Task 6 Do girls and boys in the UK engage in different levels of environmental activism?
+
+The PISA 2018 data set includes the variable `ST222Q09H` (I participate in activities in favour of environmental protection). Determine if the data for girls and boys are homogenous (i.e. if the null hypothesis that girls and boys engage in the same levels of activism is true).
+
+```{r}
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+# Task 6: Is there a relationship between UK boys' and girls' levels of enviromnental activism.
+  
+chi_data <- PISA_2018 %>%
+  select(CNT, ST004D01T, ST222Q09HA) %>% 
+  filter(CNT=="United Kingdom")  %>% 
+  na.omit()
+# We wish to compare two categorical variables, gender (Male/Female) and engagement in enviromental activism (Yes/No)
+# Create a frequency table
+Activismtable <- chi_data %>%
+    group_by(ST004D01T, ST222Q09HA)%>%
+    count()
+# Pivot the table to create a contingency table
+Activismtable <- pivot_wider(Activismtable, names_from = ST222Q09HA, values_from = n)
+
+# Drop the first column for passing to chisq.test
+Activismtable <- subset(Activismtable, select=c("Yes","No"))
+  
+# Perform the chisq.test on the data
+
+chisq.test(Activismtable)
+# p-value= 0.7778 - accept the null hypothesis - boys and girls have similar levels of activism
+```
+
+### Task 7 Does participation in environmental activism explain variation in science score for UK students?
+
+Arguments have been made the students who know more science, might engage in more environmental activism. Determine what percentage of variation in UK science scores is explained by a) the variable `ST222Q09HA` (I participate in activities in favour of environmental protection); b) `ST222Q04HA` (I sign environmental petitions online); and c) `ST222Q03HA` (I choose certain products for ethical or environmental reasons).
+
+```{r}
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+# Task 7: How much varibaility in science score is explained by participation in activism?
+# Explanation of variation is performed by carrying out an anova test
+
+UK_data <- PISA_2018 %>%
+  select(CNT, PV1SCIE, ST222Q09HA, ST222Q04HA, ST222Q03HA) %>%
+  filter(CNT=="United Kingdom")  %>% 
+  na.omit()
+
+# Perform the anova test
+resaov <- aov(data=UK_data, 
+              PV1SCIE ~ST222Q09HA + ST222Q04HA + ST222Q03HA)
+summary(resaov)
+#> Significant differences exist for ST222Q09HA (I participate in activities in favour of environmental protection) (Pr(>F)=0.00827) but not ST222Q04HA (signing petitions) (p=0.18540) or choosing products for ethical/environmental reasons (p=0.45662)
+
+# Determine the % of variation explained
+library(lsr)
+eta <- etaSquared(resaov)
+eta <- 100*eta
+eta
+#> Participation in environmental activism only explains 0.11% of variation in science scores  
+
+```

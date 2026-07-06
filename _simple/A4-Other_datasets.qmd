@@ -1,0 +1,25 @@
+---
+title: "Other datasets"
+---
+
+Gender development index:
+
+https://hdr.undp.org/gender-development-index#/indicies/GDI
+
+```{r}
+#| code-fold: true
+#| code-summary: code to match to PISA 2018 data
+
+```
+
+ONS
+
+https://www.ons.gov.uk/census/2011census/2011censusdata
+
+https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/populationandhouseholdestimatesenglandandwalescensus2021
+
+```{r}
+#| code-fold: true
+#| code-summary: code to match to DfE poverty data
+
+```

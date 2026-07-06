@@ -1,0 +1,516 @@
+---
+# title: "A5_SelfStudyTasks"
+# format: html
+# editor: visual
+---
+
+## Self study tasks
+
+The pages below set out a series of graded challenges that you can use to test your R and statistical skills. Sample code that solves each problem is included so you can compare your solution with ours. Don't worry if you solve something in a different way, there will be multiple solutions to the same task. The tasks are all set on the PISA_2018 data set: [PISA_2018](https://drive.google.com/open?id=1_DSRbsdE8h-a4vKeQLfdk6rjciOvw1Wf&authuser=richardandrewbrock%40gmail.com&usp=drive_fs)
+
+To load the data, use the code below:
+
+```{r}
+#| eval: false
+#| warning: false
+install.packages("arrow") # if you haven't already
+library(arrow)
+library(tidyverse)
+PISA_2018 <- read_parquet("<location of the downloaded PISA_2018.parquet file>")
+```
+
+## Task 1 Practice creating a summary table #1
+
+::: question
+Create a table that summarises the mean PISA science scores by country. You will need to use the `group_by`, `summarise` and `mean` functions.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+
+PISAsummary<-PISA_2018%>%  # Pipe the overall frame to a summary data.frame
+  select(CNT, PV1SCIE)%>%  # Select the two required columns
+  group_by(CNT) %>%        # Group the entries by country
+  summarise(meansci=mean(PV1SCIE)) # caluclate means for each country
+print(PISAsummary)
+
+```
+
+__Extension__: use the `signif` function to give the responses to three significant figures
+:::
+
+## Task 2 Practice creating a summary table (including percentages) #2
+
+::: question
+Use the table function to create a summary of numbers of types of school ISCEDO recorded in the data frame for the UK. Use the mutate function to turn these into percentages (you will need to calculate a total)
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+
+UKPISA<-PISA_2018%>%
+  select(CNT,ISCEDO)%>%             # Select the country school type 
+  filter(CNT=="United Kingdom")%>%  # filter for the UK
+  select(ISCEDO)                    # Just select the school type 
+                                    # I.e. remove the country
+
+UKPISA<-table(UKPISA)               # Create a summary of counts
+                                    # To manipulate the table it is
+UKPISA<-as.data.frame(UKPISA)       # easier to convert it to a 
+                                    # a data.frame
+
+UKPISA<-mutate(UKPISA, per=Freq/sum(Freq)*100)
+  
+```
+
+:::
+
+## Task 3 Practice pivoting a table
+
+::: question
+Convert a table of UK Science, Maths and Reading scores, extracted from the main data set, into the long format R prefers. In the long format, each score becomes a single so each student will have three entries.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Create a data frame in wide format, with three columns for each student's scores (math, reading and science)
+UKScores<-PISA_2018%>%
+  select(CNT,PV1MATH, PV1READ, PV1SCIE)%>%
+  filter(CNT=="United Kingdom")%>%
+  select(PV1MATH, PV1READ, PV1SCIE)
+# Use pivot longer to turn the three columns into one. First, pass pivotlonger the dataframe to be converted, then the three columns
+# to convert into one, the name of the new longer column and the
+# name of the new scores column
+
+UKScores<-pivot_longer(UKScores, cols=c('PV1MATH', 'PV1READ', 'PV1SCIE'),
+                       names_to = 'Subject', values_to = 'Score' )
+
+```
+
+:::
+
+## Task 4 Graphing Practice #1 A Bar Chart
+
+::: question
+Draw a bar chart of the mean mathematics scores for Germany, the UK, the US and China
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+
+Plotdata<-PISA_2018%>%
+  select(CNT, PV1MATH)%>%
+  filter(CNT=="United Kingdom"|CNT=="United States"|CNT=="Germany"|CNT=="B-S-J-Z (China)")%>%
+  group_by(CNT)%>%
+  summarise(mean=mean(PV1MATH))
+
+ggplot(Plotdata,               # Pass the data to be plotted to ggplot
+       aes(x=CNT, y=mean))+    # set the x and y varibale
+  geom_col(fill="red")         # plot a column graph and fill in red
+
+```
+
+:::
+
+## Task 5 Graphing Practice #2 A Bar Chart with two series
+
+
+::: question
+Draw a bar chart of the mean mathematics scores for Germany, the UK, the US and China for boys and girls
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+
+Plotdata<-PISA_2018%>%
+  select(CNT, PV1MATH, ST004D01T)%>%
+  filter(CNT=="United Kingdom"|CNT=="United States"|CNT=="Germany"|CNT=="B-S-J-Z (China)")%>%
+  group_by(CNT, ST004D01T)%>%
+  summarise(mean=mean(PV1MATH))
+
+ggplot(Plotdata,
+       aes(x=CNT, y=mean, fill=ST004D01T))+ # Setting the fill to the gender
+                                            # variable gives two series
+  geom_col(position = position_dodge())     # position_dodge here means the
+                                            # means the bars are plotted                                                # side by side
+
+```
+
+:::
+
+## Task 6 Graphing Practice #3 A scatter plot
+
+::: question
+
+Plot a graph of science scores against mathematics scores for students in the UK
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+
+Plotdata<-PISA_2018%>%              # Create a new dataframe to be plotted
+  select(CNT, PV1MATH, PV1SCIE)%>%  # Choose the country, and scores vectors
+  filter(CNT=="United Kingdom")    # Filter for only Uk results
+
+ggplot(Plotdata,                  # Pass the data to be plotted to ggplot
+       aes(x=PV1MATH, y=PV1SCIE))+ # Define the x and y varibale
+      geom_point(size=0.1, alpha=0.2, colour="red")+ 
+                                  # Use geom-point to create a scatter                                      # graph and set the size of the point 
+                                    # alpha (i.e transparency)
+      labs(x="Math Score", y="Science score") # Add clearer labels
+```
+
+:::
+
+## Task 7 Graphing Practice #4 A scatter plot with multiple series
+
+
+::: question
+
+Plot a graph of science scores against mathematics scores for students in the UK, with data split into two series for boys and girls
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+
+Plotdata<-PISA_2018%>%              # Create a new dataframe to be plotted
+  select(CNT, PV1MATH, PV1SCIE, ST004D01T)%>%  
+  filter(CNT=="United Kingdom")    # Filter for only Uk results
+
+ggplot(Plotdata,                  
+       aes(x=PV1MATH, y=PV1SCIE, colour=ST004D01T))+ 
+      geom_point(size=0.1, alpha=0.2)+ 
+                          # As above, but set colour by the gender varibale
+      labs(x="Math Score", y="Science score") 
+
+```
+
+:::
+
+## Task 8 Graphing Practice #4 A scatter plot with varying size points
+
+::: question
+Plot a graph of mean science scores against mean mathematics scores for all the countries in the data set. Vary the point size by the number of students per country.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+
+Plotdata<-PISA_2018%>%
+  select(CNT, PV1MATH, PV1SCIE) %>%
+  group_by(CNT) %>%
+  summarise(meansci=mean(PV1SCIE), meanmath=mean(PV1MATH), total=n())
+  # Summarise finds mean scores by countries and n() is used to sum
+  # the number of students in each country
+ggplot(Plotdata,
+       aes(x=meansci, y=meanmath, size=total, colour="red"))+
+  # The size aesthetic is set to the total entries value computed
+  # for the data set
+  geom_point()+
+  labs(x="Mean science score", y="Mean math score")
+
+
+```
+
+:::
+
+
+## Task 9 Graphing Practice #5 A mosaic plot
+
+::: question
+Plot a mosaic plot of the number of students in general or vocational schools
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+
+Genderschool<-PISA_2018%>%
+  select(ST004D01T,ISCEDO)%>%
+  filter(ST004D01T=="Male"|ST004D01T=="Female")%>%
+  filter(ISCEDO=="General"|ISCEDO=="Vocational")%>%
+  na.omit()
+
+install.packages("ggmosaic")
+library(ggmosaic)
+ggplot(Genderschool)+
+  geom_mosaic(aes(x=product(ST004D01T,ISCEDO), fill=ISCEDO))
+         
+```
+
+:::
+
+
+## Task 10 T-test practice #1
+
+::: question
+Using the PISA 2018 data set, determine if there are statistically significant differences between the science, reading and mathematics scores of the UK and the US.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Create data frames with the score results for UK and US
+UKscores<-PISA_2018%>%
+  select(CNT,PV1MATH,PV1READ, PV1SCIE)%>%
+  filter(CNT=="United Kingdom")
+USscores<-PISA_2018%>%
+  select(CNT,PV1MATH,PV1READ, PV1SCIE)%>%
+  filter(CNT=="United States")
+# Perform the t-test with maths results
+t.test(UKscores$PV1MATH, USscores$PV1MATH)
+# p-value is < 2.2e-16 so signficant differences exist for maths
+t.test(UKscores$PV1READ, USscores$PV1READ)
+# p-value = 0.8442 so no signficant differences exist for reading
+t.test(UKscores$PV1SCIE, USscores$PV1SCIE)
+# p-value = 0.2124 so no signficant differences exist for reading
+
+```
+
+:::
+
+## Task 11 T-test practice #2
+
+::: question
+Divide the UK population into two groups, those that have internet access at home and those who do not. Are there statistically significant differences in the means of their reading, science and mathematics scores?
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Create data frames with the score results for UK in two
+# groups, has internet and no internet, based on ST011Q06TA
+UKHasIntscores<-PISA_2018%>%
+  select(CNT,PV1MATH,PV1READ, PV1SCIE, ST011Q06TA)%>%
+  filter(CNT=="United Kingdom" & ST011Q06TA=="Yes")
+UKNoIntscores<-PISA_2018%>%
+  select(CNT,PV1MATH,PV1READ, PV1SCIE, ST011Q06TA)%>%
+  filter(CNT=="United Kingdom" & ST011Q06TA=="No")
+# Perform the t-test with maths results
+t.test(UKHasIntscores$PV1MATH, UKNoIntscores$PV1MATH)
+# p-value is < 2.2e-16 so no signficant differences for maths scores from
+# those with and without internet
+t.test(UKHasIntscores$PV1READ, UKNoIntscores$PV1READ)
+# p-value is < 2.2e-16 so no signficant differences for reading scores from
+# those with and without internet
+t.test(UKHasIntscores$PV1SCIE, UKNoIntscores$PV1SCIE)
+# p-value is < 2.2e-16 so no signficant differences for science scores from
+# those with and without internet
+```
+
+:::
+
+## Task 12 T-test practice #3
+
+::: question
+Using the PISA 2018 data set, are the mean mathematics scores of US boys and girls different to a statistically significant degree?
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Create a dataframe of US boys math scores
+USboys<-PISA_2018 %>%
+  select(CNT, PV1MATH, ST004D01T)%>%
+  filter(CNT=="United States")
+# Create a dataframe of US girls math scores
+USgirls<-PISA_2018 %>%
+  select(CNT, PV1MATH, ST004D01T)%>%
+  filter(CNT=="United States")
+# Perform the t-test, using $PVMATH to indicate which column of the dataframe to use
+t.test(USboys$PV1MATH, USgirls$PV1MATH)
+# The p-value is 1 which is over 0.05 suggesting we accept the null hypothesis, there are no  statistically signficant difference in US girls and boys math scores
+  
+```
+
+:::
+
+## Task 13 T-test practice #3
+
+::: question
+Are the mean science scores of all students in the US and the UK different to a statistically significant degree?
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+# Create a dataframe of US science scores
+USSci<-PISA_2018 %>%
+  select(CNT, PV1SCIE)%>%
+  filter(CNT=="United States")
+# Create a dataframe of UK science scores
+UKSci<-PISA_2018 %>%
+  select(CNT, PV1SCIE)%>%
+  filter(CNT=="United Kingdom")
+# Perfom the t-test, using $PV1SCIE to indicate which column of the dataframe to use
+t.test(USSci$PV1SCIE, UKSci$PV1SCIE)
+# The p-value is 0.2124, over 0.05, so we accept the null hypothesis, there is no statistically significant difference between US and UK science scores  
+```
+
+:::
+
+## Task 14 Chi-square practice #1
+
+::: question
+Are statiscally significant differences in the proportion of boys and girls and the number of books in the home for the whole dataset?
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Create a dataframe of boys and number of books in the home
+Malebooksinhome<-PISA_2018 %>%
+  select(ST004D01T, ST013Q01TA)%>%
+  filter(ST004D01T=="Male")
+# Sum these up and convert to a data frame for chisq.test
+Malebooksinhome<-as.data.frame(table(Malebooksinhome$ST013Q01TA))
+# Repeat for girls
+Femalebooksinhome<-PISA_2018 %>%
+  select(ST004D01T, ST013Q01TA)%>%
+  filter(ST004D01T=="Female")
+
+Femalebooksinhome<-as.data.frame(table(Femalebooksinhome$ST013Q01TA))
+# Perform the chisq.test
+chisq.test(Malebooksinhome$Freq,Femalebooksinhome$Freq)
+# The p-value is 0.00727, which is less than 0.05 so the null hypothesis, that are no signifcnat differneces between the number of boys in boys' and girls' homes is rejects. Girls and boys have different distributions of number of books.
+```
+
+:::
+
+## Task 15 Chi-square practice #2
+
+::: question
+Are there statistically significant differences, in the whole data set, between boys and girls use of the internet at school to browse for homework (IC011Q03TA)?
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Create a data frame of the girls responses to the question on internet use at school 
+girlsint<-PISA_2018%>%
+  select(IC011Q03TA, ST004D01T)%>%
+  filter(ST004D01T=="Female")%>%
+   select(IC011Q03TA)
+# Do the same for boys
+boysint<-PISA_2018%>%
+  select(IC011Q03TA, ST004D01T)%>%
+  filter(ST004D01T=="Male")%>%
+   select(IC011Q03TA)
+# Create frequency count tables of those data frames
+# Note the chisq.test function takes data frames as inputs
+# but the output of table is a table, so we convert the tables
+# back to data frames
+girlsint<-as.data.frame(table(girlsint))
+boysint<-as.data.frame(table(boysint))
+# Run the chi.sq test using the freq column in the dataframe
+chisq.test(girlsint$Freq,boysint$Freq)
+# The output p-value is 0.008362 which is less than 0.05. So reject the null hypothesis. There is a difference in usage.
+```
+
+:::
+
+## Task 16 Chi-square practice #3
+
+::: question
+Are there statistically significant differences between the availability of laptops (`IC009Q02TA`) in school in the US and the UK?
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+#| warning: false
+# IC009Q02TA - Available for use in school - a laptop
+# Filter the data to get laptop use in the UK, put that into a new dataframe UKchidata
+UKchidata<- PISA_2018 %>%
+  select(CNT, IC009Q02TA)%>%
+  filter(CNT=="United Kingdom")%>%
+  select(IC009Q02TA)%>%
+  na.omit()
+# Filter the data to get laptop use in the US, put that into a new dataframe USchidata
+USchidata<- PISA_2018 %>%
+  select(CNT, IC009Q02TA)%>%
+  filter(CNT=="United States")%>%
+  select(IC009Q02TA)%>%
+  na.omit()
+# use table to count the entries and convert to a data frame
+UKchidata<-as.data.frame(table(UKchidata))
+USchidata<-as.data.frame(table(USchidata))
+# Do the chi squared test
+chisq.test(UKchidata$Freq, USchidata$Freq)
+# p-value is less than 0.05, so reject the null hypotheses - there are statistically significant differences in access to laptops in the UK and the US
+
+```
+
+:::
+
+## Task 18 Anova practice #1
+
+::: question
+Are there statistically significant differences in mathematics scores of France, Germany, Spain, the UK and Italy? Find between which pairs of countries statistically significant differences in mathematics scores exist.
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+#| warning: false
+# Create a dataframe of the required countries
+EuroPISA <- PISA_2018 %>%
+  select(CNT, PV1MATH)%>%
+  filter(CNT=="Spain"|CNT=="France"| CNT=="United Kingdom"| CNT=="Italy"|CNT=="Germany")
+# Perform the anova
+resaov<-aov(data=EuroPISA, PV1MATH ~ CNT)
+summary(resaov)
+
+# Yes, statistically significant differences exist between the countries Pr(>F) <2e-16 ***
+# Perform a Tukey HSD test
+TukeyHSD(resaov)
+# Significant differences p<0.05 exist for all countries except Italy and the UK
+```
+
+:::
+
+## Task 19 Anova practice #2
+
+::: question
+For the UK PISA 2018 data set, which variable out of `WEALTH`, `ST004D01T`, `OCOD1` (Mother's occupation), `OCOD2` (Father's occupation), `ST011Q06TA` (having a link to the internet), and highest level of parental education (`HISCED`) accounts for the most variation in science score? What percentage of variance is explained by each variable?
+
+! This is a big calculation so will take some time to compute!
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+#| warning: false
+
+UKPISA_2018 <- PISA_2018 %>%
+  filter(CNT=="United Kingdom")
+
+resaov<-aov(data=UKPISA_2018, PV1SCIE ~ WEALTH + ST004D01T + OCOD1 + OCOD2 + ST011Q06TA + HISCED)
+summary(resaov)
+eta <- etaSquared(resaov)
+eta <- 100*eta
+eta <- as.data.frame(eta)
+eta
+# Most variance explained by OCOD2 (father's occupation), OCOD1 (mother's occupation)  HISCED (highest level of parental education), ST011Q06TA (having an internet link), WEALTH, then ST004DO1T (gender)
+```
+
+:::
+
+## Task 18 Anova practice #3
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+#| warning: false
+
+
+```

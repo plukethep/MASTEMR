@@ -1,0 +1,613 @@
+---
+title: "Loading packages and exploring data"
+bibliography: ./references/mastemr.bib
+---
+
+```{r setup}
+    #| eval: true
+    #| warning: false
+    #| echo: false
+    
+    # options(max.print=10000)
+    options(max.print=15)
+    
+    # only load this code if testing this file independently of overall project
+    if(!exists("test")){
+      warning("RUNNING LOCAL FILE LOAD")
+      
+      library(glue)
+      proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
+      proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+      
+      node <- Sys.info()
+      if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richards PC
+        proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+      }else if(node["nodename"] == "KCL3Y7NKR3"){ #Petes NEW Laptop
+        proj_folder <- r"(G:/My Drive/Kings/code/MASTEMR/)"
+      }else if(node["nodename"] == "PETES_PC"){ #Petes NEW Laptop
+        proj_folder <- r"(C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/)"
+      }
+      
+      source(glue("{proj_folder}MASTEMR_functions.R"))
+      source(glue("{proj_folder}MASTEMR_setup_libs.R"))
+      source(glue("{proj_folder}MASTEMR_setup.R"))
+      
+      # OpenAnalysis_load_ALL(use_cache = TRUE,
+      #                       report_cache_folder=r"[',MASTEMR_cache,']",
+      #                       over_write=FALSE)
+    }
+
+```
+
+This course focuses on using the *tidyverse*; a free collection of programming *packages* that will allow you to write code that imports data, tidys it, transforms it into useful datasets, visualises findings, creates statistical models and communicates findings to others data using a standardised set of commands.
+
+![Data science workflow - RStudio](images/data-science-workflow.png)
+
+For many people the tidyverse is the main reason that they use R. The tidyverse is used widely in government, academia, NGOs and industry, notable examples include the [Financial Times](https://johnburnmurdoch.github.io/slides/r-ggplot/#/) and the [BBC](https://bbc.github.io/rcookbook/). Code in the tidyverse can be (relatively) easily understood by others and *you*, when you come back to a project after several months.
+
+```{r}
+#| eval: false
+#| echo: false
+library(tidyverse)
+starwars %>% 
+  select(name, height, mass, species) %>%
+  filter(species != "Trandoshan",
+         mass < 1000) %>%
+  mutate(species = ifelse(species == "Human", 
+                          "Human", 
+                          "Other")) %>%
+  ggplot() +
+  geom_point(aes(x=height, y=mass, colour=species)) +
+  geom_smooth(aes(x=height, y=mass), 
+              method = "lm") +
+  facet_grid(.~species) +
+  theme(legend.position="bottom")
+```
+
+```{r}
+#| quiet: true
+#| eval: false
+#| warning: false
+#| message: false
+# load the tidyverse packages
+library(tidyverse)
+
+# download Covid data from website
+deaths <- read.csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/excess_mortality/excess_mortality.csv")
+
+deaths <- deaths %>% 
+     filter(location %in% 
+              c("United States", "United Kingdom", 
+                "Sweden", "Germany")) %>%
+  mutate(date = as.Date(date))
+
+ggplot(data=deaths) +
+  geom_line(aes(x = date, 
+                y = excess_per_million_proj_all_ages, 
+                colour=location)) +
+  theme(legend.position="bottom")
+```
+
+::: callout-note
+__Try this out__
+
+The code above transforms data and converts it into a graph. It doesn't have any comments, but you should hopefully be able to understand what a lot of the code does by just reading it. Can you guess what each line does? Try running the code by selecting parts of it and pressing `control` \| `command ⌘` and `Enter`
+:::
+
+# Loading data {#sec-loading}
+
+We can't do much with R without loading data from elsewhere. Data will come in many formats and R should be able to deal with all of them. Some of the datasets you access will be a few rows and columns; others, like the ones we are going to use on this course, might run into hundreds of thousands or even millions of rows and hundreds or thousands of columns. Depending on the format you are using, you might need to use specific packages. A few of the data file types you might meet are described below:
+
+| File type                          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|----------------------|--------------------------------------------------|
+| Comma separated values \[.csv\]    | As it says in the name, `.csv` files store data by separating data items with commas. They are a common way of transferring data and can be easily created and read by Excel, Google spreadsheets and text editors (in addition to R). CSVs aren't compressed so will generally be larger than other file types. They don't store information on the types of data stored in the file so you might find yourself having to specify that a date column is a date, rather than a string of text. You can read and write csv files without the need to load any packages, but if you do use `readr` you might find things go much faster. |
+| Excel \[.xls \| .xlsx \| .xlsxm\]  | Excel files store data in a compressed custom format. This means files will generally be smaller than CSVs and will also contain information on the types of data stored in different columns. R can read and write these files using the `openxlsx` package, but you can also use the tidyverse's `readxl` for reading, and `writexl` for writing for excel formats.                                                                                                                                                                                                                                                                  |
+| R Data \[.rds\]                    | R has it's own data format, `.rds`. Saving to this format means that you will make perfect copies of your R data, including data types and factors. When you load `.rds` files they will look exactly the same as when you saved them. Data can be highly compressed and it's one of the fastest formats for getting data into R. You can read and write `.rds` files without the need to load any packages, but using the functions in `readr` might speed things up a bit. You won't be able to look at `.rds` files in other programs such as Excel                                                                                         |
+| Arrow \[.parquet\]                    | Apache Arrow `.parquet` is a relatively new format that allows for the transfer of files between different systems. Files are small and incredibly fast to load, whilst looking exactly the same as when you save them. The PISA dataset used here, that takes ~20 seconds to load in `.rds` format, will load in less than 2 seconds in `.parquet` format. Because of the way that data is stored you won't be able to open these files in programs such as Excel. You will need the `arrow` package to read and write `.parquet` files.                                                                                    |
+| SPSS \[.sav\]                      | SPSS is a common analysis tool in the world of social science. The native format for SPSS data is `.sav`. These files are compressed and include information on column labels and column datatypes. You will need either the `haven` or `foreign` packages to read data into R. Once you have loaded the .sav you will probably want to convert the data into a format that is more suitable for R, normally this will involve converting columns into factors. We cover *factors* in more detail below.                                                                                                                               |
+| Stata \[.dta\]                     | `haven` or `foreign` packages to read data into R                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| SAS \[.sas\]                       | `haven` or `foreign` packages to read data into R                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Structured Query Language \[.sql\] | a common format for data stored in large databases. Normally SQL code would be used to query these, you can use the tidyverse to help construct SQL this through the package `dbplyr` which will convert your tidyverse pipe code into SQL. R can be set up to communicate directly with databases using the `DBI` package.                                                                                                                                                                                                                                                                                                            |
+| JavaScript Object Notation \[.json\]                               | `.json` is a popular format for sharing data on the web. You can use `jsonlite` and `rjson` to access this type of data                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+
+For this course we will be looking at `.csv`, `excel`, `.rds` and `parquet` files.
+
+# Dataframes
+
+Loading datasets into R will normally store them as *dataframes* (also known as *tibbles* when using the tidyverse). Dataframes are the equivalent of tables in a spreadsheet, with rows, columns and datatypes. 
+
+```{r}
+#| echo: true
+#| eval: true
+PISA_2022 %>% 
+  select(CNT, PV1MATH, ESCS, IC172Q01JA) %>% 
+  mutate(CNT = CNT %>% as.character()) %>%
+  head(5)
+```
+
+The table above has 4 columns, each column has a datatype, `CNT` is a character vector, PV1MATH is a double (numeric) vector, ESCS is a double (numeric) vector and `IC172Q01JA` is a factor. For more about datatypes, see @sec-datatypes
+
+Dataframes are made from a collection of vectors, each column can be treated as if it was a vector, for example you can add one column to another:
+
+```{r}
+#| echo: true
+#| eval: true
+PISA_2022 %>% 
+  select(CNT, PV1MATH, PV1SCIE, PV1READ) %>% 
+  mutate(overall_grade = PV1MATH + PV1SCIE + PV1READ)
+```
+
+You can also create your own dataframes by combining vectors, note you have to use an equals sign to do this, rather than the arrow assignment:
+```{r}
+#| echo: true
+#| eval: true
+my_class_list <- data.frame(
+  maths_grade = c(5,    4,    4,    1,     7,     5,     8),
+  english_grade = c(8,    5,    3,    2,     3,     6,     9),
+  genders = c("F",  "M",  "M",  "F",   "M",   "F",   "M"),
+  students = c("Joe", "Al", "Mo", "Flo", "Olu", "Sam", "Jimmy")
+  )
+  
+my_class_list
+```
+
+::: callout-tip
+Core to the *tidyverse* is the idea of *tidy data*, a rule of thumb for creating data sets that can be easily manipulated, modeled and presented. *Tidy data* are data sets where each variable is a column and each observation a row.
+
+This data isn't tidy data as each row has contains multiple exam results (observations):
+
+| ID    | Exam 1  | Grade 1 | Exam 2 | Grade 2 |
+|-------|---------|---------|--------|---------|
+| R2341 | English | 4       | Maths  | 5       |
+| R8842 | English | 5       |        |         |
+
+This dataframe is tidy data as each student has one entry for each exam:
+
+| ID    | Exam    | Grade |
+|-------|---------|-------|
+| R2341 | English | 4     |
+| R2341 | Maths   | 5     |
+| R8842 | English | 5     |
+:::
+
+```{r}
+#| echo: false
+#| eval: false
+
+library(openxlsx)
+TIMSS <- read.xlsx("https://drive.google.com/uc?export=download&id=1Sgyw1tLbPGsl4HeyhpNGLhJwTNIriE-B", "school_data")
+results <- read.xlsx("https://drive.google.com/uc?export=download&id=1tp9xe3dS__eg7RrXf0T_oMxcrz_TbMdM",
+          sheet="Results")
+schools <- read.xlsx("https://drive.google.com/uc?export=download&id=1tp9xe3dS__eg7RrXf0T_oMxcrz_TbMdM",
+                     sheet="Schools")
+```
+
+First we need to get some data into R so we can start analysing them. We can load large datatables into R by either providing the online web address, or by loading it from a local file directory on your hard drive. Both methods are covered below:
+
+# Loading data from the web
+
+To download files from the web you'll need to find the exact location of the file you are using. For example below we will need another package, `openxlsx`, which you need to *install* before you load it (see: @sec-packages, or use line 1 below). The code shown will download the files from an online Google drive directly into objects in R using `read.xlsx(<file_web_address>, <sheet_name>)`:
+
+::: callout-tip
+To convert data on your google drive into a link that works in R, you can use the following website: <https://sites.google.com/site/gdocs2direct/>. Note that not all read/load commands in R will work with web addresses and some will require you have to copies of the datasets on your disk drive. Additionally, downloading large datasets from the web directly into R can be very slow, loading the dataset from your harddrive will nearly always be *much* faster.
+:::
+
+```{r}
+#| echo: true
+#| eval: false
+#| warning: false
+install.packages("openxlsx")
+library(openxlsx)
+
+results <- read.xlsx("https://drive.google.com/uc?export=download&id=1tp9xe3dS__eg7RrXf0T_oMxcrz_TbMdM",
+                      sheet="Results")
+schools <- read.xlsx("https://drive.google.com/uc?export=download&id=1tp9xe3dS__eg7RrXf0T_oMxcrz_TbMdM",
+                      sheet="Schools")
+```
+
+# Loading data from your computer {#sec-loading-computer}
+
+Downloading files directly from web addresses can be slow and you might want to prefer to use files saved to your computer's hard drive. You can do this by following the steps below:
+
+Download the `PISA_student_2022_subset.parquet` file from [here](https://emckclac-my.sharepoint.com/:u:/g/personal/k1926273_kcl_ac_uk/EUT13jrQxKJCp64WnH1MG3MBHoDqkzx1NJZIoVpUFHUYvg?e=pi2ZoD) and save it to your computer where your R code file is.
+
+::: callout-note
+The PISA student dataset is huge, with over 1,200 pieces of information stored on 600,000+ students. This book uses a subset of this data, but if you do want the full dataset, you can download it from [here](https://emckclac-my.sharepoint.com/:u:/g/personal/k1926273_kcl_ac_uk/EWdsEj9h3CJFmHqA-Qq5jQoBRSKGM_Qm_4Af_xomr2N5kw?e=JNnofI)
+:::
+
+Copy the location of the file (see next step for help)
+
+-   To find the location of a file in ***Windows*** do the following:
+
+    1.  Navigate to the location of the file in *Windows Explorer*:
+
+        ![](images/navigate_file_location.png)
+
+    2.  Click on the address bar
+
+        ![](images/select_file_location.png)
+
+    3.  Copy the location
+
+-   To find the location of a file in ***Mac OSX*** do the following:
+
+    1.  Open *Finder*
+
+    2.  Navigate to the folder where you saved the file
+
+    3.  Right click on the name of the file, then press the __option__ `⌥` (or `Alt`) button and select `Copy <name of file> as Pathname`
+
+        ![](images/mac_pathnames.png)
+
+    4.  Alternatively, follow [this](https://support.apple.com/en-gb/guide/mac-help/mchlp1774/mac)
+
+To load this particular data into R we need to use the `read_parquet` command from the `arrow` package, specifying the location and name of the file we are loading. See the following code:
+
+```{r}
+#| eval: false
+#| echo: true
+#| warning: false
+install.packages("arrow")
+library(arrow)
+
+PISA_2022 <- read_parquet(r"[C:/Users/Peter/code/PISA_2022_student_subset.parquet]")
+```
+
+# Setting working directories
+
+Using the `setwd(<location>)` you can specify where R will look by default for any datasets. In the example below, the `dfe_data.xlsx` will have been downloaded and stored in `C:/Users/Peter/code`. By running `setwd("C:/Users/Peter/code")` R will always look in that location when trying to load files, meaning that `read_parquet(r"[C:/Users/Peter/code/PISA_student_2022.parquet]")` will be treated the same as `read_parquet(r"[PISA_student_2022.parquet]")`
+
+```{r}
+#| warning: false
+#| echo: true
+#| eval: false
+# context: setup
+setwd(r"[C:/Users/Peter/code/]")
+PISA_2022 <- read_parquet(r"[PISA_student_2022.parquet]")
+
+```
+
+To work out what your current working directory is, you can use `getwd()`.
+
+## Proper addresses
+
+You might have found that you get an error if you don't convert your backslashes `\` into forwardslashes `/`. It's common mistake and very annoying. In most programming languages a backslash signifies the start of a special command, for example `\n` signifies a `newline`.
+
+With R there are three ways to get around the problem of backslashes in file locations, for the location:`"C:\myfolder\"` we could:
+
+-   replace them with forwardslashes (as shown above):`"C:/myfolder/"`
+-   replace them with double backslashes (the special character specified by two backslashes is one backslash!):`"C:\\myfolder\\"`
+-   use the inbuilt R command to deal with filenames: `r"[C:\myfolder\]"`
+
+# .parquet files {#sec-parquet}
+
+For the majority of this workbook you will be using a cutdown version of the `PISA_2022` student table. This dataset is huge and we have loaded it into R, selected fields we think are useful, converted column types to work with R and saved in the  `.parquet` format. `.parquet` files are quick to load and small in size. To load a `.parquet` file you can use the `read_parquet(<location>)` command from the `arrow` package.
+
+```{r}
+#| echo: true
+#| eval: false
+library(arrow)
+PISA_2022 <- read_parquet("<yourfolder>/PISA_student_2022_subset.parquet")
+```
+
+If you want to save out any of your findings, you can use `write_parquet(<object>, <location>)`, where `object` is the table you are working on and `location` is where you want to save it.
+
+```{r}
+#| echo: true
+#| eval: false
+library(tidyverse)
+write_parquet(PISA_2022 %>% filter(CNT=="France"), "<yourfolder>/pisa_france_2022.parquet")
+```
+
+# .csv files
+
+A very common way of distributing data is through `.csv` files. These files can be easily compressed and opened in common office spreadsheet tools such as Excel. To load a `.csv` we can use `read_csv("<file_location>")`
+
+```{r}
+#| echo: true
+#| eval: false
+library(tidyverse)
+# loading from a website
+data <- read_csv("https://barrolee.github.io/BarroLeeDataSet/BLData/BL_v3_MF.csv")
+
+# loading from your hard drive
+data <- read_csv("<your_folder>/BL_v3_MF.csv")
+```
+
+You might want to save your own work as a `.csv` for use later or for manipulation in another tool e.g. Excel. To do this we can use `write_csv(<your_data>, "<your_folder><name>.csv")`. __NOTE__: don't forget to add `.csv` to the end of your "<your_folder><name>__.csv__", otherwise you might struggle to open the file in another program.
+
+```{r}
+#| echo: true
+#| eval: false
+library(tidyverse)
+# saving your results to a file called `summary_stats.csv`
+write_csv(my_results, "summary_stats.csv")
+```
+
+# Exploring data
+
+Now that we have loaded the `PISA_2022` dataset we can start to explore it.
+
+You can check that the tables have loaded correctly by typing the object name and '*running*' the line (`control`\|`command ⌘` and `Enter`)
+
+```{r}
+#| echo: true
+#| label: show full PISA_2022
+PISA_2022
+```
+
+We can see from this that the `tibble` (another word for *dataframe*, basically a spreadsheet table) is `r nrow(PISA_2022)` rows, with `r ncol(PISA_2022)` columns [^6]. This is data for all the students from around the world that took part in PISA 2022. The actual PISA dataset has many more columns than this, but for the examples here we have selected `r ncol(PISA_2022)` of the more interesting data variables. The column names might seem rather confusing and you might want to refer to the [PISA 2022 code book](https://webfs.oecd.org/pisa2022/CY08MSP_CODEBOOK_5thDecember23.xlsx) to find out what everything means.
+
+[^6]: Even in this cut down format the PISA data might take a few minutes to load. You can find the full dataset [here](https://drive.google.com/open?id=17AYuiKXxWFY6XkJZRCFXRYRRNNmata-f&usp=drive_fs), but be warned, it might crash you machine when trying to load it! Plug your laptop into a power supply, and having 16GB of RAM is highly recommended! You might also need to wrangle some of the fields to make them work for your purposes, you might enjoy the challenge!
+
+The data shown in the console window is only the top few rows and first few columns. To see the whole table click on the `Environment panel` and the table icon ![](images/icon_table.png) to explore the table:
+
+![](images/environment_view_table.png)
+
+Alternatively, you can also hold down `command ⌘`\|`control` and click on the table name in your R Script to view the table. You can also type `View(<table_name>)`. __Note:__ this has a capital "V"
+
+In the table view mode you can read the label attached to each column, this will give you more detail about what the column stores. If you hover over columns it will display the label:
+
+![](images/environment_col_label.png)
+
+Alternatively, to read the full label of a column, the following code can be used:
+
+```{r}
+#| eval: true
+#| echo: true
+# You might also want to read the label of a field
+attr(PISA_2022$ST324Q11JA, "label")
+```
+
+Each view only shows you 50 columns, to see more use the navigation panel:
+
+![](images/navigation_panel.png)
+
+::: callout-note
+To learn more about loading data from in other formats, e.g. SPSS and STATA, look at the tidyverse documentation for [haven](https://haven.tidyverse.org/).
+:::
+
+The `PISA_2022` dataframe is made up of multiple columns, with each column acting like a *vector*, which means each column stores values of only one datatype. If we look at the first four columns of the schools table, you can see the `CNTSTUID`, `ESCS` and `PV1MATH` columns are `<dbl>` (`numeric`) and the other three columns are of `<fctr>` (`factor`), a special datatype in R that helps store categorical and ordinal variables, see @sec-factors for more information on how factors work.
+
+```{r}
+#| echo: false
+PISA_2022[c("CNTSTUID", "ST004D01T","CNT", "ESCS", "PV1MATH")] %>% head(5)
+
+# PISA_2022 %>% select(where(is.numeric)) %>% View()
+
+```
+
+::: callout-note
+Vectors are data structures that bring together one or more data elements of the same datatype. E.g. we might have a numeric vector recording the grades of a class, or a character vector storing the gender of a set of students. To define a vector we use `c(item, item, ...)`, where `c` stands for combine. Vectors are very important to R, even declaring a single object, `x <- 6`, is creating a vector of size one. To find out more about vectors see: @sec-vectors
+:::
+
+We can find out some general information about the table we have loaded. `nrow` and `ncol` tell you about the dimensions of the table
+
+```{r}
+#| echo: true
+nrow(PISA_2022)  # how many rows are in the results table
+
+ncol(PISA_2022)  # how many columns are in the results table
+```
+
+If we want to know the names of the columns we can use the `names()` command that returns a vector. This can be a little confusing as it'll return the names used in the dataframe, which can be hard to interpret, e.g. `ST004D01T` is PISA's way of encoding gender. You might find the labels in the view of the table available through `View(PISA_2022)` (__note:__ the capital V in View) and the *Environment* panel easier to navigate:
+
+```{r}
+#| echo: true
+names(PISA_2022) # the column names of a table
+```
+
+As mentioned, the columns in the tables are very much like a collection of *vectors*, to access these columns we can put a `$` \[dollar sign\] after the name of a table. This allows us to see all the columns that table has, using the up and down arrows to select, press the `Tab` key to complete:
+
+![](images/dollar_fields.png)
+
+```{r}
+#| echo: true
+#| eval: true
+PISA_2022$ST038Q08NA
+```
+
+```{r}
+#| echo: false
+#| eval: false
+PISA_2022 %>% head(100) %>% pull(ST004D01T)
+```
+
+We can apply functions to the returned column/vector, for example: `sum`, `mean`, `median`, `max`, `min`, `sd`, `round`, `unique`, `summary`, `length`. To find all the different/unique values contained in a column we can write:
+
+```{r}
+#| echo: true
+unique(PISA_2022$CNT) # the unique values in this column
+```
+
+We can also combine commands, with `length(<vector>)` telling you how many items are in the `unique(PISA_2022$CNT)` command
+
+```{r}
+#| echo: true
+# tells you the number of countries in PISA 2022
+length(unique(PISA_2022$CNT))
+```
+
+You might meet errors when you try and run some of the commands because a field has missing data, recorded as `NA`. In the case below it doesn't know what to do with the `NA` values in `ESCS`, so it gives up and returns `NA`:
+
+```{r}
+#| echo: true
+max(PISA_2022$ESCS) # max cultural capital value for all students
+```
+
+You can see one of the `NA`s by just looking at this column:
+
+```{r}
+#| echo: true
+PISA_2022$ESCS # NAs present in data
+```
+
+To get around this you can tell R to remove the `NA` values when performing maths calculations:
+
+```{r}
+#| echo: true
+# max cultural capital score for all students
+max(PISA_2022$ESCS, na.rm = TRUE) 
+```
+
+::: callout-tip
+R's inbuilt `mode` function doesn't calculate the mathematical *mode*, instead it tells you what type of data you are dealing with. You can work out the mode of data by using the `modeest` package:
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+library(modeest)
+mlv(PISA_2022$PV1MATH, method = "mfv", na.rm = TRUE)
+```
+
+There is more discussion on how to use modes in R [here](https://stackoverflow.com/questions/2547402/how-to-find-the-statistical-mode)
+:::
+
+Calculations might also be upset when you try to perform maths on a column that you think is a number but is actually stored as another datatype. For example if you wanted to work out the mean number of "How many [digital devices] with screens are there in your [home]?" - `ST253Q01JA`:
+
+```{r}
+#| echo: true
+mean(PISA_2022$ST253Q01JA, na.rm=TRUE)
+```
+
+Looking at the structure of this column, we can see it is stored as a `factor`, not as a `numeric`. Factors are a special datatype that use numbers to link to categorical values. For `ST253Q01JA` there are 12 different _levels_ that you can explore using the `str()` and `levels()` commands:
+
+```{r}
+#| echo: true
+str(PISA_2022$ST253Q01JA)
+
+levels(PISA_2022$ST253Q01JA)
+```
+
+You can change the type of the column to make it work with the `mean` command, changing the column to `as.numeric(<column>)` for the calculation:
+
+```{r}
+#| echo: true
+# note: this isn't ideal for proper analysis!
+mean(as.numeric(PISA_2022$ST253Q01JA), na.rm = TRUE)
+```
+
+This is far from ideal as we are now treating a categorical field as a numeric! Looking at the coding for the numbers in the field and the corresponding levels, we see that `1` is actually no digital devices. For more details on datatypes, see @sec-datatypes.
+
+```{r}
+#| echo: true
+paste(1:length(levels(PISA_2022$ST253Q01JA)), ":", levels(PISA_2022$ST253Q01JA))
+```
+
+::: callout-tip
+To get a good overview of what a table contains, you can use the `str(<table_name>)` and `summary(<table_name>)` commands.
+:::
+
+## Questions
+
+::: question
+
+Using the `PISA_2022` dataset:
+
+1. use the Environment window to view the dataset, what is the name and the label of the 26th column?
+
+```{r}
+#| echo: true
+#| eval: false
+#| code-fold: true
+#| code-summary: answer
+
+# the 26th column is ST062Q02TA
+# the label is: "In the last two full weeks of school, how often: I [skipped] some classes"
+
+# you could use View() instead of the environment window, note the capital V
+View(PISA_2022)
+# use could use the vector subset to fetch the 100th name
+names(PISA_2022)[26]
+# [1] "ST062Q02JA"
+
+# you could use the attr function to find the label
+attr(PISA_2022$ST062Q02TA, "label")
+#  "In the last two full weeks of school, how often: I [skipped] some classes"
+
+# or using the dollar sign to load this field will also give the label
+PISA_2022$ST062Q02TA
+```
+
+2. Use the dollar sign `$` to return the column `ST004D01T`. What is stored in this column?
+
+```{r}
+#| echo: true
+#| eval: false
+#| code-fold: true
+#| code-summary: answer
+# Student (Standardized) Gender
+PISA_2022$ST004D01T
+
+#  [1] Female Male   Male   Female Female Male   Male   Female Female Female Male  
+#  [12] Male   Male   Male   Female Female Male   Female Female Female Male   Male  
+#  [23] Male   Female Female Female Female Female Male   Female Male   Male   Male  
+#  [34] Female Female Male   Female Female Female Female Female Male   Female Male  
+#   [ reached getOption("max.print") -- omitted 612744 entries ]
+# attr(,"label")
+# [1] Student (Standardized) Gender
+# Levels: Female Male Valid Skip Not Applicable Invalid No Response
+
+```
+
+3. How many students results are in the whole table?
+
+```{r}
+#| echo: true
+#| eval: false
+#| code-fold: true
+#| code-summary: answer
+
+nrow(PISA_2022)
+# [1] 613744
+```
+
+4. What `unique` values does the dataset hold for Mother's occupation `OCOD1` and Father's occupation `OCOD2`? Which is larger?
+
+```{r}
+#| echo: true
+#| eval: false
+#| code-fold: true
+#| code-summary: answer
+unique(PISA_2022$OCOD1)
+unique(PISA_2022$OCOD2)
+
+# you can read the length from the above, or you could use the
+# length command to tell you the length of the vector
+
+length(unique(PISA_2022$OCOD1))
+# [1] 590
+length(unique(PISA_2022$OCOD2))
+# [1] 590
+
+# Both fields are the same size implying there are no jobs that women do, but men don't.
+# to confirm this we can use the set difference command `setdiff(vector1, vector2)`.
+
+setdiff(unique(PISA_2022$OCOD1),
+        unique(PISA_2022$OCOD2))
+# character(0)
+```
+
+5. What are the `max`imum, `mean`, `median` and `min`umum science grades `PV1SCIE` achieved by any student
+
+```{r}
+#| echo: true
+#| eval: false
+#| code-fold: true
+#| code-summary: answer
+
+# remember to set the na.rm = TRUE
+max(PISA_2022$PV1SCIE, na.rm=TRUE)
+# [1] 895.375
+mean(PISA_2022$PV1SCIE, na.rm=TRUE)
+# [1] 450.4625
+median(PISA_2022$PV1SCIE, na.rm=TRUE)
+# [1] 444.464
+min(PISA_2022$PV1SCIE, na.rm=TRUE)
+# [1] 0
+```
+
+6. Explore the dataset and makes notes about the range of values of 2 other columns
+
+:::

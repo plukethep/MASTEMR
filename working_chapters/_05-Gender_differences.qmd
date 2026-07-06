@@ -1,0 +1,759 @@
+---
+# title: "05 Gender differences"
+# bibliography: references.bib
+---
+
+```{r}
+#| eval: true
+#| warning: true
+#| echo: false
+
+# only load this code if testing this file independently of overall project
+if(!exists("test")){
+  warning("RUNNING LOCAL FILE LOAD")
+  
+  library(glue)
+  proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
+  proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  
+  node <- Sys.info()
+  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
+    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
+    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
+  }else if(node["nodename"] == "Amys-MacBook-Air.local"){ #Amy's NEW Laptop
+    proj_folder <- r"(/Users/amyobrien/Google Drive/My Drive/MASTEMR/)"
+    
+  }
+
+  source(glue("{proj_folder}MASTEMR_setup.R"))
+}
+```
+
+## Statistical analysis
+
+There are probably statistical libraries in R to do every sort of test you will ever need, from the typical ANOVA to cutting edge machine learning. The full list of R packages sits on the [cran server](https://cran.r-project.org/web/packages/available_packages_by_name.html) and you can load packages as and when you need them at no cost. R comes pre-packaged with some common statistical tools, for example, the `t.test()` and linear model regression `lm()`. For other stats tools you'll need to install the package and load it (see @sec-load-run-pckges) before you can use the functions.
+
+## T-tests
+
+T-tests are statistical tests that determine if there are statistically significant differences between the means of two groups. Consider the data giving the results of girls and boys on a test:
+
+**Boys' scores**
+
+| Boy  | Score (/10) |
+|------|-------------|
+| A    | 7           |
+| B    | 8           |
+| C    | 6           |
+| D    | 5           |
+| E    | 8           |
+| Mean | 6.8         |
+
+**Girls' scores**
+
+| Girls | Score (/10) |
+|-------|-------------|
+| A     | 9           |
+| B     | 4           |
+| C     | 7           |
+| D     | 8           |
+| E     | 8           |
+| Mean  | 7.2         |
+
+The means of the two groups are different (6.8 for boys and 7.2 for girls) but the difference may simply be due to random variation. A t-test can report the probability that a difference is means is due to chance.
+
+```{r}
+#| eval: true
+library(tidyverse)
+Boys<-data.frame(Score=c(7,8,6,5,8))
+Girls<-data.frame(Score=c(9,4,7,8,8))
+print(mean(Boys$Score))
+print(mean(Girls$Score))
+t.test(Boys$Score, Girls$Score)
+
+```
+
+The `t.test` function returns a p-value greater than `0.05` so the mean test-results can be assumed to the result of chance, and we conclude there are no detectable differences by gender for this data set.
+
+### Task 1
+
+Consider the following scenarios. Which (if any) of the t-tests would be most of appropriate, including whether it would be a one or two tailed test.
+
+::: callout-note
+One and two-tailed tests
+
+Remember that a one-tailed test only looks for differences in one direction from the mean (for example, that one sample has a higher mean than the other). A two-tailed tests tests for the possibility of the means of the two groups being higher or lower than each other.
+:::
+
+::: question
+a)  An educational researcher wants to test a teaching approach with a group of 12 students to see if an intervention increases performance in their year 6 SATs results. Pupils are given a SATS paper before the intervention and again after. The results of these are normalised and then compared.
+
+b)  A teacher wants to see if their pupils' GCSE computer science test scores are in line with the national average or not. The tests are out of 180 marks.
+
+c)  The DfE want to compare uptake of STEM subjects pre and post pandemic to see if there has been any change in the percentage of students studying at least one STEM subject for A level.
+
+d)  A school wants to compare salaries of staff between this academic year and last academic year to see whether there has been a significant increase.
+
+e)  The same school as in d) wants to compare salaries of support staff and teaching staff to see if there is a significant difference.
+
+f)  A researcher wants to find out how much time pupils spend looking at screens during lesson time, to see if there is a difference between year 7 and year 10 students. 10 pupils in year 7 and 10 pupils in year 10 are randomly selected across a school and observed throughout a school day in November. The times are recorded to the nearest minute.
+
+g)  A business manager wants to check if the financial expenditure on STEM teachers per year is similar to the national average (based on average numbers of pupils on role)
+:::
+
+### Task 2
+
+**Progress 8** is a 'value-added' measure [@dfe2023progress8]. It indicates how much a secondary school has helped pupils progress academically over a five year period, from the end of primary school (age 11) to the end of the end year 11 (age 16).
+
+The score is calculated across 8 subjects (hence Progress 8): English; mathematics; three other English Baccalaureate (EBacc) subjects (sciences, computer science, geography, history and languages); and three further subjects
+
+-   A progress 8 score of zero means a pupil did as well as other pupils in England who got similar results
+-   Positive and negative scores indicate a pupil did better or less well than similar pupils
+
+The Department for Education dataset that we will use can be downloaded here: [DfE_Data_2019](https://docs.google.com/spreadsheets/d/1HO9NcuTuAZP307GMrXbF8knD7yrV2TlF/edit?usp=sharing&ouid=115181407937141945835&rtpof=true&sd=true)
+
+You can then load the data into R using the `read_excel` function from the `readxl` package. This function will need two "strings", one giving the location of the including the file name and file extension, and the second giving the name of the sheet within the excel file that you are trying to open
+
+    read_excel("<file_location>", "<sheet_name>")
+
+My example of using this code is here:
+
+```{r}
+#| eval: false
+# Don't forget to change the pathname to where you have downloaded on your 
+# device. Do check back to section 2.8.3 Loading data for how to find
+# the path of the file on your device.
+library(readxl)
+DfE_2019 <- read_excel("data/Amy/DfE Data 2019 for Seminar.xlsx", "Filtered")
+```
+```{r}
+#| echo: false
+DfE_2019 %>% head(4)
+```
+
+Use the dataset to complete the following tasks:
+
+::: question
+1. 
+
+i)  Replicate the t-test used in example 2 in the lecture with boys' schools and girls' schools in Birmingham local authority. Check for normality of the data and whether variances are equal also.
+
+
+::: callout-note
+**Normality checking**
+
+To check for normality we can use a number of different tests and approaches, some of which will be covered in the seminar. For data sets that are below 5000 observations then Sharpiro-Wilk is a good test to use. For data sets above 5000 (as with the PISA data) then the D'Agostino-Pearson test is a good approach. Histograms and qqplots can also be used to help visualise the data and compare with the normal distribution.
+:::
+
+::: callout-note
+**Checking for Equal Variances**
+
+To check for equal variances, we can divide the variance of one sample by the other sample. If the ratio of the variances is greater than 2 or less than 0.5 then we conclude that they are unequal. R will check this for you, and if they are unequal, will use the test for unequal variances (Welch's test).
+:::
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+
+Birminghamboys <- DfE_2019 %>%
+  select(Local_Authority_name, Gender_of_Entry, P8SCORE)%>%
+  filter(Local_Authority_name == "Birmingham" & 
+         Gender_of_Entry=="Boys")
+
+Birminghamgirls<-DfE_2019 %>%
+  select(Local_Authority_name, Gender_of_Entry, P8SCORE)%>%
+  filter(Local_Authority_name =="Birmingham" &
+         Gender_of_Entry=="Girls")
+
+shapiro.test(Birminghamboys$P8SCORE)
+#Shapiro-Wilk normality test
+#data:  Birminghamboys$P8SCORE
+#W = 0.85654, p-value = 0.05193
+
+shapiro.test(Birminghamgirls$P8SCORE)
+#Shapiro-Wilk normality test
+#data:  Birminghamgirls$P8SCORE
+#W = 0.97786, p-value = 0.9675
+
+varboys <- var(Birminghamboys$P8SCORE)
+
+vargirls <- var(Birminghamgirls$P8SCORE)
+
+varboys/vargirls
+#12.43959
+
+t.test(Birminghamboys$P8SCORE, Birminghamgirls$P8SCORE, var.equal=FALSE, alternative = 'two.sided')
+#Welch Two Sample t-test
+#data:  Birminghamboys$P8SCORE and Birminghamgirls$P8SCORE
+#t = -1.3796, df = 11.363, p-value = 0.1943
+#alternative hypothesis: true difference in means is not equal to 0
+#95 percent confidence interval:
+# -1.1825235  0.2690969
+#sample estimates:
+#mean of x mean of y 
+#0.1263636 0.5830769 
+```
+
+ii) Now, filter out any outliers in the data for part a) i) and repeat the t-test.
+
+::: callout-note
+**Checking and Filtering for Outliers**
+
+Often, we need to check and filter for outliers in the data. There are many ways to do this, depending on the distribution of the data and how extreme the outliers are that we want to remove. A good rule of thumb is the median +/- 1.5 times the interquartile range (IQR), where the IQR is the upper quartile - lower quartile. If the data is normally distributed, then the mean +/- 1.5 time the standard deviation (sd) can be used. If we only want to remove more extreme outliers, then 2 or even 3 times the IQR (or sd) from the median (or mean) can be used instead.
+
+Once we have determined the upper and lower bound of our outliers, we can remove any data points that lie outside of this and then perform our statistical test on the data.
+:::
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+outl_h_b <- mean(Birminghamboys$P8SCORE) + 1.5 * sd(Birminghamboys$P8SCORE)
+
+outl_l_b <- mean(Birminghamboys$P8SCORE) - 1.5 * sd(Birminghamboys$P8SCORE)
+
+
+
+outl_h_g <- mean(Birminghamgirls$P8SCORE) + 1.5 * sd(Birminghamgirls$P8SCORE)
+
+outl_l_g <- mean(Birminghamgirls$P8SCORE) - 1.5 * sd(Birminghamgirls$P8SCORE)
+
+
+
+Birminghamboys <- Birminghamboys %>%
+  select(Local_Authority_name, Gender_of_Entry, P8SCORE)%>%
+  filter(P8SCORE > outl_l_b &
+           P8SCORE < outl_h_b)
+
+shapiro.test(Birminghamboys$P8SCORE)
+
+#Shapiro-Wilk normality test
+
+#data:  Birminghamboys$P8SCORE
+#W = 0.94364, p-value = 0.5942
+
+shapiro.test(Birminghamgirls$P8SCORE)
+#Shapiro-Wilk normality test
+
+#data:  Birminghamgirls$P8SCORE
+#W = 0.97786, p-value = 0.9675
+
+
+varboys <- var(Birminghamboys$P8SCORE)
+
+vargirls <- var(Birminghamgirls$P8SCORE)
+
+varboys/vargirls
+#4.101412
+
+
+t.test(Birminghamboys$P8SCORE, Birminghamgirls$P8SCORE, 
+       var.equal=FALSE, 
+       alternative = 'two.sided')
+
+#Welch Two Sample t-test
+
+#data:  Birminghamboys$P8SCORE and Birminghamgirls$P8SCORE
+#t = -0.89463, df = 12.366, p-value = 0.3881
+#alternative hypothesis: true difference in means is not equal to 0
+#95 percent confidence interval:
+# -0.6446256  0.2684718
+#sample estimates:
+#mean of x mean of y 
+#0.3950000 0.5830769 
+```
+
+2.     
+
+i)  Replicate the t-test used in Example 3 of the lecture when comparing 2018 and 2019 data in Birmingham. Again, check for normality and equal variances.
+
+The data for 2018 and 2019 can be found in the `Filtered 3` sheet, so make sure you load this data, as follows:
+
+```{r}
+#| eval: false
+# Don't forget to change the pathname to where you have downloaded on your # device. Do check back to section 2.8.3 Loading data for how to find
+# the path of the file on your device.
+library(readxl)
+DfEdata20182019 <- read_excel("data/Amy/DfE Data 2019 for Seminar.xlsx", "Filtered 3")
+```
+```{r}
+#| echo: false
+DfEdata20182019 %>% head(4)
+```
+
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+Birminghamall <- DfEdata20182019 %>%
+  select(Local_Authority_name, Institution_type, Gender_of_Entry, P8SCORE2018, P8SCORE2019)%>%
+  filter(Local_Authority_name == "Birmingham")
+
+shapiro.test(Birminghamall$P8SCORE2018)
+#p-value is 4.76e-05 – not normally distributed
+
+shapiro.test(Birminghamall$P8SCORE2019)
+#p-value is is 7.78e-– not normally distributed
+
+t.test(Birminghamall$P8SCORE2018, Birminghamall$P8SCORE2019,
+       var.equal=TRUE, alternative = 'greater', paired = TRUE)
+
+#Paired t-test
+
+#data:  Birminghamall$P8SCORE2018 and Birminghamall$P8SCORE2019
+#t = -3.3994, df = 87, p-value = 0.9995
+#alternative hypothesis: true mean difference is greater than 0
+#95 percent confidence interval:
+# -0.1516149        Inf
+#sample estimates:
+#mean difference 
+#     -0.1018182 
+```
+
+ii) Using the data in Example 3, filter out any schools designated as `Special Academy`, `Foundation Special School` or `Community Special School` as their `Institution_type` from the data set, then repeat the t-test.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+BirmNOTspecial <- Birminghamall %>% 
+  filter(Institution_type != "Special Academy" &
+         Institution_type != "Community Special School" &
+         Institution_type != "Foundation Special School")
+
+# The following filter() commands would achieve the same outcome:
+# filter(!grepl("Special|special", Institution_type))
+# filter(!Institution_type %in% 
+#  c("Special Academy", "Community Special School", "Foundation Special School")) 
+
+shapiro.test(BirmNOTspecial$P8SCORE2018) 
+#p-value 0.5729 - normally distributed
+
+shapiro.test(BirmNOTspecial$P8SCORE2019)
+#p-value 0.8679 - normally distributed
+
+t.test(BirmNOTspecial$P8SCORE2019, BirmNOTspecial$P8SCORE2018, var.equal=TRUE, alternative = 'greater', paired = TRUE)  
+
+#Paired t-test
+
+#data:  BirmNOTspecial$P8SCORE2019 and BirmNOTspecial$P8SCORE2018
+#t = 3.6533, df = 77, p-value = 0.0002352
+#alternative hypothesis: true mean difference is greater than 0
+#95 percent confidence interval:
+# 0.06196414        Inf
+#sample estimates:
+#mean difference 
+#      0.1138462 
+```
+
+3.  Choose different data sets from either the 2018 or 2019 (or both) data to compare. Set out your null and alternative hypothesis, your significance level, the type of t-test and number of tails, and then calculate the p-value. State the outcome of the test.
+
+:::
+
+### Task 3
+
+Look at the `PISA_2018` dataset. You can load the PISA_2018 data set using these steps. Click here to download the parquet file: [PISA_2018.parquet](https://drive.google.com/open?id=17Owl5F5fmuOWiAXQomVfQMr_9CYDHoBC&authuser=richardandrewbrock%40gmail.com&usp=drive_fs)
+
+To load the data, use the code below:
+
+```{r}
+#| eval: false
+#| warning: false
+install.packages("arrow") # if you haven't already
+library(arrow)
+library(tidyverse)
+PISA_2018 <- read_parquet("<location of the downloaded PISA_2018.parquet file>")
+```
+
+::: callout-note
+Testing for normality
+
+One way to test whether a sample is normal (a condition of a t-test), is to plot a quantile-quantile plot `ggqqplot`.If the data are normal, the dots should form a straight line.
+
+```{r}
+#| eval: true
+#| warning: false
+# The ggpubr package includes the function to test normality (a ggqqplot)
+
+library(ggpubr)
+
+# Plot a qq plot for all the UK science scores in the PISA sample
+UKsci<-PISA_2018%>% 
+  filter(CNT=="United Kingdom")
+
+ggqqplot(UKsci$PV1SCIE)
+
+```
+:::
+
+::: question
+
+1.   Replicate the test Richard performs in the video, comparing performance in males and females `ST004D01T` in the UK in mathematics `PV1MATH` using a `t.test`.
+
+```{r}
+#| eval: false
+#| warning: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Are there differences between the mean scores of UK boys and girls in PISA mathematics?
+#
+
+library(tidyverse)
+
+# Select the gender (ST004D01T) and math score columns (PV1MATH)
+# Filter the data to select UK responses
+
+MaleUK <- PISA_2018 %>%
+  select(CNT, ST004D01T, PV1MATH) %>%
+  filter(CNT=='United Kingdom',
+         ST004D01T=='Male')
+
+FemaleUK <- PISA_2018 %>%
+  select(CNT, ST004D01T, PV1MATH) %>%
+  filter(CNT=='United Kingdom',
+         ST004D01T=='Female')
+
+# The conditions to do a t-test include that the data are normally distributed
+# and there is homogeneity (similarity) of the variances (the squared standard deviations)
+# Let us check the conditions are met by calculating first if the data sets are normally
+# distributed using the qq plot in the ggpubr package
+
+ggqqplot(MaleUK$PV1MATH)
+ggqqplot(FemaleUK$PV1MATH)
+
+# The plots produces relatively straight lines so the distributions can be assumed to be normal
+#
+# We will then check the variances of the two data sets
+
+VarM <- var(MaleUK$PV1MATH)
+VarF <- var(FemaleUK$PV1MATH)
+VarM / VarF
+
+# The variance ratio is close to 1 (1.1)
+# So our two conditions are met and can we can perform the t-test
+
+t.test(MaleUK$PV1MATH, FemaleUK$PV1MATH)
+
+# The p-value is <0.05 (4.061e-08) suggesting there are statistically
+# differences between boys and girls
+
+
+```
+
+2.   Choose a different country of interest to compare performance in males and females in that country
+
+```{r}
+#| eval: false
+#| warning: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Are there differences between the mean scores of boys and girls in China PISA mathematics?
+#
+# Select the gender (ST004D01T) and math score columns (PV1MATH)
+# Filter the data to select UK responses
+
+MaleChina <- PISA_2018 %>%
+  select(CNT,ST004D01T, PV1MATH) %>%
+  filter(CNT=='B-S-J-Z (China)', ST004D01T=='Male')
+
+FemaleChina<-PISA_2018 %>%
+  select(CNT,ST004D01T, PV1MATH) %>%
+  filter(CNT=='B-S-J-Z (China)', ST004D01T=='Female')
+
+# The conditions to do a t-test include that the data are normally distributed
+ggqqplot(MaleChina$PV1MATH)
+ggqqplot(FemaleChina$PV1MATH)
+
+# The plots produces relatively straight lines so the distributions can be # assumed to be normal
+#
+# We will then check the variances of the two data sets
+
+VarM<-var(MaleChina$PV1MATH)
+VarF<-var(FemaleChina$PV1MATH)
+VarM/VarF
+
+# The variance ratio is close to 1 (1.17)
+# So our two conditions are met and can we can perform the t-test
+
+t.test(MaleChina$PV1MATH, FemaleChina$PV1MATH)
+
+# The p-value is <0.05 (2.414e-07) suggesting there are statistically
+# differences between boys and girls in mathematics in China
+
+
+```
+
+3.   Now try to compare the performance of males and females in all `OECD` countries in the PISA dataset. You may need to think about how to do this using R without repeating the test for each country
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+
+MaleOECD <- PISA_2018 %>%
+  select(OECD, ST004D01T, PV1MATH) %>%
+  filter(OECD=='Yes', ST004D01T=='Male')
+
+FemaleOECD <- PISA_2018 %>%
+  select(OECD, ST004D01T, PV1MATH) %>%
+  filter(OECD=='Yes', ST004D01T=='Female')
+
+ggqqplot(MaleOECD$PV1MATH)
+ggqqplot(FemaleOECD$PV1MATH)
+
+# The plots produces relatively straight lines so the distributions can be assumed to be normal
+
+# We will then check the variances of the two data sets
+
+VarM <- var(MaleOECD$PV1MATH)
+VarF <- var(FemaleOECD$PV1MATH)
+VarM / VarF
+
+# The variance ratio is close to 1 (1.1)
+# So our two conditions are met and can we can perform the t-test
+
+# The p-value is <0.05 (2.2e-16) suggesting there are statistically
+# differences between boys and girls
+t.test(MaleOECD$PV1MATH, FemaleOECD$PV1MATH)
+
+```
+:::
+
+### Task 4
+
+::: question
+Looking at the reading @cook2014visiphilia, consider the following
+
+<!-- -->
+
+1.   Is it possible to replicate the results using the PISA 2018 data set? Make a graph showing the difference in male and female `PV1MATH` results for each country `CNT`. To do this we are going to have to:
+
+-   work out the `mean()` maths score `PV1MATH` for each country `CNT` and gender `ST004D01T`  grouping, call this `meanmath` and create a new dataframe to store this
+-   from this dataframe, create two new dataframes, one for males only and one for females only
+-   `rename()` (see @sec-renaming) the `meanmath` score in each dataframe to `male_mean` and `female_mean`
+- bind the dataframes together using using column bind function `cbind(<male_df>, <female_df>)` and store this in a new dataframe called `Mathgendergap`. **NOTE:** cbind only accepts tables with different names, so you'll need to select `select(CNT, male_mean)` from the male dataframe and `select(female_mean)` from the female dataframe.
+- use `mutate` (see @sec-mutate) to calculate the difference in male and female mean maths scores for each country
+- plot the results for each country
+
+```{r}
+#| eval: false
+#| warning: false
+#| code-fold: true
+#| code-summary: "creating difference dataset"
+# A relatively simple recreation (without significance testing)
+Mathgendergap <- PISA_2018 %>%
+  select(CNT,PV1MATH,ST004D01T) %>%
+  group_by(CNT,ST004D01T)%>%
+  summarise(meanmath=mean(PV1MATH)) %>%
+  ungroup()
+
+# alternative, using column binding, cbind():
+Mathgendergap<-  cbind(Mathgendergap %>% 
+                           filter(ST004D01T == "Male") %>%
+                           rename(male_mean = meanmath) %>%
+                             select(CNT, male_mean),
+                        Mathgendergap %>%
+                           filter(ST004D01T == "Female") %>%
+                             rename(female_mean = meanmath) %>%
+                             select(female_mean))
+
+# alternatively you can use pivot_wider
+# Mathgendergap <- pivot_wider(Mathgendergap, names_from = ST004D01T, values_from = meanmath)
+
+Mathgendergap <- Mathgendergap %>%
+  mutate(difference = female_mean - male_mean) %>%
+  arrange(desc(difference))
+```
+
+```{r}
+#| eval: false
+#| warning: false
+#| code-fold: true
+#| code-summary: "the graph"
+
+ggplot(Mathgendergap,
+       aes(x=reorder(CNT, difference), y=difference, fill=difference))+
+  geom_col() +
+  geom_hline(yintercept = 0, lty=2) +  # add a line on 0
+  coord_flip() +                      # rotate the graph
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size=5))
+```
+
+The above code doesn't include the t-test results for each country, to do this we need to run some more complex code, you can see how it works below:
+
+```{r}
+#| eval: true
+#| warning: false
+#| code-fold: true
+#| code-summary: "Answer"
+
+# A fuller recreation with t-tests
+# conduct a ttest across countries on a specified column
+library(broom)
+
+ttest_by_country <- function(data, column = PV1MATH){
+
+  # work out which countries have full 30+ datasets for this ttest
+  countries <- data %>% ungroup() %>%
+    filter(!is.na({{column}})) %>%    # {{column}} allows you to change the field of focus
+    select(CNT, ST004D01T, {{column}}) %>%
+    group_by(CNT) %>%
+    filter(n() > 30) %>%
+    pull(CNT) %>%  # the pull command returns the column as a vector, not a table
+    unique()
+ 
+  # list the countries that don't meet that criteria
+  message("dropping: ", setdiff(unique(data$CNT), countries), " as too few entries for ttest")
+ 
+  # reduce the dataset to only those countries with 30+ entries
+  data <- data %>%
+    filter(CNT %in% countries)
+
+  # for each country in this new dataset perform a set of calculations
+  test_result <- map_df(unique(data$CNT),
+                        function(x){
+   
+                            # make a subset of the data just for that country
+                            df <- data %>% filter(CNT == x)
+                           
+                            # get the results pull({{column}}) for females and males as two separate vectors
+                            f_data <- df %>% filter(ST004D01T == "Female") %>% pull({{column}})
+                            m_data <- df %>% filter(ST004D01T == "Male") %>% pull({{column}})
+                           
+                            # tell us the number of results
+                            message(x, " f:", length(f_data), " m:", length(m_data))
+                           
+                            # work out the means of each vector
+                            f_mean <- mean(f_data)
+                            m_mean <- mean(m_data)
+                           
+                            t.test(m_data, f_data) %>%  # conduct a ttest on the male and female results
+                              tidy() %>%      # convert the ttest result into a dataframe
+                              mutate(CNT = x,           # add columns to record the country
+                                     f_mean = f_mean,   # the mean female grade
+                                     m_mean = m_mean,   # the mean male grade
+                                     gender_diff = m_mean - f_mean,  # the difference between the two
+                                     prop_male = length(m_data) / (length(m_data) + length(f_data)))
+                                     # and the proportion who are male in the dataset
+    })
+  return(test_result)
+}
+
+plot_ttest_by_country <- function(data, column = "PV1MATH"){
+
+  ggplot(data %>% mutate(sig = p.value < 0.05),
+         aes(x=reorder(CNT, gender_diff), y=gender_diff, colour=sig))+
+    geom_point(aes(size = prop_male)) +  
+    geom_hline(yintercept = 0, lty=2) +  # add a line on 0
+    coord_flip() +     # rotate the graph
+    xlab("country") +
+    ylab("mean(male - female)") +
+    ggtitle(paste("gender differences for:", column)) +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5,
+                                     hjust=1, size=5))
+}
+
+# run the first function using 2018 data and the PV1MATH column
+ttest_results <- ttest_by_country(PISA_2018, PV1MATH)
+
+#plot the results
+plot_ttest_by_country(ttest_results, "PV1MATH")
+
+# Alternatively, you could run the following:
+# run a ttest for each country
+# ttest_results <- PISA_2018 %>%
+#     filter(!is.na(PV1MATH)) %>% # Vietnam no results?!
+#     select(CNT, ST004D01T, PV1MATH) %>%
+#     group_by(CNT) %>%
+#     nest(data = c(ST004D01T, PV1MATH)) %>% #create a dataframe of gender results for each country
+#     summarise(tt = map(data, function(df){ # apply a ttest to each country
+#       t.test(df %>% filter(ST004D01T == "Female") %$% PV1MATH,
+#              df %>% filter(ST004D01T == "Male") %$% PV1MATH) %>%
+#         tidy() # convert results into a dataframe
+#     })) %>%
+#     unnest(tt)
+```
+
+2.   What issues are there with using a t-test for the context given in the paper?
+
+3.   How do your findings from question 3 and the 2018 dataset compare with those in the paper? Are there any differences or disagreements with your findings?
+
+4.   How could the paper be improved?
+:::
+
+## Doing t-tests in R
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/KdhAcLPq5B4?start=3" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+
+</iframe>
+
+You can find the code from the video below:
+
+```{r}
+#| label: ttest video code
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the Code"
+
+# Introduction to t-tests in R
+#
+# Download data from /Users/k1765032/Library/CloudStorage/GoogleDrive-richardandrewbrock@gmail.com/.shortcut-targets-by-id/1c3CkaEBOICzepArDfjQUP34W2BYhFjM4/PISR/Data/PISA/subset/Students_2018_RBDP_none_levels.rds
+# You want the file: Students_2018_RBDP_none_levels.rds
+# and place in your own file system
+# change loc to load the data directly. Loading into R might take a few minutes
+install.packages("nortest")
+
+library(tidyverse)
+library(nortest)
+loc <- "/Users/k1765032/Library/CloudStorage/GoogleDrive-richardandrewbrock@gmail.com/.shortcut-targets-by-id/1c3CkaEBOICzepArDfjQUP34W2BYhFjM4/PISR/Data/PISA/subset/Students_2018_RBDP_none_levels.rds"
+PISA_2018 <- read_rds(loc)
+
+# Are there differences between the mean scores of UK boys and girls in PISA mathematics?
+#
+# Select the gender (ST004D01T) and math score columns (PV1MATH)
+# Filter the data to select UK responses
+
+MaleUK<-PISA_2018 %>%
+  select(CNT,ST004D01T, PV1MATH) %>%
+  filter(CNT=='United Kingdom') %>%
+  filter(ST004D01T=='Male')
+
+FemaleUK<-PISA_2018 %>%
+  select(CNT,ST004D01T, PV1MATH) %>%
+  filter(CNT=='United Kingdom') %>%
+  filter(ST004D01T=='Female')
+
+# The conditions to do a t-test include that the data are normally distributed
+# and there is homogeneity (similarity) of the variances (the squared standard deviations)
+# Let us check the conditions are met by calculating first if the data sets are normally
+# distributed using the Pearson test of normality from the nortest package
+
+pearson.test(as.numeric(MaleUK$PV1MATH))
+pearson.test(as.numeric(FemaleUK$PV1MATH))
+
+# The p-values are over 0.05 so both distriburtions are normal
+# Pearson chi-square normality test
+#
+# data:  as.numeric(MaleUK$PV1MATH)
+# P = 75.714, p-value = 0.1936
+# Pearson chi-square normality test
+#
+# data:  as.numeric(FemaleUK$PV1MATH)
+# P = 74.06, p-value = 0.2589
+#
+# We will then check the variances of the two data sets
+
+VarM<-var(MaleUK$PV1MATH)
+VarF<-var(FemaleUK$PV1MATH)
+VarM/VarF
+
+# The variance ratio is close to 1 (1.1)
+# So our two conditions are met and can we can perform the t-test
+
+t.test(MaleUK$PV1MATH, FemaleUK$PV1MATH)
+
+# The p-value is <0.05 (4.061e-08) suggesting there are statistically
+# differences between boys and girls
+```

@@ -1,0 +1,1350 @@
+---
+# title: "10 Teacher relationships and STEM achievement"
+---
+
+```{r}
+#| eval: true
+#| warning: false
+#| echo: false
+
+# only load this code if testing this file independently of overall project
+if(!exists("test")){
+  warning("RUNNING LOCAL FILE LOAD")
+  
+  library(glue)
+  proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
+  proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  
+  node <- Sys.info()
+  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
+    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
+    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
+  }else if(node["nodename"] == "PETES_PC"){ #Pete's NEW Laptop
+    proj_folder <- r"(C:\Users\Peter\Google Drive\Kings\Code\MASTEMR\)"
+}else if(node["nodename"] == "Amys-MacBook-Air.local"){ #Amy's NEW Laptop
+    proj_folder <- r"(/Users/amyobrien/Google Drive/My Drive/MASTEMR/)"
+}
+  source(glue("{proj_folder}MASTEMR_setup.R"))
+}
+```
+
+```{=html}
+<!-- Correlation 
+https://docs.google.com/presentation/d/1QlXhCOaFMRyg8IJ2JczKkpjx26eS9BRi/edit#slide=id.p1-->
+```
+```{=html}
+<!-- Correlation 
+https://docs.google.com/presentation/d/1QlXhCOaFMRyg8IJ2JczKkpjx26eS9BRi/edit#slide=id.p1
+@mikk2016relationships
+-->
+```
+In this session we will be exploring the use of **linear regression** to describe data and predict results. We will be looking for patterns within the PISA data sets, as well we trying to recreate some of the controversial findings from @stoet2018gender by linking `PISA_2018` data to global gender equality indices using the `left_join` function.
+
+There are two types of statistics that we can create:
+
+**Descriptive statistics** describe/summarise a data set. E.g. what's the average height of a woman, how many people called George were born in Somerset each year since 1921?
+
+**Inferential statistics** estimate something from a set of data, make generalisations about larger populations. E.g. If I know the height of a woman, can I predict her shoe size? If I meet someone called George, what is the likelihood that they were born in Somerset?
+
+The first few sessions of this course taught you how to use R to perform descriptive statistics, with you finding the `mean`, `max`, `min` etc of data. Following sessions have given you a range of inferential tools, for example chi-square, t-tests and ANOVA. This session will introduce you to *linear regression* a means by which you can predict the value of a variable based on the value of another variable. Before we can start using linear regression we will introduce you to *correlation*, another type of inferential statistics.
+
+## Correlation
+
+Correlation gives the direction and strength of the relationship between two numeric variables. For example we might see a relationship between the reading level of a student and their maths results in the UK: the better a student is at reading, typically, the higher their maths grade. Correlation allows us to describe this relation statistically:
+
+```{r}
+#| code-fold: true
+#| code-summary: code
+#| warning: false
+corr_data <- PISA_2018 %>% 
+  filter(CNT == "United Kingdom") %>% 
+  select(PV1MATH, PV1READ, ST004D01T)
+
+corr <- cor.test(corr_data$PV1MATH, corr_data$PV1READ, method = "pearson")
+corr_est <- signif(corr[["estimate"]],4)
+
+
+ggplot(data = corr_data, aes(PV1MATH, PV1READ)) +
+  geom_point(alpha=0.1) + 
+  geom_smooth(method="lm", se = FALSE) +
+  geom_text(label=paste("r = ", corr_est), aes(x=700,y=-4.5))
+```
+
+The graph above shows that there is a correlation between Maths score and wealth. This relationship is a *positive* one, i.e. as the reading level of an individual increases the maths grade is also likely to increase. The strength, *correlation coefficient* (`Pearson's r`) of the relationship between these two numeric fields is `r corr_est`. The correlation coefficient runs from -1 to +1.
+
+```{r}
+#| echo: false
+# correlation coefficients
+
+# positive
+coef_data <- map(c(1:100),
+    ~{
+      n <- runif(1, min=0, max=50)
+      c(.x,.x + n)
+    }) %>% as.data.frame() %>% t() %>% 
+  as.data.frame() %>% 
+  unname()
+
+names(coef_data) <- c("x", "y")
+rownames(coef_data) <- NULL
+
+corr <- cor.test(coef_data$x, coef_data$y, method = c("pearson"))
+corr_est <- format(round(corr[["estimate"]],2), nsmall = 2)
+
+coef_graph_data <- coef_data %>% mutate(relationship = "positive", r = corr_est)
+
+# negative
+coef_data <- map2(c(1:100),seq(100,1,-1),
+    ~{
+      n <- runif(1, min=0, max=50)
+      c(.x,.y + runif(1, min=-5, max=5))
+    }) %>% as.data.frame() %>% t() %>% 
+  as.data.frame() %>% 
+  unname()
+
+names(coef_data) <- c("x", "y")
+rownames(coef_data) <- NULL
+
+corr <- cor.test(coef_data$x, coef_data$y, method = c("pearson"))
+corr_est <- format(round(corr[["estimate"]],2), nsmall = 2)
+
+coef_graph_data <- rbind(coef_graph_data, coef_data %>% mutate(relationship = "negative", r = corr_est))
+
+# none
+coef_data <- map(c(1:500),
+    ~{
+      n <- runif(1, min=0, max=1)
+      n <- n * if_else(runif(1, min=0, max=2) >= 1, -1, 1)
+      # c(.x,n)
+      c(runif(1, min=10, max=110),
+        runif(1, min=10, max=110))
+      
+      
+      
+    }) %>% as.data.frame() %>% t() %>% 
+  as.data.frame() %>% 
+  #mutate(V1 = V1 / 10,
+  #       V2 = V2 + 50) %>% 
+  unname() 
+
+names(coef_data) <- c("x", "y")
+rownames(coef_data) <- NULL
+
+corr <- cor.test(coef_data$x, coef_data$y, method = c("pearson"))
+corr_est <- format(round(corr[["estimate"]],2), nsmall = 2)
+
+coef_graph_data <- rbind(coef_graph_data, coef_data %>% 
+                     mutate(relationship = "none-negligible", 
+                            r = corr_est))
+```
+
+-   If the correlation coefficient (r) is negative, i.e. as one factor increase the other declines, the slope of the line of best-fit will be negative. E.g "The more time you spend running on a treadmill, the more calories you will burn"
+-   If the correlation coefficient (r) is positive, i.e. as one factor increase the other increases, the slope of the line of best-fit will be positive. E.g. "As the temperature decreases, more heaters are purchased."
+-   If the correlation coefficient (r) is 0, i.e one factor increasing doesn't impact the other factor, the slope of the line of best-fit will be flat. E.g. "the number of trees in a city has no relation to the number of chocolate bars purchased by children"
+
+```{r}
+#| warning: false
+#| echo: false
+#| fig-height: 3
+# graph of correlation coefficients
+
+ggplot(data = coef_graph_data, aes(x, y)) +
+  geom_point(alpha=0.3) + 
+  geom_smooth(method="lm", se = FALSE) +
+  geom_text(aes(label=paste("r = ", r),x=max(x) *0.8,y=min(y))) +
+  ylab("") + xlab("") +
+  facet_wrap(relationship ~ .)
+```
+
+To run the correlation test in R we use the `cor.test` function:
+
+`cor.test(<vector1>, <vector2>, method = "pearson")`
+
+For our data we will be using the `PV1MATH` and `PV1READ` columns.
+
+```{r}
+#| warning: false
+cor.test(corr_data$PV1MATH, corr_data$PV1READ, method = "pearson")
+```
+
+-   `df` the number of ways that the data can vary, the larger this number the more ways the data could have been different
+-   `p-value` significance of the result, can we dismiss the null-hypothesis that there isn't a relationship between maths score and wealth as the p-value is less than `0.05`
+-   `sample estimates` the strength of the relationship between the factors
+-   `confidence intervals` the upper and lower limit of where the correlation coefficient is likely to lie, with 95% confidence.
+
+::: callout-note
+Degrees of freedom (`df`)
+
+Two individuals from different countries might have a weight difference of 5 KG. So what?! But if *average* weights between *whole* populations of countries vary by 5 KG then this becomes much more interesting.
+
+Roughly: Number of independent values that can vary without questioning the significance of the model. So the more `df` you have, the safer your model. Degrees of freedom can be calculated by looking at the number of values that can vary, often this is the number of observations that you have minus one -- if you had just one element it wouldn't be able to vary against anything else:
+
+`df = n - 1`
+:::
+
+### Other correlation-coefficients
+
+When looking for correlations in data that is *non-parametric*, i.e. not normally distributed you could use *Spearman's rank order correlation-coefficient (rho ρ)* rather than *Pearson's r*. `cor.test(... method = "...")` allows you to specify the `method` used for correlation, you can set this to Spearman's rho by writing `method = "spearman"`
+
+Data will need to contain continuous or ordinal variables. The Spearman correlation coefficient is based on the *ranked* values for each variable rather than the raw data. The Spearman correlation between two variables is equal to the Pearson correlation between the rank values of those two variables.
+
+We want to look at the correlation between attitudes towards the learning activities in schools (`ATTLNACT`) and wealth (`WEALTH`) for females from the UK with fathers who are Cooks.
+
+```{r}
+# all the females who have fathers that are Cooks(!)
+sub_data <- PISA_2018 %>% 
+                filter(CNT == "United Kingdom",
+                       ST004D01T == "Female",
+                       OCOD2 == "Cooks")
+```
+
+Graphing this data, it is unclear if it is normalised:
+
+```{r}
+ggplot(sub_data) + geom_density(aes(x=ATTLNACT))
+```
+
+We can run the *Shapiro-Wilk Test* to check for the the normality of the data, any alpha value greater than `0.05` means we can assume that the data is normally distributed.
+
+```{r}
+shapiro.test(sub_data$ATTLNACT)
+```
+
+In this case the data *isn't* normally distributed as `p < 0.05` and we need to use a non-parametric correlation test. We need to run *Spearman* rather than *Pearson*:
+
+```{r}
+#| warning: false
+cor.test(sub_data$WEALTH, sub_data$ATTLNACT, method = "spearman")
+```
+
+The result shows no significant correlation (`p=0.31`) between wealth and attitude to school for this group of students
+
+```{r}
+#| warning: false
+#| echo: false
+#| eval: false
+cor.test(sub_data$WEALTH, sub_data$ATTLNACT, method = "pearson")
+```
+
+```{r}
+#| echo: false
+#| eval: false
+sub_data <- PISA_2018 %>% 
+                filter(CNT == "United Kingdom",
+                       ST004D01T == "Female",
+                       OCOD2 == "Cooks")
+
+
+
+cor.test(sub_data$WEALTH, sub_data$ATTLNACT, method = "spearman")
+cor.test(sub_data$WEALTH, sub_data$ATTLNACT, method = "pearson")
+
+# get different job roles
+# tmp <- PISA_2018 %>% 
+#                 filter(CNT == "United Kingdom",
+#                        ST004D01T == "Female") %>%
+#   group_by(OCOD2) %>% count() %>% arrange(desc(n))
+
+
+num_flds <- PISA_2018 %>% select(where(is.numeric)) %>% names()
+
+shaps <- map(num_flds,
+    ~{
+      shapiro.test(sub_data[[.x]])[["p.value"]]
+    })
+names(shaps) <- num_flds
+sub_data$ATTLNACT
+
+ggplot(sub_data) + geom_point(aes(x=ATTLNACT, y=PV1SCIE))
+```
+
+::: callout-important
+the *central limit theorem* means that when you have a sufficiently large sample you can presume that the data is normally distributed. As a rule of thumb *"30 is the magic number"*, and any samples you are studying with 30 or more data items can be treated as parametric, e.g. you would always use pearson when running correlation analysis on 30 or more items.
+:::
+
+When dealing with non-parametric and small data sets you can also use **Kendall's Tau** i.e. `cor.test(... method = "kendall")`
+
+### Reporting correlations
+
+To interpret the correlation co-efficient of a model we can use the following table:
+
+| Correlation co-efficient | Relationship         |
+|--------------------------|----------------------|
+| .70 or higher            | very strong positive |
+| .40 to .69               | strong positive      |
+| .30 to .39               | moderate positive    |
+| .20 to .29               | weak positive        |
+| .01 to .19               | negligible or none   |
+| 0                        | no relationship      |
+| -.01 to -.19             | negligible or none   |
+| -.20 to -.29             | weak negative        |
+| -.30 to -.39             | moderate negative    |
+| -.40 to -.69             | strong negative      |
+| -.70 or higher           | very strong negative |
+
+When writing a report we might present our findings like this:
+
+> There was no significant relationship between the perceived quality of sleep and its impact on Mood, *r* = -.12, *p* = .17
+
+or
+
+> There is a significant very strong correlation between overall well-being and life satisfaction, *r* = .86, *p* = .00
+
+### Questions
+
+::: question
+Use `cor.test` to explore the following relationships:
+
+1.  `PV1MATH` to `PV1SCIE`, is this a stronger relationship than that between Maths and Reading?
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+cor.test(PISA_2018$PV1MATH, PISA_2018$PV1SCIE, method = "pearson")
+#> cor 0.8451287
+
+cor.test(PISA_2018$PV1MATH, PISA_2018$PV1READ, method = "pearson")
+#> cor 0.828626
+
+#> very slightly, yes!
+```
+
+2.  The wealth `WEALTH` of females `ST004D01T` and their Reading `PV1READ` score, how does this compare to males? Why might they be different?
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+
+data <- PISA_2018 %>% filter(ST004D01T == "Female")
+cor.test(data$WEALTH, data$PV1READ, method = "pearson")
+
+
+data <- PISA_2018 %>% filter(ST004D01T == "Male")
+cor.test(data$WEALTH, data$PV1READ, method = "pearson")
+#> cor 0.2553069
+```
+
+3.  For the `United Kingdom` How does the sense of belonging to school `BELONG` correlate with the attitude to learning activities `ATTLNACT`? How does the UK compare against other countries?
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+data <- PISA_2018 %>% filter(CNT == "United Kingdom")
+cor.test(data$BELONG, data$ATTLNACT, method = "pearson")
+#> cor 0.1314652
+```
+:::
+
+::: callout-tip
+If you want to find all the `numeric` fields, i.e. the fields that you can easily run correlation calculations on, use the following code to list them:
+
+```{r}
+PISA_2018 %>% select(where(is.numeric)) %>% names()
+```
+:::
+
+## Regression
+
+Correlation allows us to see the strength of the relationship but it doesn't allow us to *predict* what would happen if a variable changed. "When the wind blows, the trees move. When the trees move, the wind blows." Which is it? Correlation suggests there is a link but tells us nothing about causation. To do this we need *regression*.
+
+| Correlation                                                                             | Regression                                                                            |
+|-----------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| an example of inferential statistics                                                    | an example of inferential statistics                                                  |
+| give direction and strength of the relationship between two (or more) numeric variables | give direction and strength of the relationship between two (or more) variables       |
+| Relationship between variables                                                          | The extent to which one variable [predicts]{.underline} another                       |
+| Effect only (no cause)                                                                  | Cause and effect                                                                      |
+| p(x,y) == p(y,x)                                                                        | One way (e.g. education affects income differently from how income affects education) |
+| Single point/value                                                                      | An equation that creates a best fitting line                                          |
+
+: differences and similarities between correlation and regression
+
+Regression is a way of *predicting* the value of one *dependent* variable from one or more *independent* variables by creating a hypothetical model of the relationship between them.
+
+-   **independent variable** - the cause of the change that is independent of other variables
+-   **dependent variable** - the effect of the cause
+
+### Linear models and regression
+
+The model used is a **linear** one, therefore, we describe the relationship using the equation of a straight line. In linear regression, with one dependent and one independent variable, we use the *Method of Least Squares* to find the line of best fit. The means finding a straight line that passes as close as possible to all the points. The distance between a point and this line is called a residual. The line of best fit is the line where the sum of the residuals squared is the smallest number possible.
+
+![Method of Least Squares](images/method_of_least_squares.png)
+
+The line that is created can be described by the equation:
+
+`Output = Intercept + Coefficient * Input` <!--F-statistic = a measure of the ratio of the variation explained by the model and the variation attributable to unsystematic factors (the error of the model).-->
+
+Let's use linear regression to explore the relationship between the score in maths(`PV1MATH`) and the score in reading (`PV1READ`). To build this model we use the `lm` command:
+
+`lm(<dependent_var> ~ <independent_var> , data=<dataframe>)`
+
+The first part defines the model we are going to explore, listing the dependent variable and separating it from the independent variable\[s\] with a tilde `~`. You can specify multiple independent variables by adding more plusses, but for the example here we are only going to use one. Once the model has been built we can feed it into the `summary(<mdl>)` command to output the results:
+
+```{r}
+mdl_math_read <- lm(PV1MATH ~ PV1READ, data=PISA_2018)
+summary(mdl_math_read)
+```
+
+If you look at the `Coefficents:` table we can see that `PV1READ` is significant in explaining the outcome of the model as the p-value `Pr(>|t|)` is less than 0.001 `<2e-16 ***`. The null hypothesis is that one variable does not predict another, we can dismiss this. By looking at the `Estimate` we can also see by how much a `PV1MATH` grade would increase if the `PV1READ` increased by one: `0.8003`. Additionally, we have *R^2^* value of `0.6866`, this suggests that the model is very good at explaining the value of the dependent variable, 68.7% of the variance in the `PV1MATH` grade is explained by the `PV1READ` grade.
+
+### R squared
+
+With large data sets you will often find a statistically significant difference, but *p-values* should be read with caution as the larger the data set you use the more likely you are to get a low *p-value*. The actual magnitude of a significant difference might be very small. **r-squared** and **adjusted r-squared** are ways for you to report on the magnitude of a significant difference and when you report the findings from a linear model you should be looking at the `p` and the `R^2^` values. You have already met *R*, this is the correlation coefficient from earlier, *R^2^* is this value squared:
+
+-   **R** - The correlation between the observed values of the outcome, and the values predicted by the model.
+-   **R^2^** - The proportion of variance in the dependent variable accounted for by the model.
+-   **Adj. R^2^** - An estimate of R^2^ in the population (shrinkage), often very similar to plain R^2^.
+
+<!--Effect size measurements include Cohen's d, Glass' g and Pearson's r-->
+
+Imagine we take two experiments a) and b)
+
+![a) larger effect-size; b) smaller effect-size from @coe2002s](images/effectsize.png)
+
+Both have statistically significant results, but it's clear that the impact of the intervention in graph a) is larger as there is less overlap between the curves, i.e. there is more difference between the the outcomes.
+
+> if the difference were as in graph (a) it would be very significant; in graph (b), on the other hand, the difference might hardly be noticeable [@coe2002s p2]
+
+Different effect sizes have different meanings and there is some debate on how to interpret them, with different interpretations for different fields of research [@schafer2019meaningfulness]
+
+| Effect size value | Effect size |
+|-------------------|-------------|
+| 0.0 to 0.19       | negligible  |
+| 0.2 to 0.49       | small       |
+| 0.5 to 0.79       | medium      |
+| 0.8+              | large       |
+
+: How to interpret effect sizes [@cohen1962statistical]
+
+You might be familiar with the Education Endowment Foundation's *Teaching and Learning Toolkit* which outlines the *Impact* of different interventions on student learning. For example, repeating a year is seen to decrease student progress by 3 months and providing students with feedback is seen to increase student progress by 6 months. Behind the scenes they are using effect-sizes to predict the impact of educational interventions. In their model an effect-size of 0.1 is considered to have "Low impact", but also an effect size of this magnitude is translated to 2 months progress in the Toolkit [@higgins2016sutton p.5].
+
+### Questions
+
+::: question
+1.  Is it reasonable to presume that using 5 interventions from the education endowment foundation toolkit, each with effect-sizes of 0.1, i.e. 2 months improvement, will increase the progress for the average student in your class by 10 months (5 \* 2)?
+
+2.  Run a regression model to look at how science grades predict Maths outcomes in UK students. How does this compare to students in France?
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+mdl <- lm(PV1MATH ~ PV1SCIE, 
+          data=PISA_2018 %>% filter(CNT=="United Kingdom"))
+summary(mdl)
+#> Estimate = 0.757
+#> p<0.001
+#> R2 = 0.6378
+
+mdl <- lm(PV1MATH ~ PV1SCIE, 
+          data=PISA_2018 %>% filter(CNT=="France"))
+summary(mdl)
+#> Estimate = 0.834
+#> p<0.001
+#> R2 = 0.7326
+
+#> both models are significant, but the model in France has a higher R squared value, i.e. Science is a better predictor of maths outcomes in France than it is in the UK.
+```
+
+3.  Create a linear model to look at how wealth `WEALTH` influences Maths grades in the United Kingdom and Belarus. If we use the Education Endowment Foundation's interpretation of effect sizes [@higgins2016sutton p.5] what is the impact of increasing the wealth of students in each country?
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+mdl <- lm(PV1MATH ~ WEALTH, 
+          data=PISA_2018 %>% filter(CNT=="United Kingdom"))
+summary(mdl)
+#> Estimate = 14.3
+#> p<0.001
+#> R2 = 0.01999
+#> this is just below 0.02, meaning the model has "Very low or no impact"
+
+mdl <- lm(PV1MATH ~ WEALTH, 
+          data=PISA_2018 %>% filter(CNT=="Belarus"))
+summary(mdl)
+#> Estimate = 31.4
+#> p<0.001
+#> R2 = 0.05476
+#> Wealth has a greater impact on Maths results in Belarus than in the UK, with an effect size of "Low"
+```
+:::
+
+### Multiple linear regression
+
+So far we have looked at the impact of a single independent variable on a single dependent variable. We are now going to look at building models that contain multiple independent variables, of both continuous and discrete values. For example, we might want to see how Gender (`ST004D01T`) and Reading score (`PV1READ`) help predict a maths score. To add extra independent variables, use the plus symbol `+`:
+
+```{r}
+mdl <- lm(PV1MATH ~ PV1READ + gender, 
+          data=PISA_2018 %>% rename(gender = ST004D01T))
+summary(mdl)
+```
+
+Both independent variables are significant (`p<0.001`), and the *R^2^* of the model is high at `0.7043`, this model explains 70% of the variance in Maths grade. Looking at the Estimates, we see both independent variables presented, this means we can read them as if the other factor has been *controlled* for; e.g. what is the impact of reading score if the impact of gender has been taken into consideration. `PV1READ` is `0.818`, meaning for an increase of 1 in this score, the `PV1MATH` grade would increase by `0.818`. Gender is different, this is a *nominal* field, being either Male or Female, and `genderMale` is shown in the coefficients table. This means that the model has taken `gender == Female` as the base state, and modeled what happens if the gender were to change to Male. Interestingly, it suggests that when controlling for the reading grade, e.g. comparing females and males of the same reading score, males would do `27.98` points better in their `PV1MATH` grade than females(!). We'll be exploring these gender differences a little further in section @sec-Stoet-Geary.
+
+### Reporting regression
+
+When reporting linear regression we should make note of the *estimate* (also known as beta *β-value*) of each factor along with their *p-values*. We need to know the *R^2^* and *p-value* for the model as well as the *F-statistic* and the *degrees of freedom*. We can then construct a few sentences to explain our findings [@statology2021]:
+
+> Simple linear regression was used to test if \[predictor variable\] significantly predicted \[response variable\]. The overall regression was statistically significant (R2 = \[R2 value\], F(df regression, df residual) = \[F-value\], p = \[p-value\]). It was found that \[predictor variable\] significantly predicted \[response variable\] (β = \[β-value\], p = \[p-value\]).
+
+For the example above, this would be:
+
+> Simple linear regression was used to test if a student reading grade significantly predicted student maths grade. The overall regression was statistically significant (R^2^ = 0.6866, F(1,606625) = 1329000, p = \<0.001). It was found that reading grade significantly predicted maths grade (β = 0.8003, p = \<0.001).
+
+Alternatively, you could make use of the `easystats` package which will do most of the heavy lifting for you:
+
+```{r}
+library(easystats)
+mdl <- lm(PV1MATH ~ PV1READ, data=PISA_2018)
+summary(mdl)
+report(mdl)
+
+```
+
+### Questions
+
+::: question
+1.  What errors can you see in this code:
+
+```{r}
+#| eval: false
+#| error: false
+
+ml(ST113Q01TA ~ ST004D01T, WEALTH, data = PISA_2015)
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+#| error: false
+# 1. lm rather than ml
+# 2. + between ST004D01T + WEALTH, rather than an ,
+lm(ST113Q01TA ~ ST004D01T + WEALTH, data = PISA_2015)
+```
+
+
+2.  PV1MATH given PV1READ and PV1SCIE
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+
+```
+
+3.  
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+
+```
+:::
+
+## Standardising results with z-values {#sec-z-values}
+
+When we are trying to compare data between countries, our results can be heavily skewed by the overall performance of a country. For example, imagine we have country *A* and country *U*. Students in country *A* generally get high grades with a very high standard deviation, whilst students in country *U* generally get very low grades with a very low standard deviation.
+
+```{r}
+#| warning: false
+df <- data.frame(sex=c("M","M","M","F","F","F","M","M","M","F","F","F"),
+           country=c("A","A","A","A","A","A","U","U","U","U","U","U"),
+           grade=c(100,87,98,95,82,90,10,8,9,12,10,11))
+
+df %>% group_by(country, sex) %>% 
+  mutate(mgrade = mean(grade)) %>%
+  group_by(country) %>%
+  mutate(meancountry = mean(grade),
+         sdgrade = sd(grade)) %>%
+  pivot_wider(names_from = sex, values_from = mgrade) %>%
+  summarise(M_max = max(M, na.rm=TRUE),
+            `F_max` = max(`F`, na.rm=TRUE),
+            difference = M_max-`F_max`,
+            sd = max(sdgrade),
+            mean = max(meancountry))
+
+```
+
+If we look for the difference in grades between females and males in country *A* we might see a massive difference, whilst female and male students in country *U* have a much smaller difference. We might then conclude that country *U* is more equitable. But in reality, because the standard deviation in country *U* is so small, the relative difference between females and males is actually larger than that seen in country *A*! To get around this problem, when dealing with situations like this, we can use *standardised*, or *z*, values. These z-values would be a student's grade in relation to the standard deviation of all of that country's grades.
+
+To calculate the standardised *z-value* for each entry, we use:
+
+`(entry - mean of grouping) / sd of grouping`
+
+For example, for the first Male student in country A who scored 100 points, we would calculate
+
+`(100 - 92) / 6.899 = 1.16`
+
+This shows that this student got 1.16 standard deviations more than the mean of the population. For the first female in country U, we would calculate:
+
+`(12 - 10) / 1.141 = 1.75`
+
+These two values are then directly comparable, the first males in country A is relatively closer to the mean grade of country A, than the first female in country U. How does this work out for the whole country? Going back to whether sex had a greater impact on results in country A or country U we can calculate the z-values for each student by using the `scale()` command:
+
+```{r}
+dfz <- df %>% group_by(country) %>% 
+  mutate(zgrade = scale(grade))
+dfz
+```
+
+We can then group by country and by sex and see how the `mean` z-value varies
+
+```{r}
+#| warning: false
+dfz %>%
+  group_by(country, sex) %>%
+  summarise(mean_zgrade = mean(zgrade))
+
+```
+
+We can clearly see that the grades in country *A* are relatively closer to the mean of country *A*, than the grades in country *U*, meaning that there is less variation in country *A*.
+
+## Recreating Stoet and Geary's paper {#sec-Stoet-Geary}
+
+Stoet and Geary's 2018 paper: *"The Gender-Equality Paradox in Science, Technology, Engineering, and Mathematics Education"* presented controversial findings, including how the increased female uptake of STEM degrees in country could be partially explained (using regression) by the decreased gender equality in that country. We are going to explore part of this paper by looking at another finding (figure 3a) that looked at girls' achievement in the `PISA_2015` science test compared to their maths and reading grades. Comparing this relative grade to boys in the same country, it showed that as gender equality of their country increased, the gap got bigger, i.e. the more gender equal a country, the worse the female relative performance in science.
+
+> The gender gap in intraindividual science scores (a) was larger in more gender-equal countries (*r~s~* = .42)
+
+<!-- fields used by stoet geary and 2012 equivalents
+
+MATHEFF 2012 MATINTFC 2012 SCIEEFF 2015-->
+
+### Loading data sets
+
+To perform more complex analysis you will often want to join different data sets together. @stoet2018gender explore gender differences in outcomes with gender equality in countries (see their figures 3 and 4), by using the `PISA_2015` data set with the science efficacy `SCIEEFF`, and science performance (maybe `PV1SCIE`, or a aggregation of `PV1`, `PV2` etc ) fields; mapping this data set to the 2015 Global Gender Gap Index (GGGI). Let's try and recreate what they did.
+
+First we are going to download the GGGI, unfortunately, it's difficult to find the 2015 data set, so we'll use 2013 instead, which can be found [here](https://data.humdata.org/dataset/29f2f52f-a9c2-4ff9-a99e-42b894dc18e9/resource/a8fe8c72-1359-4ce3-b8cc-03d9e5e85875/download/table-3b-detailed-rankings-2013.csv)
+
+The data is in a `.csv` format so we need to use `read.csv` to get it into R (make sure that you use `read.csv` rather than `read_csv` as the names will come out slightly differently)
+
+```{r}
+#| warning: false
+#| eval: false
+# load the GGGI
+GGGI <- read.csv("<folder>table-3b-detailed-rankings-2013.csv")
+```
+
+If we look at the names of the GGGI fields we find that there is a `Country` column and the `Overall.Score` column, these are the columns that we are interested in. We can also see that many of the top scoring countries, i.e. those with better gender equality are Nordic countries.
+
+```{r}
+#| warning: false
+#| echo: false
+GGGI %>% head(5) %>% select(Country, Overall.Score)
+```
+
+Now we will load the 2015 PISA data set, we have a `.parquet` copy for you [here](https://drive.google.com/file/d/18NpQO1DGY5dnjnlR2b3IF9Zv8xtpc1Fk/view?usp=share_link)
+
+```{r}
+#| warning: false
+#| eval: false
+# load PISA_2015 student data set
+PISA_2015 <- read_parquet("<folder>PISA_2015_student_subset.parquet")
+```
+
+### Linking data using `left_join` {#sec-leftjoin}
+
+To link the `GGGI` to the `PISA_2015` data set we will use the `left_join` function from the tidyverse. This takes a few parameters
+
+    left_join(<table_1>, <table_2>, by=<matching_field[s]>)
+
+We will now join a subset of the `PISA_2015` data set to a subset of the `GGGI` scores:
+
+```{r}
+#| warning: false
+PISA_2015_GGGI <- left_join(
+  PISA_2015 %>% select(CNT, ST004D01T, PV1MATH, PV1SCIE, PV1READ, SCIEEFF),
+  GGGI %>% select(Country, Overall.Score),
+  by=c("CNT"="Country"))
+```
+
+-   line 1, assigns `<-` the result of the `left_join` to a new object, `PISA_2015_GGGI`,
+-   line 2, specifies `<table_1>` to be `PISA_2015` with the selected fields, note we have chosen to use `PV1` grades here, it's unclear what the original paper uses (See @sec-PV for a discussion on the use of `PV` grades)
+-   line 3, specifies `<table_2>` to be `GGGI` with just the country and `Overall.Score` fields
+-   line 4, specifies the `<matching_field>` to be `CNT`from `PISA_2015` and `Country` from `GGGI`, this means that the data in `<table_2>` will be added to `<table_1>` where `CNT` and `Country` are the same. For example for every entry of `Finland` in `PISA_2015`, the `Overall.Score` of `0.8421` will be added. Where it can't find a matching country, e.g. Albania doesn't have a GGGI entry, `NA` will be added.
+
+You can see the new data set has attached the `Overall.Score` field from `GGGI` to the selected fields from `PISA_2015`:
+
+```{r}
+#| warning: false
+#| echo: false
+PISA_2015_GGGI %>% head(3)
+```
+
+::: callout-tip
+There are multiple types of join in the tidyverse, you can find out more about them [here](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)
+
+![The available joins in the tidyverse, CC 4.0, by rstudio.com](/images/joins.png)
+:::
+
+### Standardising PISA results {#sec-standard-stoet-geary}
+
+Next, we will try to wrangle the data into shape to recreate figure 3 from @stoet2018gender. To do this we first need to standardise the grades for maths, science and reading so we can compare the results of students between countries without low performing or high performing countries skewing the results (see @sec-z-values for details on how to standardise data). Following the steps outlined on page 7:
+
+> 1.  We standardized the mathematics, science, and reading scores on a nation-by-nation basis. We call these new standardized scores *zMath*, *zRead*, and *zScience*.
+> 2.  We calculated for each student the standardized average score of the new z-scores and we call this *zGeneral*.
+> 3.  Then, we calculated for each student their intra-individual strengths by subtracting *zGeneral* as follows: *relativeSciencestrength = zScience - zGeneral*, *relativeMathstrength = zMath - zGeneral*, *relativeReadingstrength = zReading - zGeneral*.
+> 4.  Finally, using these new intra-individual (relative) scores, we calculated for each country the averages for boys and girls and subtracted those to calculate the gender gaps in relative academic strengths
+
+produces the following code:
+
+```{r}
+#| warning: false
+#| code-fold: true
+#| code-summary: code
+# standardise the results for each student in line with pg7
+# https://eprints.leedsbeckett.ac.uk/id/eprint/4753/6/symplectic-version.pdf
+
+library(tidyverse)
+library(arrow)
+library(ggrepel)
+
+# step 1
+PISA_2015z <- PISA_2015_GGGI %>% 
+  rename(gender = ST004D01T) %>%
+  group_by(CNT) %>%
+  mutate(zMaths   = scale(PV1MATH),
+         zScience = scale(PV1SCIE), 
+         zReading = scale(PV1READ))
+
+# step 2
+PISA_2015z <- PISA_2015z %>% 
+  mutate(zGeneral = (zMaths + zScience + zReading) / 3)
+
+# step 3
+PISA_2015z <- PISA_2015z %>% 
+  mutate(rel_MATH = zMaths   - zGeneral,
+         rel_SCIE = zScience - zGeneral,
+         rel_READ = zReading - zGeneral)
+
+# step 4 part 1
+PISA_2015z <- PISA_2015z %>% 
+  group_by(CNT, gender) %>%
+  summarise(zMaths = mean(zMaths, na.rm=TRUE),
+            zScience = mean(zScience, na.rm=TRUE),
+            zReading = mean(zReading, na.rm=TRUE),
+            zGeneral = mean(zGeneral, na.rm=TRUE),
+            rel_MATH = zMaths - zGeneral,
+            rel_SCIE = zScience - zGeneral,
+            rel_READ = zReading - zGeneral,
+            gggi = unique(Overall.Score))
+
+# step 4 part 2
+pisa_gggi_diff <- PISA_2015z %>%
+  select(CNT, gender, gggi, rel_SCIE) %>%
+  pivot_wider(names_from = gender,
+              values_from = rel_SCIE) %>%
+  mutate(difference =  Male - Female)
+```
+
+Finally we will plot the results:
+
+```{r}
+#| warning: false
+#| code-fold: true
+#| code-summary: graph code
+library(ggrepel)
+
+ggplot(pisa_gggi_diff,
+       aes(x=difference, y=gggi)) + 
+  geom_point(colour="red") +
+  geom_smooth(method="lm") +
+  geom_text_repel(aes(label=CNT),
+            box.padding = 0.2,
+            max.overlaps = Inf,
+            colour="black") +
+  xlab(paste0("relative difference in PV1SCIE scores (male-female)"))
+```
+
+```{r}
+#| warning: false
+#| echo: false
+#| eval: false
+
+foc <- "SCIE"
+focus <- sym(paste0("rel_",foc))
+
+#| warning: false
+pisa_gggi_diff <- PISA_2015z %>%
+  select(CNT, gender, gggi, {{focus}}) %>%
+  group_by(CNT, gender) %>%
+  pivot_wider(names_from = gender,
+              values_from = {{focus}}) %>%
+  mutate(difference =  Male - Female)
+
+ggplot(pisa_gggi_diff,
+       aes(x=difference, y=gggi)) + 
+  geom_point(colour="red") +
+  geom_smooth(method="lm") +
+  # coord_flip() +
+  geom_text_repel(aes(label=CNT),
+            box.padding = 0.2,
+            max.overlaps = Inf,
+            colour="black") +
+  xlab(paste0("relative difference in ",foc," scores (male-female)"))
+```
+
+The graph is pretty good recreation of what the paper presented, with the general shape the same; differences in grades for each country might be explained by the original paper using 5 plausible values rather than just `PV1SCIE`, as we have used [@stoet2020gender]. Does the statistical model stand up to scrutiny? To find out we will use *correlation*. Stoet and Geary used _Spearman's rho_, signified by the ~*s*~ in *r~s~*:
+
+> The most important and novel finding here is that the sex difference in intraindividual strength in science was higher and more favorable to boys in more gender-equal countries, *r~s~* = .42, 95% CI = \[.19,.61\], *p* \< .001, *n* = 62 (Fig. 3a)
+
+We can run our version of this model using the following:
+
+```{r}
+result <- cor.test(pisa_gggi_diff$gggi, 
+                    pisa_gggi_diff$difference, 
+                    method="spearman")
+result
+```
+
+Our model doesn't show such a strong correlation. In fact, our model shows a "weak positive" relationship of just <code>`r signif(result[["estimate"]],3)`</code>, albeit a significant one (`p<0.05`).
+
+For our version of this model it seems unnecessary to use Spearman's rho, the number of countries we are comparing with valid data is `r nrow(na.omit(pisa_gggi_diff))` (`pisa_gggi_diff %>% na.omit() %>% nrow()`), which is greater than 30 and using the *central limit theorem* we should be able to use _Pearson's r_. Additionally,`shapiro.test`on both difference and`gggi` give non-significant results, suggesting Pearson is the better test to use here:
+
+```{r}
+#| eval: false
+shapiro.test(pisa_gggi_diff$gggi) 
+#> p-value = 0.1226
+shapiro.test(pisa_gggi_diff$difference)
+#> p-value = 0.4078
+```
+
+If we run the model again using Pearson's r, we get:
+
+```{r}
+result <- cor.test(pisa_gggi_diff$gggi, 
+                    pisa_gggi_diff$difference, 
+                    method="pearson")
+result
+```
+
+A result much closer to the one published. The differences here might be the result of the different GGGI data set we used or a difference in the way we calculated `difference`, or something to do with the correlation model used. It would be good to know!
+
+We can also explore this data using regression and a linear model looking at the relationship between `difference` in grades and the `gggi` value for each country:
+
+```{r}
+mdl <- lm(difference ~ gggi, data = pisa_gggi_diff)
+summary(mdl)
+```
+
+This model also finds a significant difference (`p<0.001`) and an estimate for gggi of <code>`r signif(summary(mdl)[["coefficients"]][2,1],3)`</code>, i.e. for each increase of 1 in gggi, males will do <code>`r signif(summary(mdl)[["coefficients"]][2,1],3)`</code> of a standard deviation better than females. The R^2^ is pretty decent too at <code>`r signif(summary(mdl)[["r.squared"]],3)`</code> suggesting the finding that Stoet and Geary reported is a sound one.
+
+```{r}
+#| warning: false
+#| echo: false
+#| eval: false
+pisa_gggi_maths_diff <- PISA_2015z %>% 
+  group_by(CNT, gender) %>%
+  summarise(math_mean= mean(rel_MATH),
+            gggi = unique(gggi)) %>%
+  pivot_wider(names_from = gender,
+              values_from = math_mean) %>%
+  mutate(difference = Male - Female)
+
+ggplot(pisa_gggi_maths_diff,
+       aes(x=difference, y=gggi)) + 
+  geom_point(colour="red") +
+  geom_smooth(method="lm") +
+  geom_text_repel(aes(label=CNT),
+            box.padding = 0.5,
+            max.overlaps = Inf,
+            colour="black") +
+  xlab("relative difference in maths scores (male-female)")
+```
+
+```{r}
+#| echo: false
+#| eval: false
+lm(difference ~ gggi, data = pisa_gggi_maths_diff) %>% summary()
+```
+
+<!--
+### Science self efficacy
+
+We can also try and recreate fig. 4 from @stoet2018gender, looking at how self-efficacy in science `SCIEEFF` varies given the GGGI `Overall.Score`:
+
+```{r}
+#| warning: false
+#| fig-height: 8
+pisa_gggi_scislfeff <- PISA_2015_GGGI %>% 
+  rename(gender = ST004D01T) %>%
+  group_by(CNT, gender) %>%
+  summarise(sci_eff_mean= mean(SCIEEFF, na.rm = TRUE),
+            gggi = unique(Overall.Score))
+
+ggplot(pisa_gggi_scislfeff,
+       aes(x=sci_eff_mean, y=gggi)) + 
+  geom_point(colour="red") +
+  geom_smooth(method="lm") +
+  geom_text_repel(aes(label=CNT),
+            box.padding = 0.2,
+            max.overlaps = Inf,
+            colour="black") +
+  xlab("mean science self efficacy") +
+  facet_grid(gender ~ .)
+
+```
+
+```{r}
+lm(sci_eff_mean ~ gggi + gender, 
+   data = pisa_gggi_scislfeff) %>% 
+  summary()
+
+```
+
+> We used the UNESCO graduation data (available via http://data.uis.unesco.org) labelled "Distribution of tertiary graduates"
+
+::: question
+1.  
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+summary_mdl_math_read_wealth <- summary(mdl_math_read_wealth)
+summary_mdl_math_read_wealth$r.squared
+```
+
+2.  
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+summary_mdl_math_read_wealth <- summary(mdl_math_read_wealth)
+summary_mdl_math_read_wealth$r.squared
+```
+
+3.  calculate a new field, then conduct a
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+summary_mdl_math_read_wealth <- summary(mdl_math_read_wealth)
+summary_mdl_math_read_wealth$r.squared
+```
+:::
+
+## Logistic regression
+
+Sometimes the dependent variable will be *boolean*, that is a field that can only have two values, e.g. `True/False`, `Yes/No`, `High/Low`, etc. Unfortunately we can't use the linear model to do th
+
+```{r}
+
+# get regression line
+
+# for a given observation x, find y on the regression line
+
+
+
+```
+
+```{r}
+
+# direct_indep %>% select(starts_with("ST00"))
+
+```
+
+-->
+
+## Seminar Tasks
+
+::: question
+
+Group discussion:
+
+- What were the most important findings from Stoet and Geary's paper?
+- How trustworthy are the results?
+- What do these results mean for gender equality in STEM?
+
+1.  What are _Spearman's Rho_ and _Pearson's r_? When might you use one rather than the other?
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#> When the data you use has outliers or is not 
+#> normally distributed (non-parametric) you should use Spearman's Rho
+#> you can test this by checking that shapiro.test p >0.05
+
+```
+
+2.  Identify dependent and independent variables in the following scenarios and select the most appropriate statistical test (from all that you have learnt) for the analysis.
+
+-   The government is trying to understand which groups of people have been affected by a pandemic. They have data on healthcare professionals, education professionals and train drivers and the number of days taken off ill in the last 6 months.
+-   A cigarette company, working in a country that still allows cigarette advertising(!), wants to work out which groups in society are not currently smoking that many cigarettes. They want to find out if city dwellers are more likely to smoke than people living in the countryside.
+-   A netball team is trying to work out how likely their players are to get injured in a season. They have data on the number of injuries per player and the number of minutes each player has been playing netball.
+-   A country is trying to find out whether girls or boys are better behaved in schools. They have access to school databases that record the number of bad behaviour slips for each student.
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+
+# The government is trying to understand which groups of people have been affected by a pandemic. They have data on healthcare professionals, education professionals and train drivers and the number of days taken off ill in the last 6 months.
+#> Dependendent: days off ill
+#> Independent: job role
+#> Suggested model: ANOVA to check if there are differences between jobs
+
+# A cigarette company, working in a country that still allows cigarette advertising(!), wants to work out which groups in society are not currently smoking that many cigarettes. They want to find out if city dwellers are more likely to smoke than people living in the countryside.
+#> Dependent: Smoker / Non Smoker
+#> Independent: City / Countryside residence
+#> Suggested model: Chi-square
+
+# A netball team is trying to work out how likely their players are to get injured in a season. They have data on the number of injuries per player and the number of minutes each player has been playing netball.
+#> Dependent: injuries
+#> Independent: time on court
+#> Suggested model: Linear model/regression
+
+# A country is trying to find out whether girls or boys are better behaved in schools. They have access to school databases that record the number of bad behaviour slips for each student.
+#> Dependent: behaviour slips
+#> Independent: Gender (Girls/Boys)
+#> Suggested model: t-test
+
+```
+
+3.  Interpret this correlation coefficient between the Index of economic, social and cultural status `ESCS` and Family wealth `WEALTH`
+
+```{r}
+#| echo: false
+#| eval: true
+cor.test(PISA_2018$ESCS, PISA_2018$WEALTH)
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+#> The Index of economic, social and cultural status `ESCS` is strongly
+#> correlated with Family wealth `WEALTH`, with a correlation coefficient
+#> of 0.697926. This model is signficant with a p-value of < 0.001
+
+```
+
+4.  Interpret this linear model based on the FBI's 2006 crime statistics. It explores the relationship between size of population (1,000s) and the number of murders (units)[^FBI]:
+
+[^FBI]: https://www.statisticssolutions.com/the-linear-regression-analysis-in-spss/:
+
+||Estimate|Std. Error|t value|Pr(>\|t\|)|
+|--|--|--|--|--|
+|(Intercept)|-0.726|0.089|-8.191|<2e-16 ***|
+|Pop_thou|0.103|0.001|145.932|<2e-16 ***|
+
+_Adj R^2^_ 0.721
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+#> The model is pretty good at explaining the variance, The Adj. R2
+#> shows that population explains 72% of the variance in murders.
+#> The model is significant as p < 0.001. For every increase in 
+#> population of 1000 people, the model predicts another 0.1 deaths.
+
+```
+
+5. Work out the correlation between a country's mean female science grade and mean male science grade. Should you use _Spearman's Rho_ or _Pearson's r_ in your model? Why?
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+
+df <- PISA_2018 %>% group_by(CNT, ST004D01T) %>% summarise(maths = mean(PV1MATH))
+
+maths_male   <- df %>% filter(ST004D01T == "Male")
+maths_female <- df %>% filter(ST004D01T == "Female")
+
+cor.test(maths_male$maths, maths_female$maths)
+
+#> you should use Pearson as the shapiro wilkes test has a p-vale > 0.05
+
+shapiro.test(maths_female$maths)
+#> p-value = 0.1727
+
+shapiro.test(maths_male$maths)
+#> p-value = 0.1414
+
+```
+
+6.  Create a linear model to explore the relationship between the time spent in science lessons (`SMINS`) and the grade in science (`PV1SCIE`)
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+
+mdl <- lm(PV1SCIE ~ SMINS, data = PISA_2018)
+summary(mdl)
+
+#> For every extra minute spent learning science, 
+#> there is a grade increase of 0.07, 
+#> SMINS is a significant predictor p <2e-16 ***, 
+#> but the overall model has a very low R squared value of 0.01625
+
+```
+
+Add the student maths score `PV1MATH`  this model, how does this change the outcome? 
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+
+mdl <- lm(PV1SCIE ~ SMINS + PV1MATH, data = PISA_2018)
+summary(mdl)
+
+#> For every extra minute spent learning science each week, 
+#> there is now a grade increase of only 0.015, 
+#> i.e. when controlling for maths outcomes, time in science 
+#> lessons explains less of the overall science grade. 
+#> Both factors remain significant and the overall model 
+#> now has a very high R squared value of 0.6974
+```
+
+7.  Load the school level data set for 2018 (file [here](https://drive.google.com/file/d/1ZJkiIGkVfBdRupTVxbaRQ1fwOZr_RV8O/view?usp=share_link)) and explore the fields.
+
+  Using a linear model, how do "Shortage of educational staff" `STAFFSHORT` and "Shortage of educational material" `EDUSHORT` relate to "Student behaviour hindering learning" `STUBEHA`
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+mdl <- lm(STUBEHA ~ STAFFSHORT + EDUSHORT, data=PISA_2018_school)
+summary(mdl)
+
+#> STAFFSHORT has a slightly larger estimate, 0.214186, than EDUSHORT, 0.17148.
+#> This means as staff and educational resource shortages increase, so does
+#> student behaviour hindering learning.
+#> Both factors are significant p <2e-16 ***
+#> The effect size of the overall model is low, at 0.08346
+```
+
+  Adjust the model to incorporate the percentage of boys in a school (see `SC002Q01TA` and `SCHSIZE`), what difference does this make?
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+tbl_beh_predict <- PISA_2018_school %>% 
+  mutate(boy_per = 100 * SC002Q01TA / SCHSIZE)
+
+mdl <- lm(STUBEHA ~ STAFFSHORT + EDUSHORT + boy_per, data=tbl_beh_predict)
+summary(mdl)
+
+#> adding percentage of boys to the model increases the effect size 0.09553,
+#> albeit, still a small one.
+#> when controlling for boy_per the estimate of staff shortages
+#> decreases slightly, and the estimate of educational shortages
+#> increases. The estimate of boy_per is significant, for every 
+#> one percent increase in boys in a school, student behaviour
+#> hindering learning increases by 0.005, this model shows an all 
+#> girls school would likely have a student behaviour hindering
+#> learning value 0.5 lower than an all boys school!
+#> it'd be worth double checking to see if boy_per is parametric
+
+```
+
+  How does the explanatory value of this model change if you only look at schools in the UK?
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+
+mdl <- lm(STUBEHA ~ STAFFSHORT + EDUSHORT + boy_per, 
+          data=tbl_beh_predict %>% filter(CNT == "United Kingdom"))
+summary(mdl)
+
+#> for the UK the effect size is larger at 0.1686, more of the variance of
+#> STUBEHA is explained by this model than for other countries
+#> educational resource shortages have a negative impact on STUBEHA, 
+#> albeit with a very small estimate -0.003519
+#> staff shortages have a bigger impact that other countries, with an
+#> estimate of 0.396835
+```
+
+8.  Using `left_join` (see @sec-leftjoin),  link each student record in `PISA_2018` to their school details (file [here](https://drive.google.com/file/d/1ZJkiIGkVfBdRupTVxbaRQ1fwOZr_RV8O/view?usp=share_link)). You will need need to `select` a subset of the school table to cover: 
+`CNT, CNTSCHID, SC016Q02TA, SC156Q03HA, SC156Q04HA, SC154Q01HA,`
+`SC154Q02WA, SC154Q05WA, SC154Q08WA, SC154Q09HA, STRATIO, CLSIZE,`
+`EDUSHORT, STAFFSHORT, STUBEHA` 
+
+```{r}
+#| code-fold: true
+#| code-summary: left_join code
+#| eval: true
+#| warning: false
+
+#> SC016Q02TA	Percentage of total funding for school year from: Student fees or school charges paid by parents
+#> SC156Q03HA	At school: A programme to use digital devices for teaching and learning in specific subjects
+#> SC156Q04HA	At school: Regular discussions with teaching staff about the use of digital devices for pedagogical purposes
+#> SC154Q01HA	School's use of assessments of students: To guide students' learning
+#> SC154Q02WA	School's use of assessments of students: To inform parents about their child's progress
+#> SC154Q05WA	School's use of assessments of students: To compare the school to <district or national> performance
+#> SC154Q08WA	School's use of assessments of students: To identify aspects of instruction or the curriculum that could be improved
+#> SC154Q09HA	School's use of assessments of students: To adapt teaching to the students' needs
+#> STRATIO	Student-Teacher ratio
+#> CLSIZE	Class Size (cheating here slightly as this is a nominal field which roughly maps to the continuous)
+#> EDUSHORT	Shortage of educational material (WLE)
+#> STAFFSHORT	Shortage of educational staff (WLE)
+#> STUBEHA	Student behaviour hindering learning (WLE)
+
+PISA_2018_stusch <- 
+  left_join(PISA_2018 %>% select(CNT, CNTSCHID, ST004D01T, WEALTH, 
+                                 ESCS, PV1SCIE, PV1MATH, PV1READ), 
+             PISA_2018_school %>% 
+              select(CNT, CNTSCHID, SC016Q02TA, SC156Q03HA, SC156Q04HA,
+                     SC154Q01HA, SC154Q02WA, SC154Q05WA, SC154Q08WA,
+                     SC154Q09HA, STRATIO, CLSIZE, EDUSHORT, STAFFSHORT, STUBEHA))
+```
+
+  Using a linear model, find out how well the student teacher ratio `STRATIO` in a school predicts the `mean` maths achievement `PV1MATH` in that school. __HINT__: you need one row for each school, so use summarise with unique on `STRATIO` and mean on `PV1MATH`:
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+stu_tch_mat <- PISA_2018_stusch %>% 
+  group_by(CNTSCHID) %>%
+  summarise(stu_tch_rat = unique(STRATIO),
+            maths = mean(PV1MATH))
+
+mdl_stu_tch_mat <- lm(maths ~ stu_tch_rat, data=stu_tch_mat)
+summary(mdl_stu_tch_mat)
+
+#> it's significant p <2e-16 ***, but with a very low 
+#> estimates/betas, i.e. one extra student per teacher 
+#> decreases the maths score by just 1.3 points, 
+#> additionally the R squared value is low 0.02499 
+#> this is "low impact" in the EEF toolkit
+```
+
+  Adjust the linear model used above to incorporate `STUBEHA`	"Student behaviour hindering learning" in addition to the student teacher ratio:
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+stu_tch_mat_bev <- PISA_2018_stusch %>% 
+  group_by(CNTSCHID) %>%
+  summarise(stu_tch_rat = unique(STRATIO),
+            behaviour = unique(STUBEHA),
+            maths = mean(PV1MATH))
+
+#> max(stu_tch_mat_bev$behaviour, na.rm = TRUE)
+#> min(stu_tch_mat_bev$behaviour, na.rm = TRUE)
+
+mdl_stu_tch_mat_bev <- lm(maths ~ stu_tch_rat + behaviour, data=stu_tch_mat_bev)
+summary(mdl_stu_tch_mat_bev)
+
+#> both factors are significant p<2e-16 ***, but with low estimates/betas, 
+#> i.e. one extra student per teacher decreases 
+#> the maths score by 1.2 points and the aggregated student behaviour hinder 
+#> learning decreases maths by 11.1 points 
+#> (max behaviour = 3.6274, min = -4.3542), additionally the R squared value 
+#> is better, but still low 0.05619
+```
+
+9. Explore the schools data set to look at other interesting models. The school data set has a lot more numeric/continuous fields than the student table! To find these fields use this code:
+
+```{r}
+#| code-fold: true
+#| code-summary: find numeric fields
+#| eval: false
+
+# to get the names of numeric fields along with their labels
+nms <- PISA_2018_school %>% select(where(is.numeric)) %>% names()
+lbls <- map_dfr(nms,~{
+  lbl <- attr(PISA_2018_school[[.x]], "label")
+  nme <- .x
+  row <- c(nme, lbl)
+  names(row) <- c("name", "label")
+  return(row)
+})
+
+```
+
+10.  In pairs discuss how you could use correlation and regression in your own research. Start building some models to explore the data sets.
+
+11.  Recreate the Stoet & Geary analysis (see @sec-standard-stoet-geary) to see if there is a "gender gap in intraindividual __mathematics__ scores" that is "larger in more gender-equal countries". You might expect this to be the case as it exists for science. Is this a STEM wide finding? How does the science model look for 2018 data? Was it a one off finding?
+
+```{r}
+#| warning: false
+#| code-fold: true
+#| code-summary: answer
+#| eval: false
+# standardise the results for each student in line with pg7
+# https://eprints.leedsbeckett.ac.uk/id/eprint/4753/6/symplectic-version.pdf
+
+library(tidyverse)
+library(arrow)
+library(ggrepel)
+
+PISA_2015_GGGI <- left_join(
+  PISA_2015 %>% select(CNT, ST004D01T, PV1MATH, PV1SCIE, PV1READ, SCIEEFF),
+  GGGI %>% select(Country, Overall.Score),
+  by=c("CNT"="Country"))
+
+# step 1
+PISA_2015z <- PISA_2015_GGGI %>% 
+  rename(gender = ST004D01T) %>%
+  group_by(CNT) %>%
+  mutate(zMaths   = scale(PV1MATH),
+         zScience = scale(PV1SCIE), 
+         zReading = scale(PV1READ))
+
+# step 2
+PISA_2015z <- PISA_2015z %>% 
+  mutate(zGeneral = (zMaths + zScience + zReading) / 3)
+
+# step 3
+PISA_2015z <- PISA_2015z %>% 
+  mutate(rel_MATH = zMaths   - zGeneral,
+         rel_SCIE = zScience - zGeneral,
+         rel_READ = zReading - zGeneral)
+
+# step 4 part 1
+PISA_2015z <- PISA_2015z %>% 
+  group_by(CNT, gender) %>%
+  summarise(zMaths = mean(zMaths, na.rm=TRUE),
+            zScience = mean(zScience, na.rm=TRUE),
+            zReading = mean(zReading, na.rm=TRUE),
+            zGeneral = mean(zGeneral, na.rm=TRUE),
+            rel_MATH = zMaths - zGeneral,
+            rel_SCIE = zScience - zGeneral,
+            rel_READ = zReading - zGeneral,
+            gggi = unique(Overall.Score))
+
+# step 4 part 2
+pisa_gggi_diff <- PISA_2015z %>%
+  select(CNT, gender, gggi, rel_MATH) %>%
+  pivot_wider(names_from = gender,
+              values_from = rel_MATH) %>%
+  mutate(difference =  Male - Female)
+
+ggplot(pisa_gggi_diff,
+       aes(x=difference, y=gggi)) + 
+  geom_point(colour="red") +
+  geom_smooth(method="lm") +
+  geom_text_repel(aes(label=CNT),
+            box.padding = 0.2,
+            max.overlaps = Inf,
+            colour="black") +
+  xlab(paste0("relative difference in PV1MATH scores (male-female)"))
+
+# perform correlation analysis
+result <- cor.test(pisa_gggi_diff$gggi, 
+                    pisa_gggi_diff$difference, 
+                    method="spearman")
+result
+#> this result isn't significant as p-value > 0.05
+#> additionally the correlation coefficient is negative
+#> this suggests that the STEM gender paradox doesn't apply to maths.
+```
+
+:::

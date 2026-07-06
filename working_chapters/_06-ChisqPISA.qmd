@@ -1,0 +1,744 @@
+---
+# title: "6 Maths anxiety"
+# bibliography: ./references/mastemr.bib
+# bibliography: references.bib
+bibliography: references.bib
+---
+
+```{r}
+#| eval: true
+#| warning: true
+#| echo: false
+
+# only load this code if testing this file independently of overall project
+if(!exists("test")){
+  warning("RUNNING LOCAL FILE LOAD")
+  
+  library(glue)
+  proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
+  proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  
+  node <- Sys.info()
+  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
+    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
+    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
+  }else if(node["nodename"] == "PETES_PC"){ #Pete's NEW Laptop
+    proj_folder <- r"(C:\Users\Peter\Google Drive\Kings\Code\MASTEMR\)"
+}else if(node["nodename"] == "Amys-MacBook-Air.local"){ #Amy's NEW Laptop
+    proj_folder <- r"(/Users/amyobrien/Google Drive/My Drive/MASTEMR/)"
+}
+  source(glue("{proj_folder}MASTEMR_setup.R"))
+}
+```
+
+## Chi-square tests
+
+Chi squared ($\chi^2$) tests are *non-parametric* tests, this means that the test isn't expecting the underlying data to be distributed in a certain way. Chi-squared determines how well the frequency distribution for a sample fits the population distribution and will let you know when things aren't distributed as expected. For example you might expect girls and boys to have the same coloured dogs, a chi squared test can tell you whether the null hypothesis, that there is no difference between the colours of dogs owned by girls and boys, is true or not.
+
+In more mathematical terms, chi squared examines differences between the categories of an independent variable with respect to a dependent variable measured on a nominal (or categorical) scale. A nominal scale has values that aren't ordered, or continuous, for example gender or favourite flavour of icecream.
+
+Chi-square tests can be categorised in two groups:
+
+-   *A test of goodness of fit* - this is a form of hypothesis test which determines whether a sample fits a wider population. For example, does the pattern of exam results in one school fit the national distribution?
+
+-   *A test of independence* - allows inference to be made about whether two categorical variables in a population are related. For example, are there differences in the uptake of careers by gender?
+
+For more information on chi-square tests, see [chapter 12](https://learningstatisticswithr.com/book/chisquare.html), in Navaro's Learning Statistics with R.
+
+## Creating contingency tables
+
+Chi-square calculations depend on contingency tables. A contingency table is a table that shows the frequency counts for two variables. We can use the `xtabs` function to create contingency tables in R.
+
+For example, imagine we want to create a contingency table for the number of boys and girls in the UK and US in the PISA sample. First we create a subset of the `PISA_2018` `data.frame` including country and gender, and `filter` for the two countries. We use the `xtabs` function to create the table. We pass the subset data (`UKUSgender`) to `xtabs` and indicate the columns and rows we want `~CNT + ST004D01T`
+
+```{r}
+#| eval: true
+#| code-fold: false
+#| code-summary: "Show the code"
+# Example contingency table
+
+UKUSgender<-PISA_2018%>%
+  select(CNT, ST004D01T)%>% # Select gender and country variables
+  filter(CNT=="United Kingdom"|CNT=="United States")%>% # Filter for  UK and the US
+  droplevels() # To prevent the levels for other countries confusing the table
+
+ContTable<-xtabs(data=UKUSgender, ~CNT+ ST004D01T)
+ContTable
+
+```
+
+## Hypothesis testing and Chi-square goodness of fit tests
+
+If we want to determine if a sample categorical data matches the pattern of a whole population we can use a Chi-square goodness of fit test. The test is a form of hypothesis testing.
+
+Hypothesis testing is one type of statistical analysis. A researcher states an assumption that they want to test.
+
+For example, they might want to examine whether the distribution of boys and girls in the UK matches the expected distribution of 50:50.
+
+A researcher typically proposes a null hypothesis - that is that there is no difference in groups. Whilst this is typical practice, and we will follow it in this course, researchers have pointed out that it is rare for the null hypothesis to be true, which impacts the validity of the test (see: @cohen1994) . Nonetheless, we will adopt the practice here, as it is a widely used approach.
+
+Our null hypothesis then is:
+
+*There is no difference in the distribution of boys and girls in the UK and a random sample of 50/50 girls and boys*.
+
+Notice the 'goodness of fit' element - we are checking if some categorical data from a sample population (the UK) fits an expected pattern.
+
+The outcome of a hypothesis test is typical reported by stating the value of some test (the test statistic, in this case, the Chi-squared statistic) which is used to calculate a significance level (or p-value). The p-value is the probability of obtaining test results at least as extreme as the result actually observed, under the assumption that the null hypothesis is correct.
+
+This assumption has been critiqued, but in many research traditions, if the p-value is less than 0.05 (p\>0.05) the result is taken to be statistically significant.
+
+In the case of a Chi-squared goodness of fit test:
+
+• If the p-value is ***greater than 0.05*** (p\<0.05) ***we accept the null hypothesis*** that the sample has been drawn from the wider population.
+
+• If the p-value ***is less than 0.05*** (p\>0.05) ***we reject the null hypothesis*** that the sample has been drawn from the wider population.
+
+::: callout-tip
+It is important that care is taken when interpreting p-values. A p-value of below 0.05 does not mean the null hypothesis is false. Monya Baker provided a helpful summary of how to think of p-values:
+
+"A P value of 0.05 does not mean that there is a 95% chance that a given hypothesis is correct. Instead, it signifies that if the null hypothesis is true, and all other assumptions made are valid, there is a 5% chance of obtaining a result at least as extreme as the one observed. And a P value cannot indicate the importance of a finding; for instance, a drug can have a statistically significant effect on patients' blood glucose levels without having a therapeutic effect."
+
+See @baker2016statisticians for further discussion of how to interpret p-values.
+:::
+
+## An example: Does the disritbution of male and female students in the UK fit the expected pattern (50:50)?
+
+## Loading the data
+
+We will continue to use the PISA_2018 dataset, make sure it is loaded.
+
+```{r}
+#| eval: false
+#| code-fold: false
+#| code-summary: "Show the code"
+# Load PISA data
+
+library(arrow)
+library(tidyverse)
+
+PISA_2018 <- read_parquet(r"[<folder>PISA_2018_student_subset.parquet]")
+
+```
+
+## Performing the goodness of fit test
+
+To perform the goodness of fit test, we make a subset `dataframe` of the UK data including the `ST004D01T` (gender variable).
+
+```{r}
+#| eval: false
+#| code-fold: false
+#| code-summary: "Show the code"
+# Perform a chi-square goodness of fit test on categorical data related to gender in the UK
+
+UKPISAgender<-PISA_2018%>%
+  select(CNT, ST004D01T)%>% # Select gender and country variables
+  filter(CNT=="United Kingdom")%>% # Filter for the UK
+  droplevels() # To prevent the levels for other countries confusing the table
+
+GenderContTable<-xtabs(data=UKPISAgender,~CNT + ST004D01T)
+
+chisq.test(GenderContTable, p=c(1/2,1/2))
+
+
+```
+
+The outcome of the chi squared test returns a p-value = 0.1388. This is greater than 0.05, suggesting we reject the null hypothesis, and the numbers of boys and girls in the UK sample does not match a 50:50 distribution.
+
+### Example - Gender distribution in the PISA sample
+
+::: question
+a)  Should we accept or reject the hypothesis that the populations of boys and girls in the United States, Japan and China are 50:50?
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+# Perform a chi-square goodness of fit test on categorical data related to gender in the US, Japan and China
+
+USPISAgender<-PISA_2018%>%
+  select(CNT, ST004D01T)%>% # Select gender and country variables
+  filter(CNT=="United States")%>% # Filter for the US
+  droplevels() # To prevent the levels for other countries confusing the table
+
+GenderContTable<-xtabs(data=USPISAgender,~CNT + ST004D01T)
+
+chisq.test(GenderContTable, p=c(1/2,1/2))
+
+# In the US, population of M:F differs from 50:50 p= 0.2163, reject null hypothesis of equality.
+
+JPNPISAgender<-PISA_2018%>%
+  select(CNT, ST004D01T)%>% # Select gender and country variables
+  filter(CNT=="Japan")%>% # Filter for the Japan
+  droplevels() # To prevent the levels for other countries confusing the table
+
+GenderContTable<-xtabs(data=JPNPISAgender,~CNT + ST004D01T)
+
+chisq.test(GenderContTable, p=c(1/2,1/2))
+
+# In Japan, population of M:F differs from 50:50 p= 0.09373, reject null hypothesis of equality.
+
+ChinaPISAgender<-PISA_2018%>%
+  select(CNT, ST004D01T)%>% # Select gender and country variables
+  filter(CNT=="B-S-J-Z (China)")%>% # Filter for China
+  droplevels() # To prevent the levels for other countries confusing the table
+
+GenderFreqTable<-xtabs(data=ChinaPISAgender,~CNT + ST004D01T)
+
+chisq.test(GenderFreqTable, p=c(1/2,1/2))
+# In China, population of M:F is 50:50 p= 3.724e-06, accept null hypothesis of equality.
+
+
+```
+:::
+
+::: callout-tip
+R uses standard form: an output of p= 3.724e-06, represents, p=3.724x10^-6^, or p=0.0000003724.
+:::
+
+## Chi-square test of independence
+
+Goodness of fit tests can be useful, but they rely on knowing the expected distribution (for example, assuming a 50:50 distribution of boys and girls).
+
+An alternative ways of using a Chi-square test, is the test of independence. This approach determines whether two categorical variables in a sample are related.
+
+For example, a categorical variable in the same is item - `ST011Q04TA` - is there a a quiet place to study in the home? Which can be responded to with 'yes' or 'no' (or `<NA>`).
+
+We might want to see if students in the UK respond to this question in the same way as the rest of the sample. That is, are students in the UK just as likely to have a quiet place to study as their international peers.
+
+A simple first attempt is to create frequency tables for the UK and the rest of the sample and examine the responses.
+
+```{r}
+#| eval: false
+#| code-fold: false
+#| code-summary: "Show the code"
+# Produce tables of counts of having a quiet room for the UK and the rest of the sample
+
+QuiRoom<-PISA_2018%>%
+  select(ST011Q04TA)%>% # Select quiet room
+  droplevels() # To prevent the levels for other countries confusing the table
+
+QuiFreqTable<-xtabs(data=QuiRoom,~ST011Q04TA)
+print(QuiFreqTable)
+
+UKQuiRoom<-PISA_2018%>%
+  select(CNT, ST011Q04TA)%>% # Select quiet room and country variables
+  filter(CNT=="United Kingdom")%>% # Filter for the UK
+  droplevels() # To prevent the levels for other countries confusing the table
+
+UKQuiFreqTable<-xtabs(data=UKQuiRoom,~ST011Q04TA)
+print(UKQuiFreqTable)
+
+```
+
+From the data, it is hard to tell if the UK is different from the overall pattern. To make things easier, we can use `mutate` to add a percentage column to aid comparison.
+
+```{r}
+#| eval: false
+#| code-fold: false
+#| code-summary: "Show the code"
+# Produce tables of counts of having a quiet room for the UK and the rest of the sample
+
+QuiRoom<-PISA_2018%>%
+  select(ST011Q04TA)%>% # Select quiet room
+  droplevels() # To prevent the levels for other countries confusing the table
+
+QuiFreqTable<-xtabs(data=QuiRoom,~ST011Q04TA)
+QuiFreqTable<-as.data.frame(QuiFreqTable)
+Total=sum(QuiFreqTable$Freq) # Find the total count
+QuiFreqTable<-QuiFreqTable%>%
+  mutate(Perc=(Freq*100)/Total) # Mutate the table to calculate the percentage
+print(QuiFreqTable)
+
+UKQuiRoom<-PISA_2018%>%
+  select(CNT, ST011Q04TA)%>% # Select quiet room and country variables
+  filter(CNT=="United Kingdom")%>% # Filter for the UK
+  droplevels() # To prevent the levels for other countries confusing the table
+
+UKQuiFreqTable<-xtabs(data=UKQuiRoom,~ST011Q04TA)
+UKQuiFreqTable<-as.data.frame(UKQuiFreqTable)
+Total=sum(UKQuiFreqTable$Freq) # Find the total count
+UKQuiFreqTable<-UKQuiFreqTable%>%
+  mutate(Perc=(Freq*100)/Total)  # Mutate the table to calculate the percentage
+print(UKQuiFreqTable)
+
+```
+
+## Plotting the chi-square relationships
+
+The numbers in the contingency table are hard to interpret - it is challenging to see how far out the numbers for each row are from each other. Alternatively, we can visualise the data from the contingency table by building a mosaic plot, a form of stacked bar chart. Mosaic plots can be a useful visulations before running a chi-squared test.
+
+To create a mosaic plot, you are going to need to install and load the `ggmosaic` package. See @sec-load-run-pckges for more details on how to do this.
+
+Imagine we want to plot the 'quiet room' data (`ST011Q04TA`) from the previous section for the UK, US, and Brazil
+
+To create the mosaic plot we use `ggplot`, as we used for previous graphs. As before, we first pass the data (in this case `QuiRoom`) to `ggplot`. Then, to create the graph, `geom_mosaic` is used. `geom_mosaic` does not have a direct mapping of input to x and y variable so we need to pass it what we want plotted on the y-axis (`ST011Q04TA`) and x-axis (`CNT`) within the `product` function (`product(ST011Q04TA, CNT)`). We can also specify how we want the rectangles to be coloured (in our case, by `CNT`).
+
+```{r}
+#| warning: false
+ # install.packages("ggmosaic")
+library(ggmosaic)
+
+QuiRoom<-PISA_2018%>%
+  select(ST011Q04TA, CNT)%>%
+  filter(CNT=="United Kingdom" | CNT=="Brazil"| CNT=="United States")%>%
+  droplevels()
+
+# plot results
+ggplot(data = QuiRoom) +
+  geom_mosaic(aes(x = product(ST011Q04TA, CNT), fill=CNT))+
+  xlab("Country")+
+  ylab("Do you have a quiet room to work in?")
+
+```
+
+## Running Chi square tests of independence
+
+The mosaic plot suggests the availability of quiet rooms is different between the UK and Brazil, but the difference is only small between the UK and the US. Simply looking at the data does not tell us if the distributions are different - a Chi-square tests of independence can report the significance level, which can help us make a judgement.
+
+The null hypothesis in a test of independence is that the categorial variables are not related. So in the case of comparing the UK and Brazil the null hypothesis is: 'There is no relationship between the country (UK or Brazil) and availability of a quiet room'.
+
+```{r}
+#| eval: false
+#| code-fold: false
+#| warning: false
+# Produce tables of counts of having a quiet room for the UK and the rest of the sample
+
+BraUKQuiRoom<-PISA_2018%>%
+  select(ST011Q04TA, CNT)%>% # Select quiet room
+  filter(CNT=="Brazil"| CNT=="United Kingdom")%>% # Filter for Brazil and UK
+  droplevels() # To prevent the levels for other countries confusing the table
+
+BraUKQuiFreqTable<-xtabs(~ST011Q04TA+CNT, data=BraUKQuiRoom)
+
+UKUSQuiRoom<-PISA_2018%>%
+  select(CNT, ST011Q04TA)%>% # Select quiet room and country variables
+  filter(CNT=="United Kingdom"|CNT=="United States")%>% # Filter for the UK
+  droplevels() # To prevent the levels for other countries confusing the table
+
+UKUSQuiFreqTable<-xtabs(~ST011Q04TA+CNT, data=UKUSQuiRoom)
+
+# Perform Chisq test between UK and Brazil
+chisq.test(BraUKQuiFreqTable)
+# p-value < 2.2e-16, less than 0.05, so there are signifcant differences by UK and Brazil, the null hypothesis is rejected
+# Perform Chisq test between UK and US
+chisq.test(UKUSQuiFreqTable)
+# p-value = 1.924e-15 less than 0.05, so there are signifcant differences by UK and Brazil, the null hypothesis is rejected
+```
+
+The test here returns a p-value=1. This is more than 0.05 so implies there is a the null hypothesis can be accepted. The null hypothesis is that and it is assumed that the availability of quiet rooms in the UK is different from the population as a whole.
+
+## Seminar Tasks
+
+### Activity 1 - Creating contingency tables
+
+::: question
+a)  Create a contingency table for UK, Germany and France levels of maternal education (`ST005Q01TA`). in which countries are most mothers (in total) education to post school level?
+
+::: callout-tip
+The responses to `ST005Q01TA` are: • ISCED level 3A - Post-16 technical equivalents • ISCED level 3B, 3C - A-level equivalents • ISCED level 2 - Lower secondary education ISCED level 1 - Primary Education She did not complete ISCED Level 1 - Did not complete primary education
+:::
+
+```{r}
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+# Create contingency table of mother's level of education
+
+MatEd<-PISA_2018%>%
+  select(CNT, ST005Q01TA)%>% # Select maternal ed and country variables
+  filter(CNT=="United Kingdom"| CNT=="France"|CNT=="Germany")%>% # Filter for CNT
+  droplevels() # To prevent the levels for other countries confusing the table
+
+ContTab<-xtabs(~ST005Q01TA +CNT, data=MatEd)
+ContTab
+
+# The country with the highest number of level 3A mothers is the UK
+```
+
+b)  `ST011Q01TA` asks if students have a desk to study at. Create a contingency table by gender for this variable for students in the UK. Do more girls or boys have a desk?
+
+```{r}
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+# Create contingency table of mother's level of education
+
+DeskUK<-PISA_2018%>%
+  select(CNT, ST011Q01TA, ST004D01T)%>% # Select desk and country variables
+  filter(CNT=="United Kingdom")%>% # Filter for the UK
+  droplevels() # To prevent the levels for other countries confusing the table
+
+ContTab<-xtabs(~ST011Q01TA + ST004D01T, data=DeskUK, )
+ContTab
+
+# More girls have a desk
+
+```
+
+c)  `ST011Q06TA` asks if students have access to the internet. In which country in the dataset do students report the highest levels of access to the internet?
+
+::: callout-tip
+To sort a table, the easiest way is to convert it to a dataframe and then use the `arrange` function. The default order for arrange is ascending, adding `desc` switches to descending.
+
+```{r}
+#| eval: true
+#| code-fold: false
+
+# Arranging a table
+
+ContTab<-ContTab%>%
+  as.data.frame()%>%
+  arrange(desc(Freq))
+
+```
+:::
+
+```{r}
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+# Create contingency table of internet use by country
+
+Net<-PISA_2018%>%
+  select(CNT, ST011Q06TA)%>% # Select internet and country variables
+  droplevels() # To prevent the levels for other countries confusing the table
+
+ContTab<-xtabs(~ST011Q06TA + CNT, data=Net)
+ContTab
+# Arrange the table
+ContTab<-ContTab%>%
+  as.data.frame()%>%
+  arrange(desc(Freq))
+# The country with respondents reporting most internet use is Spain
+```
+:::
+
+### Activity 2 - Goodness of fit test. Are the responses of the survey in proportion to populations?
+
+::: question
+The populations of three countries in the sample are:
+
+| Country | Population  | Ratio |
+|---------|-------------|-------|
+| US      | 332 million | 0.69  |
+| Germany | 83 million  | 0.17  |
+| UK      | 67 million  | 0.14  |
+
+Are the number of responses in the sample a good fit for the overall populations?
+
+Use a goodness of fit implementation of Chi square with the null hypothesis that the proportion of students in the sample of PISA match that of the overall population. Hint: You can use the `CNT` column to create counts of the total dataset.
+:::
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+
+Subset<-PISA_2018%>%
+  select(CNT)%>%
+  filter(CNT=="United Kingdom"|CNT=="United States"|CNT=="Germany")%>%
+  droplevels()
+
+CNTcount<-as.data.frame(table(Subset))
+
+chisq.test(CNTcount$Freq, p=c(0.17, 0.14, 0.69))
+
+# The UK has many more responses that expected by proportion of its size.
+
+```
+
+### Activity 3 - Goodness of fit test: Birth month distribution
+
+::: question
+Perform a goodness of fit test to determine if the birth months (`ST003D02T`) of respondents are distributed as expected in a) the whole sample; b) in the UK. Use ggplot to plot a column graph of both data sets (the world and the UK). Whay might exaplin any patterns you see.
+:::
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+
+Worldmonth<-PISA_2018%>%
+  select(ST003D02T)%>%
+  droplevels()
+
+Worldmonth<<-as.data.frame(table(Worldmonth))
+
+Expected<-c(rep(1/12, times=12))
+
+chisq.test(Worldmonth$Freq, p=Expected)
+
+# p-value < 2.2e-16, which is less than 0.05, reject the null hypothesis.The world data does not follow the expect distribution
+
+UKmonth<-PISA_2018%>%
+  select(ST003D02T, CNT)%>%
+  filter(CNT=="United Kingdom")%>%
+  select(ST003D02T)%>%
+  droplevels()
+
+UKmonth<<-as.data.frame(table(UKmonth))
+
+Expected<-c(rep(1/12, times=12))
+
+chisq.test(UKmonth$Freq, p=Expected)
+
+# p-value < 2.2e-16, which is less than 0.05, reject the null hypothesis.The world data does not follow the expect distribution
+
+ggplot(data=Worldmonth,
+       aes(x=ST003D02T,y=Freq))+
+  geom_col()+
+  ggtitle("World birth months")
+
+ggplot(data=UKmonth,
+       aes(x=ST003D02T,y=Freq))+
+  geom_col()+
+  ggtitle("UK birth months")
+
+```
+
+### Activity 4 - Country differences - hypothesis testing
+
+::: question
+Perform a hypothesis test to determine: a) `ISCEDO` contains information about the type of school students attend - responses can be: General, Pre-Vocational, Vocational or Modular. Determine if the attendance at such schools is equivalent in the United Kingdom, United States, France, and Germany.
+
+Plot a mosaic plot of the proportions
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+
+SchTypes<-PISA_2018%>%
+  select(CNT, ISCEDO)%>% # choose country and type of school
+  filter(CNT=="United Kingdom"|CNT=="United States"|
+           CNT== "France"|CNT=="Germany")%>% # filter by four countries
+  droplevels() # Remove other countries which exist as factors
+
+# Create a contingency table
+SchCont<-xtabs(data=SchTypes, ~ISCEDO+CNT)
+
+chisq.test(SchCont) # Perform the test
+# The p-value is less than 0.05 (p-value < 2.2e-16), therefore we reject the null hypothesis that the distributions are the same
+
+ggplot(data=SchTypes)+
+  geom_mosaic(aes(x=product(ISCEDO,CNT), fill=ISCEDO))
+
+
+```
+:::
+
+::: question
+b)  Are there significant differences between Japan, Greece and the UK in `IC001Q01TA`, Available for you to use at home: Desktop computer? (Yes or No). Produce a mosaic plot.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+
+Desktop<-PISA_2018%>%
+  select(CNT, IC001Q01TA)%>% # choose country and use of computer
+  filter(CNT=="United Kingdom"|CNT=="Japan"| CNT=="Greece")%>% # filter by countries
+  droplevels() # Remove other countries which exist as factors
+
+# Produce a contingency table
+ContDesk<-xtabs(data=Desktop, ~CNT+IC001Q01TA)
+
+chisq.test(ContDesk) # Perform the test
+# The p-value is less than 0.05 (p-value < 2.2e-16), therefore we reject the null hypothesis that the distributions are the same
+
+ggplot(data=Desktop)+
+  geom_mosaic(aes(x=product(IC001Q01TA,CNT), fill=IC001Q01TA))
+
+
+```
+:::
+
+::: question
+Perform a hypothesis test to determine if `ST007Q01TA` - the highest level of schooling completed by respondents' fathers, is different in the UK, US, France and Germany.
+
+Plot a mosaic plot of the proportions.
+
+Follow up question: Are the proportions of paternal education different in the three European countries (UK, France and Germany)?
+
+::: callout-tip
+Hint: assume the null hypothesis is that fathers have the same level of qualifications in the four countries.
+:::
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+
+PatEdTypes<-PISA_2018%>%
+  select(CNT, ST007Q01TA)%>% # choose country and type of school
+  filter(CNT=="United Kingdom"|CNT=="United States"|
+           CNT== "France"|CNT=="Germany")%>% # filter by four countries
+  droplevels() # Remove other countries which exist as factors
+
+Conttable<-xtabs(data=PatEdTypes,~CNT,ST007Q01TA)
+chisq.test(Conttable) # Perform the test
+# The p-value is less than 0.05 (p-value < 2.2e-16), therefore we reject the null hypothesis that the distributions are the same
+
+# Create a geom_mosaic
+ggplot(data=PatEdTypes)+
+  geom_mosaic(aes(x=product(ST007Q01TA,CNT), fill=ST007Q01TA))+
+  ylab("Frequency of father's level of qualification")+
+  xlab("Country")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))# Rotate x-axis labels
+
+# Follow up Question
+
+PatEdTypes<-PISA_2018%>%
+  select(CNT, ST007Q01TA)%>% # choose country and type of school
+  filter(CNT=="United Kingdom"|CNT== "France"|CNT=="Germany")%>% 
+  droplevels() # Remove other countries which exist as factors
+
+Conttable<-xtabs(data=PatEdTypes,~CNT,ST007Q01TA)
+chisq.test(Conttable) # Perform the test
+# The p-value is less than 0.05 (p-value < 2.2e-16), therefore we reject the null hypothesis that the distributions are the same
+
+# Create a geom_mosaic
+ggplot(data=PatEdTypes)+
+  geom_mosaic(aes(x=product(ST007Q01TA,CNT), fill=ST007Q01TA))+
+  ylab("Frequency of father's level of qualification")+
+  xlab("Country")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))# Rotate x-axis labels
+
+
+```
+:::
+
+### Testing ordinal data - the Kruskal Wallis test
+
+An assumption of a chi-square test is that the data are categorical. Some of the items in the PISA are a type of categorical data which come in naturally ordered sequence - ordinal data. For example, gender is a categorical variable with no preferred order to responses: female or male. By contrast, the answer to a question: How many books do you have in your home? 0-10; 11-100; 101-200; More than 200, is ordinal data.
+
+Though there is some debate among statisticians, but if testing ordinal data, it is recommend you use an alternative to the chi-square test, the Kruskal Wallis test, which functions in a similar manner. It is called using the `kruskal.test` function. Unlike the chi square test, you pass it the raw data, rather than a contingency table.
+
+For example,`ST012Q02TA` asks students to report the number of cars in their home, ordinal data. To carry out the Kruskal Wallis on differences in car ownership in the UK by gender we create a `data.frame` of responses to `ST012Q02TA` in the UK by gender. Unlike the chi square test, there is no need to create a contingency table and we just pass the data frame to `kruskal.test`, specifiying we want to compare number of cars (`ST012Q02TA`) to gender (`ST004D01T`): `kruskal.test(data=CarsUKGender,ST012Q02TA~ST004D01T)`
+
+```{r}
+#| eval: true
+#| code-fold: false
+#| code-summary: "Show the code"
+
+CarsUKGender<-PISA_2018%>%
+  select(CNT, ST004D01T,ST012Q02TA )%>% # choose country, no of cars and gender
+  filter(CNT=="United Kingdom")%>% # filter for the UK
+  select(ST004D01T,ST012Q02TA )%>% #drop the country variable now filtering is done
+  droplevels() # Remove other countries which exist as factors
+# Make the contingency table
+
+kruskal.test(data=CarsUKGender,ST012Q02TA~ST004D01T) # Perform the test
+# The p-value is more than 0.05 (p-value=0.1763), therefore we accept the null hypothesis that the number of cars is the same for boys and girls
+```
+
+### Activity 5 - Testing ordinal data with the Kruskal-Wallis test
+
+::: question
+Are there differences in the number of books in the home`ST013Q01TA` in the UK and the United States?
+
+```{r}
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+
+UKUSbooks<-PISA_2018%>%
+  select(CNT, ST013Q01TA )%>% # choose country and no of books
+  filter(CNT=="United Kingdom"|CNT=="United States")%>% # filter for the UK and US
+  droplevels() # Remove other countries which exist as factors
+
+kruskal.test(data=UKUSbooks,ST013Q01TA~CNT) # Perform the test
+# The p-value is more than 0.05 (p-value=1), therefore we accept the null hypothesis that the number of books is the same for respondents in the UK and the US
+```
+
+In the UK, are there differences for boys and girls for the number of instruments in the home (`ST012Q09NA`)?
+
+```{r}
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+UKInstruments<-PISA_2018%>%
+  select(CNT, ST012Q09NA, ST004D01T )%>% # choose CNT, no of instruments, gender
+  filter(CNT=="United Kingdom")%>% # filter for the UK
+  select(ST012Q09NA, ST004D01T)%>% #drop the country variable now filtering is done
+  droplevels() # Remove other countries which exist as factors
+# Make the contingency table
+kruskal.test(UKInstruments,ST012Q09NA ~ST004D01T) # Perform the test
+# The p-value is less than 0.05 (p-value < 2.2e-16), therefore we reject the null hypothesis. Girls and boys have different access to instruments in the home.
+```
+
+In the UK, are there differences for boys and girls in the number of smart phones in the home (`ST012Q05NA`)?
+
+```{r}
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+UKPhones<-PISA_2018%>%
+  select(CNT, ST012Q05NA, ST004D01T )%>% # choose CNT, no of instruments, gender
+  filter(CNT=="United Kingdom")%>% # filter for the UK
+  select(ST012Q05NA, ST004D01T)%>% #drop the country variable now filtering is done
+  droplevels() # Remove other countries which exist as factors
+# Make the contingency table
+kruskal.test(UKPhones,ST012Q05NA ~ST004D01T) # Perform the test
+# The p-value is less than 0.05 (p-value < 2.2e-16), therefore we reject the null hypothesis. Girls and boys have different access to phones in the home.
+```
+:::
+
+### Doing Chi-Square tests in R
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/qnZX0G1M29E" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+
+</iframe>
+
+You can find the code used in the video below
+
+```{r}
+#| eval: false
+#| warning: true
+#| echo: true
+# Introduction to Chi-square
+#
+# Download data from /Users/k1765032/Library/CloudStorage/GoogleDrive-richardandrewbrock@gmail.com/.shortcut-targets-by-id/1c3CkaEBOICzepArDfjQUP34W2BYhFjM4/PISR/Data/PISA/subset/Students_2018_RBDP_none_levels.rds
+# You want the file: Students_2018_RBDP_none_levels.rds
+# and place in your own file system
+# change loc to load the data directly. Loading into R might take a few minutes
+
+loc <- "https://drive.google.com/open?id=14pL2Bz677Kk5_nn9BTmEuuUGY9S09bDb&authuser=richardandrewbrock%40gmail.com&usp=drive_fs"
+PISA_2018 <- read_rds(loc)
+
+# Are there differences between how often students change school?
+# ST004D01T is the gender variable (Male, Female)
+# SCCHANGE is a categorical variable (No change / One change / Two or more changes)
+
+chidata <- PISA_2018 %>%
+  select(CNT,ST004D01T,SCCHANGE) %>%
+  filter(CNT=="United Kingdom")
+
+chidata<-chidata[-c(1)]
+chidata<-drop_na(chidata)
+
+ chidata <- PISA_2018 %>%
+   filter(CNT=="United Kingdom")
+   select(ST004D01T,SCCHANGE) %>% 
+   drop_na()
+# Above is the approiach I took in the video
+# An alternative, Pete suggests, which is more elegant, is below
+# Note he drops the country varibale, within the piped section
+# using: elect(-CNT)
+#    
+# chidata <- PISA_2018 %>%
+#   select(CNT,ST004D01T,SCCHANGE) %>%
+#   filter(CNT=="United Kingdom") %>%
+#   select(-CNT) %>% 
+#   drop_na()
+
+# run the test
+chisq.test(chidata$ST004D01T, chidata$SCCHANGE)
+  
+
+```

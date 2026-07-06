@@ -1,0 +1,659 @@
+---
+# title: "03 Descriptive Statistics"
+# bibliography: references.bib
+---
+
+```{r}
+#| eval: true
+#| warning: true
+#| echo: false
+
+# only load this code if testing this file independently of overall project
+if(!exists("test")){
+  warning("RUNNING LOCAL FILE LOAD")
+  
+  library(glue)
+  proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
+  proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  
+  node <- Sys.info()
+  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
+    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
+    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
+  }else if(node["nodename"] == "PETES_PC"){ #Pete's NEW Laptop
+    proj_folder <- r"(C:\Users\Peter\Google Drive\Kings\Code\MASTEMR\)"
+  }
+
+  source(glue("{proj_folder}MASTEMR_setup.R"))
+}
+```
+
+## Seminar activities
+
+### Discussion activity
+
+Based on @davis2013introduction [Link to chapter](https://ieas-szeged.hu/downtherabbithole/wp-content/uploads/2018/02/Lennard-J.-Davis-ed.-The-Disability-Studies-Reader-Routledge-2014.pdf#page=15)
+
+![](images/03%20Normal%20Curve-01.jpg)
+
+Consider how and why we think of things as being 'normal' (or not). Some suggested questions are:
+
+-   What were your immediate thoughts on reading this paper?
+-   In what ways have you yourself been aware of being compared to norms or ideals?
+-   How do you feel about that? As an education professional, have you made comparisons between individual students and expected norms or averages? Between groups of students?
+-   When and how was this useful?
+-   When and how was this problematic?
+
+### Tasks
+
+**Getting set up**
+
+Ensure you have the PISA 2018 data set loaded. If you can see the PISA_2018 data frame in your environment window (at the top right of your screen), there is no need to reload.
+
+```{r}
+#| eval: false
+#| code-fold: false
+#| code-summary: "Loading the data"
+# Load the PISA data set.
+
+library(arrow)
+library(tidyverse)
+
+PISA_2018 <- read_parquet(r"[<folder>PISA_2018_student_subset.parquet]")
+```
+
+::: callout-tip
+We are going to focus on the following variables in the PISA_2018 dataset:
+
+-   ***CNT*** the country of the student.
+
+-   ***ISCEDO*** refers to the type of school the student attends. It's values can be: General, Pre-Vocational, Vocational, Modular, or NA
+
+-   ***WEALTH*** is a self-reported measure of student's wealth. It is a numeric variable, with a mean of -0.4, minimum of -7.5 and a maximum of 4.75.
+
+-   ***ESCS*** is the index of economic, social and cultural status. It might be thought of a relating to a measure of economic and social status (with some cultural capital measures included). It is a numeric variable, with a mean of 0, minium of -8.2 and a maximum of 4.3.
+
+-   ***PV1MATH, PV1SCIE, PV1READ*** are the plausible value scores for achievement tests in mathematics, science and reading, respectively. The full achievement tests are long, so each student only completes a subset of items (which still takes 2 hours). Statistical models are then used to calculate an overall score, based on the response to the subset, as if students had answered all the questions. Ten different approaches to calculating a representative scores, plausible values are used, leading to ten different plausible values. We will just use the first plausible value (PV1). This differs from the PISA recommendation for using the scores, but simplifies things for teaching. For more on plausible values see: [What are plausible values?](https://peterejkemp.github.io/#sec-PV)
+
+-   ***ST004D01T*** is the gender variable and is either 'Male', 'Female' or NA.
+:::
+
+#### Descriptive statistics
+
+For further reading on descriptive statistics and see [chapter 5](https://learningstatisticswithr.com/book/descriptives.html) and of Navaro's Learning Statistics with R.
+
+The simplest way to find information about a dataframe is to use the console. You type commands to find out about a dataframe directly into the console. To preform an action on a particular column (also called a vector), we use the `$` symbol. For example, to refer to country data (which is in the vector `CNT`) we would use `PISA_2018$CNT`
+
+In the command line, if you want to find the mean of all the science scores you can type the following:
+
+> mean(PISA_2018\$PV1SCIE)
+
+Notice that you get this response: \[1\] NA. An NA in the dataframe can occur for a number of reasons but may indicate a response is missing or incomplete. To tell R to ignore such entries, we add `na.rm = TRUE` to a function:
+
+> mean(PISA_2018\$PV1SCIE, na.rm = TRUE)
+
+You can use the command line with a number of functions to find useful information about a dataframe:
+
+R has a number of standard functions that might be useful for descriptive statistics: `mean` - finds the arithmetic mean `median` - finds the median value `min` - finds the minimum value `max` - finds the maximum value `sd` - finds the standard deviation `range` finds the range of values `nrow` finds the number of rows `ncol` finds the number of colums `unique` finds the unique values of a variable
+
+::: callout-tip
+Surprisingly, there is no function to calculate the mode in tidyverse. However, you can get one by loading the `modeest` package and using the most frequent value (`nfv`) function.
+
+```{r}
+#| eval: true
+#| warning: false
+# Install the modeest package to calculate a mode
+
+library(modeest)
+library(tidyverse)
+# The mode can be found with the most frequent value (mfv) function
+
+PISAUKMath<-PISA_2018%>%
+  select(CNT, PV1MATH)
+
+mfv(PISA_2018$PV1MATH, na_rm= TRUE)
+
+```
+:::
+
+#### Task 1
+
+::: question
+-   Using the command line find out:
+
+a)  The number of students (i.e. the number of rows) in the PISA 2018 dataset
+b)  The number of items in our dataset (i.e. the number of columns)
+c)  The mean, maximum and minimum science score (don't forget to use `$`)
+d)  The unique values of `ST003D02T` - what information do you think this column holds?
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Using the command line
+nrow(PISA_2018)
+ncol(PISA_2018)
+mean(PISA_2018$PV1SCIE)
+max(PISA_2018$PV1SCIE)
+min(PISA_2018$PV1SCIE)
+unique(PISA_2018$ST003D02T)
+# This column contains students' birth months
+# You can find out the subtitle of columns using
+attributes(PISA_2018$ST003D02T)
+
+
+```
+:::
+
+::: callout-tip
+You can read a complete list of what the items in PISA mean here: [PISA 2018 student survey item descriptors](https://drive.google.com/open?id=1sogAg0ql4KaAPqx7cTOVe1neblGp-tv8&usp=drive_fs)
+:::
+
+A useful way to get a quick summary of what is in a `data.frame` is, the `summary` command. This command outputs the minimum, median, mean, maximum (and 1st and 3rd quartile, i.e. the values at 25% and 75% of the range). For example, to get a sense of the science score variable (`PV1SCIE`) we can use:
+
+```{r}
+summary(PISA_2018$PV1SCIE)
+```
+
+#### Task 2
+
+::: question
+-   Using `summary` find:
+
+a)  The maximum and minimum of the WEALTH variable
+b)  The mean reading score
+c)  The minimum science score in the data set
+d)  Comment on the difference in distribution of the reading and science scores
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Using the command line
+
+summary(PISA_2018$WEALTH)
+summary(PISA_2018$PV1READ)
+summary(PISA_2018$PV1SCIE)
+
+
+
+
+```
+:::
+
+We will now learn how to calculate means of subgroups of schools using the `filter` and `summarise` functions. We can use `filter` to focus on only a subset of our `data.frame`. For example, below, we choose to focus on responses from UK students.
+
+In line 3 below, we focus on UK responses. Note that, in `filter` we use `==`. Then we use `summarise` to calculate the means of the variables we are interested in, students getting science (`PV1SCIE`), mathematics (`PV1MATH`) and reading scores. We can also find the total number of students entered in the UK, using (`n`).
+
+```{r}
+#| eval: true
+#| code-fold: false
+#| code-summary: "Loading the data"
+# Selecting only UK responses and finding the mean of various variables
+
+PISA_2018 %>% 
+  filter(CNT == "United Kingdom") %>% # Filter to only include UK entries (note the ==)
+  summarise(MeanSci=mean(PV1SCIE), 
+            MeanMath=mean(PV1MATH), 
+            Total=n())
+
+```
+
+::: callout-tip
+If you want to filter by a different vector (that is, a different column in the table), don't forget to change the name of the vector in the filter command, for example, to find the mean mathematics and reading scores, and total number of pupils in vocational schools. Don't forget to use the `%>%` and the `==` in `filter`!
+
+```{r}
+#| eval: true
+PISA_2018 %>% 
+ filter(ISCEDO =="Vocational")%>%
+  summarise(MeanSci=mean(PV1SCIE), 
+            MeanMath=mean(PV1MATH), 
+            Total=n())
+```
+
+You can add multiple filters by using the `&` operator which means AND. Later on we will also meet `|`, which means OR. So if you want to find the scores of female students in the UK you would use:
+
+```{r}
+#| eval: true
+PISA_2018 %>% 
+ filter(CNT =="United Kingdom" & ST004D01T=="Male")%>%
+  summarise(MeanSci=mean(PV1SCIE), 
+            MeanMath=mean(PV1MATH), 
+            Total=n())
+```
+:::
+
+Often we are interested in summary data across multiple subgroups. We can then tell R to `group_by`, for example, `group_by(CNT)`, to get a summary of data for subgroups.
+
+```{r}
+#| eval: true
+# Grouping by country and summarising
+PISA_2018 %>% 
+ group_by(CNT)%>% 
+  summarise(MeanSci=mean(PV1SCIE), 
+            MeanMath=mean(PV1MATH), 
+            Total=n())
+```
+
+::: callout-tip
+In the console, R will truncate tables, so you might only see the first 10 countries of 80 in the dataset using the code above. One solution to this is to put the results of the summarising into a new dataframe (e.g. `summarydata`) which you can then view from the environment window (and use for future processing). To do this you use the asign operator `<-`
+
+```{r}
+#| eval: true
+# Grouping by country and summarising, and asigning to a new dataframe
+summarydata<-PISA_2018 %>% 
+ group_by(CNT)%>% 
+  summarise(MeanSci=mean(PV1SCIE), 
+            MeanMath=mean(PV1MATH), 
+            Total=n())
+```
+:::
+
+#### Task 3
+
+::: question
+-   Find the total number of students who responded in the United States, their mean science, mathematics and reading scores. Compare that to the responses in China (Note the country name for China is: B-S-J-Z (China), indicating the data are drawn from the four participating municipalities, Beijing, Shanghai, Jiangsu and Zhejiang).Don't forget to pipe (`%>%`) each step!
+
+-   Filter the dataset for the UK and `group_by` gender (which is `ST004D01T`). Use summarise to find the maximum, minimum and mean scores for boys and girls in mathematics.
+
+-   Filter the dataset for the UK, the US and China, and `group_by` gender (which is `ST004D01T`) and country. Use summarise to compare mathematics and science achievement.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Summarising responses in the US and China and finding means
+
+PISA_2018 %>% 
+ filter(CNT =="United Kingdom" | CNT=="B-S-J-Z (China)")%>%
+  summarise(MeanSci=mean(PV1SCIE), 
+            MeanMath=mean(PV1MATH),
+            MeanRead=mean(PV1READ),
+            Total=n())
+
+# Comparing male and female mathematics performance in the UK
+
+PISA_2018 %>% 
+ filter(CNT =="United Kingdom")%>%
+  group_by(ST004D01T)%>%
+  summarise(MeanMath=mean(PV1MATH),
+            MaxMath=max(PVMATH),
+            MinMath=min(PV1MATH))
+
+# Comparing male and female mathematics performance in the UK, US and China
+
+PISA_2018 %>% 
+  filter(CNT =="United Kingdom" | CNT=="United States" | CNT== "B-S-J-Z (China)")%>%
+  group_by(ST004D01T, CNT)%>%
+  summarise(MeanMath=mean(PV1MATH),
+            MaxMath=max(PV1MATH),
+            MinMath=min(PV1MATH))
+
+```
+:::
+
+::: callout-tip
+Make sure you have spelled the name of the variables PV1MATH, etc. correctly. They are case sensitive. You can use the function `colnames(PISA_2018)` to get a list of names and copy and paste them
+:::
+
+#### Creating summary tables and manipulating them
+
+The PISA data set is large (!) so it can often be helpful to create interim summary tables.
+
+::: callout-tip
+When using `summarise`, be careful to add a comma after each function, and check you have closed as many brackets as you open!
+:::
+
+A useful function is `table` which creates a summary table of the counts of unique entries in a dataframe. For example, we might want to know how many schools of different types (General, Pre-Vocational, Vocational, Modular) there are in the PISA dataset for the UK.
+
+We have met the `filter` function which subsets a table by rows. In the example below, we will use `select` which creates a subset of a table by columns. For example, if I want to create the table of school type by country, we need only include two columns from the PISA_2018 dataset, country (`CNT`) and schooltype (`ISCEDO`). We use the command `select` to focus on those two: `select(CNT, ISCEDO)`.
+
+To create a summary table, intuitively, we use the `table` function. There are two additional actions we need to do. First, because we piped the whole `PISA_2018` dataset, if we apply `table`, even though we have filtered by the UK, the dataset retains levels for all the other countries. If we don't remove these levels, we will get a large dataset with many zero entries for the countries we have filtered out. The function `droplevels()` removes the levels for other countries. Finally, the output of `table` is a datatype called (appropriately) a table. Dataframes are more easily maniuplated so we convert the table into a dataframe using `as.data.frame(table(SchoolType))`
+
+```{r}
+#| eval: true
+# Creating a summary dataframe
+SchoolType<-PISA_2018 %>% # Create a new dataframe, SchoolType, and pipe PISA_2018
+  filter(CNT =="United Kingdom")%>% # Filter by the UK
+  select(CNT, ISCEDO)%>% # Choose the columns of interest
+  droplevels() # Ignore countires we are not interested in
+
+SchoolTypeSummary<-as.data.frame(table(SchoolType))
+
+```
+
+You can open the `SchoolTypeSummary` dataframe and see the summary data. `Table` has created a new column `Freq` which stores the results of the counts.
+
+It might now be intersting to now what percentage the counts of school types represent. To achieve that, first we create a variable that is the total number of schools (to calculate the percentage) -this variable is `total` and we perform a simple sum on the count column - `SchoolTypeSummary$Freq`.
+
+We then use the `mutate` function. `mutate` allows you to add a new column to a table. You pipe the dataframe to `mutate`, and begin by giving the name of the new column you want, in this case the percentage of schools of each type, I will call this PerSch `mutate(PerSch=`. Then I set the value of that column to the percentage calculation: `Freq*100/total)`. The Frequency count for each column will be multiplied by 100 and divided by the total.
+
+```{r}
+#| eval: true
+# Adding a percentage column
+total=sum(SchoolTypeSummary$Freq)
+SchoolTypeSummary%>%
+  mutate(PerSch=Freq*100/total)
+
+```
+
+::: callout-tip
+You can use the ``` round`` function to display a given number of decimal places. Here, I have used ```round( ,2)\` to limit the percentage calculation to two significant figures
+
+```{r}
+#| eval: true
+
+# Calculating Percentages of students on EHC plans
+total=sum(SchoolTypeSummary$Freq)
+SchoolTypeSummary%>%
+  mutate(PerSch=round(Freq*100/total,2))
+
+```
+:::
+
+#### Task 4
+
+::: callout-tip
+Don't forget to use the pipe operator `%>%` between each function
+:::
+
+::: question
+`ST205Q02HA` asks participants if they feel students in their school are competing with each other. For students in the UK, find out the percentage of students who responded: Not at all true, Slightly true, Very true, Extremely true, and NA. (Hint: don't forget to `droplevels()`)
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Finding the percentage of students who feel they compete in the UK
+
+CompData<-PISA_2018%>%
+  select(CNT, ST205Q02HA)%>%
+  filter(CNT=="United Kingdom")%>%
+  group_by(ST205Q02HA)%>%
+  droplevels()
+
+CompData<-as.data.frame(table(CompData))
+Total=sum(CompData$Freq)
+CompData<-CompData%>%
+  mutate(PercComp=round((Freq*100/Total),1))
+
+```
+
+`ST012Q09NA` asks students if they have a musical instrument in their home. What percentage of students in the UK have no instruments in their home? What is the percentage in China?
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Finding the percentage of students with no musical instruments in the UK and China
+
+MusicData<-PISA_2018%>%
+  select(CNT, ST012Q09NA)%>%
+  filter(CNT=="United Kingdom"|CNT=="B-S-J-Z (China)")%>%
+  group_by(ST012Q09NA, CNT)%>%
+  droplevels()
+
+MusicData<-as.data.frame(table(MusicData))
+Total=sum(MusicData$Freq)
+MusicData<-MusicData%>%
+  mutate(PercComp=round((Freq*100/Total),1))
+
+```
+:::
+
+::: callout-tip
+Don't forget to use the pipe operator `%>%` between each function
+:::
+
+### Graphing
+
+For more details on graphing with the `PISA_2018` dataset, see @sec-graphing
+
+### Column graphs
+
+Imagine we want to plot a graph of whether students report having an interactive whiteboard (IWB) in their school `IC009Q11NA` in the UK
+
+When plotting graphs, it makes things easier to have a data.frame of the data you will pass to ggplot - a bit like the final table of data you will actually plot when drawing a graph in real life.
+
+To complete our take we are going to create a new `data.frame` we will use in the plot. I have called that `data.frame` `IWBplot`. Then, I take the main data.frame and select `IC009Q11NA` and `CNT` and filter for the UK.
+
+The new element here is using ggplot, R's graphing function (more details on how to use geom_bar are in the section above: [Geom_bar)](https://peterejkemp.github.io/#geoms).
+
+To plot a graph, you call ggplot and specify the data you want to use for the graph (in our case, the new `data.frame` we have created, `IWBplot`).
+
+The next layer of ggplot is the aesthetics (`aes`), i.e., what our graph will look like. First, we tell ggplot what we want our `y` (`IC009Q11NA`). Finally, we specify we want a bar graph using `geom_bar()`.
+
+```{r}
+#| eval: true
+#| code-fold: false
+#| code-summary: "Show the code"
+# Graphing the number of students who have an interactive whiteboard
+IWBplot <- PISA_2018 %>%
+  select(CNT, IC009Q11NA) %>%
+  filter(CNT=="United Kingdom")
+
+# use IWBplot data to create a graph
+ggplot(data=IWBplot,
+       aes(x=IC009Q11NA)) +
+  geom_bar()
+
+```
+
+#### Task 5
+
+::: question
+Plot a bar graph of `ST221Q03HA` - I learn about other cultures at school? First for the UK, then for China.
+
+Extension: Switch from a graph of counts, to a percentage chart
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+
+Cultplot <- PISA_2018 %>%
+  select(CNT, ST221Q03HA) %>%
+  filter(CNT=="United Kingdom"|CNT== "France")
+
+
+# use culture data to create a graph
+ggplot(data=Cultplot,
+       aes(x=ST221Q03HA, fill=CNT)) +
+  geom_bar(position="dodge2")
+  
+```
+:::
+
+### Scatter Graphs
+
+To plot a scatter graph we use the `geom_point` (see also: [Geom_Point section](https://peterejkemp.github.io/#sec-geom_point)), which works in a similar way to `geom_col`.
+
+**Example**
+
+Imagine I want to plot a graph of mathematics scores `PV1MATH` (on the x-axis) against science scores `PV1SCIE` (y-axis) for students in the UK.
+
+A above, I first want to create a `data.frame` to plot - in this case I have called it `plotdata`. I `select` only the columns I need (`PV1MATH`, `PV1SCIE`, and `CNT` to `filter` for the UK), and then filter for the UK.
+
+Then I pass ggplot `plotdata`. As with `geom_col`, I use `ggplot` and first specify the data I want to plot (`ggplot(data=plotdata,`). Next, I set the `aes`thetic variables, to keep things simple,only the `x` and `y` variables. Then I call `geom_point` to plot the points as a scatter graph.
+
+```{r}
+#| eval: true
+#| code-fold: false
+
+# Filter to create a dataframe of UK scores in science and mathematics
+plotdata<-PISA_2018 %>%
+  select(CNT, PV1SCIE, PV1MATH)%>%
+  filter(CNT=="United Kingdom")
+# Plot the data as a scatter graph with geom_point()
+ggplot(data=plotdata,
+       aes(x=PV1MATH,y=PV1SCIE)) +
+  geom_point()
+```
+
+We can make things more pleasing by adding more features to the aesthetic variable. For example, I can add colour (`geom_point(colour="blue")`) and rename the axes `labs(x="Mathematics score", y="Science score")`. Note when adding to `ggplot`, the `+` should come at the end of the line before the new addition to avoid an error.
+
+```{r}
+#| eval: true
+#| code-fold: false
+
+# Filter to create a dataframe of UK scores in science and mathematics
+plotdata<-PISA_2018 %>%
+  select(CNT, PV1SCIE, PV1MATH)%>%
+  filter(CNT=="United Kingdom")
+# Plot the data as a scatter graph with geom_point()
+ggplot(data=plotdata,
+       aes(x=PV1MATH,y=PV1SCIE)) +
+  geom_point(colour="blue")+
+  labs(x="Mathematics Score", y="Science Score")
+```
+
+I can also add a line using (`geom_smooth(method='lm')`) - here 'lm' specifies a linear plot (i.e. a straight line).
+
+```{r}
+#| eval: true
+#| code-fold: false
+#| warning: false
+
+# Filter to create a dataframe of UK scores in science and mathematics
+plotdata<-PISA_2018 %>%
+  select(CNT, PV1SCIE, PV1MATH)%>%
+  filter(CNT=="United Kingdom")
+# Plot the data as a scatter graph with geom_point()
+ggplot(data=plotdata,
+       aes(x=PV1MATH,y=PV1SCIE)) +
+  geom_point(colour="blue")+
+  labs(x="Mathematics Score", y="Science Score")+
+  (geom_smooth(method='lm'))
+```
+
+I can also change the colour of the points by a variable in the dataframe - for example by gender (`aes(colour=ST004D01T`) - NB I have to select that collumn in my intial selection. I can vary the size of points and make them slightly transparent (their alpha level): `geom_point(alpha=0.4, size=0.6)`, and I can move the legend to the bottom (`theme(legend.position = "bottom")`)
+
+```{r}
+#| eval: true
+#| code-fold: false
+plotdata<-PISA_2018 %>%
+  select(CNT, PV1SCIE, PV1MATH, ST004D01T)%>%
+  filter(CNT=="United Kingdom")
+# Plot the data as a scatter graph with geom_point()
+ggplot(data=plotdata,
+       aes(x=PV1MATH,y=PV1SCIE, colour=ST004D01T)) +
+  geom_point(alpha=0.4, size=0.6)+
+  labs(x="Mathematics Score", y="Science Score")+
+  (geom_smooth(method='lm'))+
+  theme(legend.position = "bottom")
+
+```
+
+::: callout-tip
+For a summary of all the elements of a graph you can change in `ggplot` - see this [help sheet](https://posit.co/wp-content/uploads/2022/10/data-visualization-1.pdf)
+:::
+
+#### Task 6
+
+::: question
+For schools in the UK and Brazil, plot science scores (`PV1SCIE`) by the index of economic, social and cultural status (`ESCS`) - a little like social class. The try varying the colour of points by country, adding a line.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+plotdata<-PISA_2018 %>%
+  select(CNT, PV1SCIE, ESCS)%>%
+  filter(CNT=="United Kingdom"|CNT=="Brazil")
+# Plot the data as a scatter graph with geom_point()
+ggplot(data=plotdata,
+       aes(x=ESCS,y=PV1SCIE, colour=CNT)) +
+  geom_point(alpha=0.2, size=0.6)+
+  labs(x="Index of economic, social and cultural status", y="Science Score")+
+  (geom_smooth(method='lm'))+
+  theme(legend.position = "bottom")
+```
+:::
+
+#### Extension task - Binning data
+
+If we want to plot a frequency plot, the kind of chart that often gives a normal distribution, we need to divide data into counts of ranges of data.
+
+For example, to produce a frequency plot of science scores in the UK, I can first run a `summary` command on `PV1SCIE` to find the minimum and maximum score:
+
+```{r}
+#| eval: true
+#| code-fold: false
+# Find the range of science score
+summary(PISA_2018$PV1SCIE)
+```
+
+If we wanted to plot a frequency chart of heights, we might divide the range of scores (from 58.74-886.08) into bins of 20 points. To do this we can use the `cut(<field>,<breaks>)` function within the `mutate` command on a 'data.frame'. The `<field>` specifies the range (i.e. from around 50-900) and `<breaks>` the size of bins.
+
+In the example below, I use `cut(PV1SCIE, breaks=seq(50,900,20))` to create a new vector (column in the table) with the total number of pupils divided up into bins. The specification `breaks=seq(50,900,20))` sets how the data are broken up - into bins (i.e. groups of respondents) of scores starting at 50 and rising to 900 in steps of 20.
+
+```{r}
+#| eval: true
+#| code-fold: false
+# Creates distribution of schools by size
+binnedsize <- PISA_2018 %>% # Creates a new data frame with binned data
+  select(PV1SCIE, CNT)%>% # Select the column I need
+  filter(CNT=="United Kingdom")%>%
+  mutate(BinnedPV1SCIE = cut(PV1SCIE, breaks=seq(50,900,20)))%>%
+  na.omit() # Drop any NAs
+# Plot the data as a bar graph
+ggplot(binnedsize,
+       aes(x=BinnedPV1SCIE)) +
+  geom_bar(fill="dark green") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(y="Number of schools", x="Pupil range")
+
+```
+
+::: question
+Create a graph of the binned counts of mathematics scores in Malta. Don't forget to run a summary command first to get a sense of the range in values.
+
+::: callout-tip
+To find out a range of a vector, you can use the `range` function in the console - for example, to get a sense of the range of numbers of students on SEN support. I can type: `range(DfE_SEN_data$SEN.support)`
+:::
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: Answer
+# Creates distribution of schools by size
+binnedsize <- PISA_2018 %>% # Creates a new data frame with binned data
+  select(PV1MATH, CNT)%>% # Select the column I need
+  filter(CNT=="Malta")%>%
+  mutate(BinnedPV1MATH = cut(PV1MATH, breaks=seq(20,900,20)))%>%
+  na.omit() # Drop any NAs
+# Plot the data as a bar graph
+ggplot(binnedsize,
+       aes(x=BinnedPV1MATH)) +
+  geom_bar(fill="orange") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(y="Number of schools", x="Pupil range")
+
+```
+
+::: callout-tip
+To find out a range of a vector, you can use the `range` function in the console - for example, to get a sense of the range of numbers of students on SEN support. I can type: `range(DfE_SEN_data$SEN.support)`
+:::
+
+Plot a binned `geom_bar` graph of the wealth scores in the UK and Belarus on the same axes.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: Answer
+# Creates distribution of schools by size
+binnedwealth <- PISA_2018 %>% # Creates a new data frame with binned data
+  select(WEALTH, CNT)%>% # Select the column I need
+  filter(CNT=="Belarus"|CNT=="United Kingdom")%>%
+  mutate(BinnedWEALTH = cut(WEALTH, breaks=seq(-8,5, 0.25)))%>%
+  na.omit() # Drop any NAs
+# Plot the data as a bar graph
+ggplot(binnedwealth,
+       aes(x=BinnedWEALTH, fill=CNT)) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(y="Frequency", x="Wealth")
+
+```
+:::

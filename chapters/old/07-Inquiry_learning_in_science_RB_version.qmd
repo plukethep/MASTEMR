@@ -1,0 +1,920 @@
+---
+# bibliography: references.bib
+title: "07 Inquiry learning"
+subtitle: Anova
+---
+
+```{r setup}
+#| echo: false
+#| warning: false
+# library("easystats") # Load the package every time you want to use these tools
+# library(glue)
+# library(lsr)
+# library(multcomp)
+# library(arrow)
+# library(tidyverse)
+
+# loc <- glue("C:/Users/k1345925/OneDrive - King's College London/R stats/PISA2015studentbz2levelsDP2.rds")
+#message("LOADING: PISA 2015 data")
+#PISA_2015 <- read_rds(loc)
+#names(PISA_2015)
+
+if(!exists("test")){
+  warning("RUNNING LOCAL FILE LOAD")
+  
+  library(glue)
+  proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
+  proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  
+  node <- Sys.info()
+  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
+    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
+    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
+  }else if(node["nodename"] == "PETES_PC"){ #Pete's PC
+    proj_folder <- r"(C:\Users\Peter\Google Drive\Kings\Code\MASTEMR\)"
+  }else if(node["nodename"] == "Amys-MacBook-Air.local"){ #Amy's NEW Laptop
+    proj_folder <- r"(/Users/amyobrien/Google Drive/My Drive/MASTEMR/)"
+  }
+
+  source(glue("{proj_folder}MASTEMR_setup.R"))
+}
+# loc<-glue(r"[C:\Users\Peter\Google Drive\Kings\Code\PISR\Data\PISA\subset\PISA_2015_student_subset.parquet]")
+# PISA_2015 <- read_parquet(loc)
+
+#lapply(names(sessionInfo()$loadedOnly), require, character.only = TRUE)
+#invisible(lapply(paste0('package:', names(sessionInfo()$otherPkgs)), detach, character.only=TRUE, unload=TRUE, force=TRUE))
+
+# direct instruction code
+
+# PISA_2015 %>% select(where(is.numeric)) 
+
+```
+
+<!--https://www.r-bloggers.com/2022/01/how-to-perform-eta-squared-in-r/-->
+
+You have now learned how to find if the means of two groups are different to a statistically significant degree - you use a t-test. However, t-tests are used to compare two groups. When more than two groups are compared, a different test is required, an _analysis of variation_ or *_anova_* test.
+
+Anova refers to a collection of tests that can be used to analyse the varriance in means between groups (hence analysis of variation, or anova for short). For example, consider the data below, which show students scores on a test, their age in years and socio-economic class (categorised as high or low):
+
+| Socio | Age | Score |
+|-------|-----|-------|
+| High  | 15  | 100   |
+| High  | 16  | 98    |
+| High  | 11  | 89    |
+| High  | 15  | 98    |
+| Low   | 11  | 21    |
+| High  | 14  | 31    |
+| Low   | 12  | 23    |
+| High  | 16  | 92    |
+| High  | 12  | 99    |
+| Low   | 15  | 19    |
+
+::: callout-warning
+Note that an assumption of an anova test is that the variables are normally distributed, and have equal variance. This is not the case with the small data set in this example. It is a teaching illustration.
+:::
+
+::: question
+Which variable, age or socio-economic class, seems to explain the variation in test scores?
+:::
+
+We can use anova to determine, first, if there is statistically significant differences in the variation of scores by class and age. Second an additional anova analysis (a post-hoc analysis, so-called because it comes after the first test) can determine how much variation each variable (class and age) accounts for.
+
+You can get a sense of this difference graphically by plotting graphs of the distribution of scores by socio-economic class:
+
+```{r}
+
+Testscores <- data.frame(socio=c("High","High","High","High","Low","High","Low","High","High","Low"),
+                       score=c(100,98,89,98,21,31,23,92,99,19),
+                       Age=c(15,16,11,15,11,14,12,16,12,15))
+ggplot(Testscores,
+       aes(x=score, fill=socio)) +
+  geom_density(alpha=0.5)
+
+
+```
+
+It looks like there might be a difference in the variation of scores by those in different classes (notice that the normal distribution seems more spread out for the high socio-economic students' group, i.e. there is a larger variance than for low socio-economic group students' scores).
+
+To simply the analysis of variation with age, we can categorise ages into two groups, under 15, and 15 and over:
+
+```{r}
+# Testscores$Age[Testscores$Age>=15] <- "Fifteen and over"
+# Testscores$Age[Testscores$Age<15]  <- "Under fifteen"
+Testscores <- Testscores %>% 
+  mutate(Age = ifelse(Age >= 15, 
+                      "Fifteen and over", 
+                      "Under fifteen"))
+  # Here the mutate function changes the column age
+  # ifelse changes the Age column to "Fifteen and over" if
+  # the varibale is over 15, and otherwise (ifelse) to
+  # "Under fifteen"
+# Then we plot a graph, using geom_density, to get a representaiton of the
+# distribution
+ggplot(Testscores,
+       aes(x=score, fill=Age)) +
+  geom_density(alpha=0.5)
+```
+
+The difference is less clear for age than class, but, visually, there appears to be some difference in variance between the two groups.
+
+To determine if there is a statistically significant difference between groups we run an anova calculation, using the `aov` function in R. The dependent variable is the one we are interested in explaining, the independent variables are the factors we think might explain the variance.
+
+`aov(data, dependent_var ~ independent_var + independent_var + ...)`
+
+We pass the function the data we wish to focus on (Testscores) and then indicate we wish to look for variation in the `score`, by `Age` and `socio` (social class) - `aov(data=Testscores, score ~ Age + socio)`. We then summarise the result to get a table.
+
+```{r}
+
+resaov <- aov(data=Testscores, score ~ Age + socio)
+sumresaov <- summary(resaov)
+sumresaov
+
+```
+
+The resulting table has three rows: `Age` and `socio` (the two vectors we input to examine) and a third, residuals. The `aov` function looks to determine if there is a difference in the variance of groups of different ages (under fifteen and over) and class (high and low). After determining any variation from those two variables, any remaining variation is associated with residuals - you can think of this as the unexplained variation that isn't associated with the vectors we specified (age and class).
+
+First, look at the `Pr(>F)` column. This is a test of significance and reports if the groups in that row show statistically significant variation. For example, Age returns `Pr(>F) 0.07` - which is over `0.05` therefore there is no significant difference in variance between the two age groups. However, for class, `Pr(>F) is 0.00422**` suggesting there is a significant difference by class.
+
+# Eta-squared
+
+Now knowing that there are significant differences between the two class groups, we can next determine how much variation in the test score is explained by class. To do this we calculate a variable called eta-squared.
+
+Eta-squared gives the proportion of variance explained by each variable. The eta squared function is in the package `lsr` so we will install `lsr`, and then use the result of our anova (`resaov`) to calculate the eta squared variable using the function `etaSquared`. To report the value of eta as a percentage we need to multiply the output of eta by 100.
+
+Eta squared tells us the proportion of the total variance that is explained by a variable (you can also think of it as an effect size). An eta squared value of 1 indicates all the variance of a sample is explain by some variable and 0 means the variable is not responsible for any of the observed variance. We can multiply the eta-squared score by 100 to get a value for the percentage of variance explained.
+
+The percentage of variance explained is a useful figure. For example, it has been reported that schools only account for 14% of the variance in progress 8 scores, whilst family explains 43% (@wilkinson2018assessing).
+
+```{r}
+#| echo: true
+library(lsr)
+eta <- as.data.frame(etaSquared(resaov))
+eta <- eta*100
+eta
+
+```
+
+The important column here is the `eta.sq` column - it tells us that age only explains 5% of the variance in test scores, but socioeconomic class, explains 60%. (The second column contains information about partial eta-squared, which we won't go into, but are used when the results of each measure are *not independent* i.e. one result influences another).
+
+::: callout-note
+As a rule of thumb, a percentage variance explained of 1% is considered small, 6% medium and 14% and more large
+:::
+
+We can now apply anova to the `PISA_2018`. Let us focus on science scores (`PV1SCIE`).
+
+First, load the PISA data and create a `data.frame` containing the UK results for the vectors of science scores (`PV1SCIE`), parental wealth (`WEALTH`), gender (`ST004D01T`) and age (`AGE`).
+
+```{r}
+#| echo: true
+PISAUK <- PISA_2018 %>%
+ select(CNT, PV1SCIE, ST004D01T, WEALTH, AGE)%>%
+ filter(CNT=="United Kingdom")
+
+```
+
+::: callout-note
+Two assumptions of anova tests are a) the normality of the groups and b) that the groups have equal variance. We can do those checks using the quantile-quantile plot of normality we have seen earlier, and the `var` function to find the variance.
+
+```{r}
+#| eval: true
+#| warning: false
+PISAUKmale   <- PISAUK %>% filter(ST004D01T=="Male")
+PISAUKFemale <- PISAUK %>% filter(ST004D01T=="Female")
+
+ggqqplot(PISAUKmale$PV1SCIE)
+ggqqplot(PISAUKFemale$PV1SCIE)
+
+var=var(PISAUKmale$PV1SCIE)/var(PISAUKFemale$PV1SCIE)
+var
+
+```
+
+Both plots come out as straight lines indicating normality. The ratio of variance is 1.2, close enough to equal variance to suggest the conditions for anova tests are met. The rule of thumb for equal variances is taken as anything less than 3:1.
+:::
+
+Currently, the wealth scores are a numeric measure of family wealth, normalised around 0 (being the mean) and in the range of -0.935 to 1.20. To make the calculation simpler, we will categorise the scores into two groups, high wealth (over 0) and low wealth (0 or under). We will drop any NA values.
+
+```{r}
+PISAUK <- drop_na(PISAUK)
+
+PISAUK <- PISAUK %>% 
+  mutate(WEALTH = ifelse(WEALTH > 0, "High", "Low"))
+
+# PISAUK$WEALTH<-replace(PISAUK$WEALTH,PISAUK$WEALTH>0, "High")
+# PISAUK$WEALTH<-replace(PISAUK$WEALTH,PISAUK$WEALTH<=0, "Low")
+
+```
+
+To visualise the difference in means, here are graphs of the science scores for the two wealth groups:
+
+```{r}
+ggplot(PISAUK,
+       aes(x=PV1SCIE, fill=WEALTH))+
+  geom_density(alpha=0.5)
+
+```
+
+Visually, there appear to be some differences, the high wealth group seems to have a higher mean, but to determine if they are statistically significant, we need to run an anova test.
+
+Below is code to run the anova, just like in the example with test scores. We use `aov` and specify the data set as `PISAUK.` Then we state we wish to compare the variance in science scores `PV1SCIE`, against gender (`ST004D01T`), wealth and age: `PV1SCIE ~ ST004D01T + WEALTH + AGE`.
+
+We then summarise and print the table:
+
+```{r}
+resaov <- aov(PV1SCIE ~ ST004D01T + WEALTH + AGE, data=PISAUK)
+sumresaov<-summary(resaov)
+sumresaov
+```
+
+Note that the p value for gender (`ST004D01T`) is `0.405`, which is over `0.05`, so there are no significant differences by gender. By contrast, for `WEALTH` and `AGE`, the p values are below the `0.05` cut off, so the two wealth groups and 14 different age groups are statistically significantly different.
+
+Note that, in the anova table, the `df` (degrees of freedom column), tells you how many groups there are. `df` is the number of groups minus one. So, for `WEALTH` groups, `df` is 1, because there are two groups (high and low, which we created) and so df=2-1=1. For age, which gives participants' birth month, there are df=13-1=12 groups, i.e. the number of months of the year.
+
+Finally, we are interested in finding how much of the variance is explained by age and wealth, so we can run an eta-squared test, and multiply by 100 to get percentage variance explained
+
+```{r}
+eta<-etaSquared(resaov)
+eta<-eta*100
+eta
+```
+
+`WEALTH` and `AGE` only explain a small amount of the variation, 0.85% and 0.5% respectively.
+
+# Pre-seminar tasks - please complete the two tasks below before the seminar
+
+## Pre-seminar task 1
+
+::: question
+Determine if there is significant variation in UK PISA science scores by gender, and having a quiet place to study (ST011Q03TA). Then find the proportion of variance explained by each variable.
+:::
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: true
+# Create a dataframe of UK results with science scores, gender and
+# the quiet place to study item
+PISAUK <- PISA_2018 %>%
+  select(CNT, PV1SCIE, ST004D01T, ST011Q03TA)%>%
+  filter(CNT=="United Kingdom")%>%
+  drop_na()
+# Perform the anova using the dataframe PISAUK
+# finding the variance in PV1SCIE by gender (ST004D01T) and
+# having a quiet place to study (ST011Q03TA)
+resaov<-aov(data=PISAUK, PV1SCIE ~ ST004D01T + ST011Q03TA)
+# summarise the results and print
+sumresaov<-summary(resaov)
+sumresaov
+# No significant difference by gender (Pr(>)=0.737)
+# Significant differences by quiet space (Pr(>)=1.31e-14)
+#
+# To perform the eta-sqaured caluclation - i.e. how much
+# variation is explained by each varibale, install the
+# lsr package
+
+# Carry out the eta-squared calculation and times by 100 to get %s
+eta=etaSquared(resaov)
+eta=eta*100
+eta
+# Gender is not significant, so won't report the eta-squared value
+# Quiet space explains 0.45% of the variance
+
+```
+
+## Pre-seminar task 2
+
+::: question
+Determine if there is significant variation in UK PISA mathematics scores by gender, and having an internet link in the home (`ST011Q06TA`). Then find the proportion of variance explained by each variable.
+:::
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: true
+# Create a dataframe of mathematics scores, gender and internet connection
+# for UK students and remove NAs
+PISAUK <- PISA_2018 %>%
+  select(CNT, PV1MATH, ST004D01T, ST011Q06TA)%>%
+  filter(CNT=="United Kingdom")%>%
+  drop_na()
+# Perform the anova on the PISAU data, find variance in PV1MATH ~ (by)
+# gender (ST004D01T) and having an internet connection (ST011Q06TA)
+resaov<-aov(data=PISAUK, PV1MATH ~ ST004D01T + ST011Q06TA)
+sumresaov<-summary(resaov)
+sumresaov
+# There are significant differences by gender (Pr(>F)=2.84e-10) and
+# by having an internet connection (Pr(>F)=< 2e-16)
+# Use eta squared to find the % of variance explained by each variable
+eta=etaSquared(resaov)
+eta=eta*100 # Times by 100 to get percentages
+eta
+# Gender explains 0.32% of the variance
+# Having an internet connection 1.5%
+
+```
+
+# Seminar Tasks - please leave these to complete in the seminar
+
+## Task 1
+
+Discussion points:
+
+Recall the presentation slide on validity. As you are already aware, it is important that we keep in mind what the data we are analysing are based on, so:
+
+a)  What threats are there to the validity of PISA for its intended interpretations (e.g. scientific literacy) and uses (i.e. informing education policy)?
+
+b)  To what extent does the content of the PISA items used in the recommended reading reflect what you consider to be "inquiry-based teaching" and "teacher-directed teaching"?
+
+***Inquiry based science teaching (IBTEACH) items:***
+
+- Students spend time in the laboratory doing practical experiments
+- Students do experiments by following the instructions of the teacher
+- Students are asked to draw conclusions from an experiment they have conducted
+- Students are required to design how a school science question could be investigated in the laboratory
+- Students are allowed to design their own experiments
+- Students are given the chance to choose their own investigations
+- Students are asked to do an investigation to test out their own ideas
+
+**Teacher-directed science teaching (TDTEACH) items**
+
+- The teacher explains scientific ideas
+- A whole class discussion takes place with the teacher.
+- The teacher discusses our questions.
+- The teacher demonstrates an idea.
+
+c) What are the assumptions of a one-way anova test? How might it be misapplied to some variables in the PISA dataset?
+
+## Task 2
+
+::: question
+Determine if there is significant variation in UK PISA mathematics scores by gender, wealth, and having a computer in the home (`ST011Q04TA`). Then find the proportion of variance explained by each variable.
+
+Hint, wealth is a normalised score which you can sort into two categories, high and low. We can consider a score above 0, high wealth, and scores below 0, low wealth.
+
+To do this you can use the `mutate` (see @sec-mutate) function to change a column, combined with the `ifelse` function (see @sec-ifelse).
+
+This line mutates the `WEALTH` column, writing "High" when the value is over 0 and, if else, "Low"
+
+`mutate(WEALTH = ifelse(WEALTH > 0, "High", "Low"))`
+:::
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: true
+PISAUK <- PISA_2018 %>%
+  select(CNT, PV1MATH, ST004D01T, WEALTH, ST011Q04TA)%>%
+  filter(CNT=="United Kingdom")%>%
+  drop_na()
+
+PISAUK <- PISAUK %>% 
+  mutate(WEALTH = ifelse(WEALTH > 0, "High", "Low"))
+
+# PISAUK$WEALTH<-replace(PISAUK$WEALTH,PISAUK$WEALTH>0, "High")
+# PISAUK$WEALTH<-replace(PISAUK$WEALTH,PISAUK$WEALTH<=0, "Low")
+
+resaov<-aov(PV1MATH ~ ST004D01T + WEALTH + ST011Q04TA, data=PISAUK)
+sumresaov<-summary(resaov)
+sumresaov
+
+eta=etaSquared(resaov)
+eta=eta*100
+eta
+
+```
+
+## Task 3
+
+::: question
+Try the same task again, determine if there is significant variation in UK mathematics scores by gender, Wealth, and having a computer in the home. This time, divide the wealth variable into four levels.
+:::
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: true
+
+PISAUK <- PISA_2018 %>%
+  select(CNT, PV1MATH, ST004D01T, WEALTH, ST011Q04TA)%>%
+  filter(CNT=="United Kingdom")%>%
+  drop_na()
+
+PISAUK <- PISAUK %>% 
+  mutate(WEALTH = ifelse(WEALTH >= 0.5, "High",
+                         ifelse(WEALTH > 0, "Medium High",
+                                ifelse(WEALTH <= -0.5, "Low",
+                                       ifelse(WEALTH <= 0,"Medium Low", "ERROR")))))
+
+# PISAUK$WEALTH<-replace(PISAUK$WEALTH,PISAUK$WEALTH>=0.5, "High")
+# PISAUK$WEALTH<-replace(PISAUK$WEALTH, PISAUK$WEALTH>0, "Medium High")
+# PISAUK$WEALTH<-replace(PISAUK$WEALTH,PISAUK$WEALTH<=-0.5, "Low")
+# PISAUK$WEALTH<-replace(PISAUK$WEALTH,PISAUK$WEALTH<=0,"Medium Low")
+
+resaov<-aov(PV1MATH ~ ST004D01T + WEALTH + ST011Q04TA, data=PISAUK)
+sumresaov<-summary(resaov)
+sumresaov
+
+eta=etaSquared(resaov)
+eta=eta*100
+eta
+```
+
+## Tukey's HSD
+
+When an anova test reports that are some statistically significant differences between groups, it does not imply there are statistically significant differences between all subgroups. For example, if the anova reports statistically significant differences by age, statistically significant differences might exist between 11, 12 and 13-year old students, but not between 13 and 14-year olds.
+
+We can use an additional anova test, **Tukey's Honest Significant Difference** test (or Tukey's HSD for short), to find out which pairs of subgroups have statistically significant differences in means.
+
+Consider the question: Are there statistically significant differences in the variance of science scores of the UK, US, France and Germany? To determine if such differences exist, we create a new subset for those countries' science scores, and then run an anova test by country, reporting the eta squared value.
+
+```{r}
+PISAMULTI <- PISA_2018 %>%
+  select(CNT, PV1SCIE)%>%
+  filter(CNT=="United Kingdom" | CNT=="United States" | CNT=="Germany" | CNT=="France")
+  # filter(CNT %in% c("United Kingdom", "United States", "Germany", "France"))
+
+ggplot(PISAMULTI,
+       aes(x=PV1SCIE, fill=CNT))+
+  geom_density(alpha=0.5)
+
+resaov<-aov(PV1SCIE ~ CNT, data=PISAMULTI)
+sumresaov<-summary(resaov)
+sumresaov
+
+eta<-as.data.frame(etaSquared(resaov))
+eta<-eta*100
+eta
+```
+
+The anova results tell us there are significant differences between the countries, which account for 0.4% of variance in scores. We can then run a Tukey HSD test to determine which countries have significant differences between mean scores.
+
+```{r}
+TukeyHSD(resaov)
+```
+
+From that we get a table with p values (p adj) for different pairs of countries. Note that these are below 0.005 for all pairs of countries, except the US and the UK. So we can conclude there are significant differences in science scores between all countries except the UK and the US.
+
+## Task 4
+
+::: question
+For the China, Thailand, Japan and Korea, determine if there are statistically significant differences in variation in mathematics scores.
+:::
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: true
+PISAMULTI<-PISA_2018 %>%
+  select(CNT, PV1SCIE)%>%
+  filter(CNT=="B-S-J-Z (China)" | CNT=="Thailand" | CNT=="Japan" | CNT=="Korea")
+  # filter(CNT %in% c("B-S-J-Z (China)", "Thailand", "Japan", "Korea"))
+
+ggplot(PISAMULTI,
+       aes(x=PV1SCIE, fill=CNT))+
+  geom_density(alpha=0.5)
+
+resaov<-aov(PV1SCIE ~ CNT, data=PISAMULTI)
+sumresaov<-summary(resaov)
+sumresaov
+
+eta<-as.data.frame(etaSquared(resaov))
+eta<-eta*100
+eta
+
+TukeyHSD(resaov)
+
+```
+
+## Task 5
+
+Finally, a significant open question is the extent to which *discovery learning* impacts students' results. The PISA 2015 data contains a couple of variables related to whether students report their teachers use *direct instruction* (teacher-led activities) or not, and whether they experience *inquiry based teaching* (student-led activities), or not. In 2015, the two composite variables related to students' reports of their teachers' teaching styles in science are:
+
+-   `IBTEACH` quantifies teachers' use of inquiry based teaching. It is based on responses to nine questions: frequency with which they experienced specific activities:
+    1.  students are given opportunities to explain their ideas;
+    2.  students spend time in the laboratory doing practical experiments;
+    3.  students are required to argue about science questions;
+    4.  students are asked to draw conclusions from an experiment they have conducted;
+    5.  the teacher explains how a science idea can be applied to different phenomena;
+    6.  students are allowed to design their own experiments;
+    7.  there is a class debate about investigations;
+    8.  the teacher clearly explains the relevance of science concepts; and,
+    9.  students are asked to do an investigation to test ideas
+-   `TDTEACH` scores teachers use of teacher-directed approaches. It is based on 4 items on the survey asking the frequency of:
+    1.  The teacher explains scientific ideas;
+    2.  A whole class discussion takes place with the teacher;
+    3.  The teacher discusses our questions;
+    4.  and the teacher demonstrates an idea.
+
+First, download the PISA 2015 dataset: [PISA_2015](https://drive.google.com/file/d/18NpQO1DGY5dnjnlR2b3IF9Zv8xtpc1Fk/view?usp=share_link) and load the data using this code:
+
+```{r}
+#| warning: false
+#| eval: false
+library(arrow)
+library(tidyverse)
+
+#PISA_2015 <- read_parquet("<folder>PISA_2015_student_subset.parquet")
+```
+
+::: question
+Task: For science, determine the amount of variation in scores explained by `IBTEACH` and `TDTEACH` for the whole data set. What is true in the context of students in the UK, China and the US? Are the patterns different for mathematics?
+:::
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: true
+
+```
+
+# Repeating research
+
+The direct instruction vs inquiry learning debate is a current one with impact upon national policy and classroom practice [@gove2013michael]. A piece of research by @mourshed2017improve suggested that there was a *"sweet spot"* which in practice is:
+
+> teacher-directed instruction in most to all classes and inquiry-based learning in some
+
+![the sweet spot for teacher-directed instruction and inquiry-based learning [@mourshed2017improve]](images/mckinsey.png)
+
+Unfortunately @mourshed2017improve never published the code behind their study and it's not actually clear how we can recreate their findings. Others have tried, but failed [@bokhove2021mckinsey]. Now it's our turn!
+
+## Exploring the data
+
+First, let's make sure that we have a dataset without any missing values for `IBTEACH` and `TDTEACH`
+
+```{r}
+#| warning: false
+# For the whole dataset
+# Remove any NAs
+PISA_2015<-PISA_2015 %>%
+  drop_na(IBTEACH) %>%
+  drop_na(TDTEACH)
+```
+
+## A simple attempt to recreate the sweet spot analysis
+
+To recreate the sweet spot analysis: a) divide `IBTEACH` and `TDTEACH` intro three categories, using `ifelse,` as we have done above. b) Use `group_by` with `IBTEACH` and `TDTEACH` and `summarise` the mean to create a summary table c) use `ggplot`, with `geom_point`, and change the point size by the mean to create a similar plot to the McKinsey graph.
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: true
+#| warning: false
+# Create a data set to plot including IBTEACH, TDTEACH and PV1SCIE
+
+PISAIBTD <- PISA_2015 %>%
+  select(IBTEACH, TDTEACH, PV1SCIE) %>%
+  na.omit()
+
+# Create data to plot
+Plotdata <- PISAIBTD %>%
+# Categorise IBTEACH  into three levels
+  mutate(IBTEACH = ifelse(IBTEACH >= 1, "High", 
+                          ifelse(IBTEACH > -1.2, "Medium","Low")))%>%
+  # Categorise TDTEACH  into three levels
+  # The function range(PISAIBTD$TDTEACH) and range(PISAIBTD$IBTEACH)
+  # was used to determine the range of the two variables
+  # The range was roughly divided into three parts
+  mutate(TDTEACH = ifelse(TDTEACH >= 0.5, "High", 
+                          ifelse(TDTEACH > -1, "Medium","Low")))%>%
+  # Group by the IBTEACH and TDTEACH to create a table, and find the mean
+  # science scores
+  group_by(IBTEACH, TDTEACH)%>%
+  summarise(Mean_Sci_Score = mean(PV1SCIE))
+# Set an order for the levels of IBTEACH and TDTeach
+# so the plot comes out in right order
+Plotdata$IBTEACH=factor(Plotdata$IBTEACH, levels=c("Low","Medium","High"))
+Plotdata$TDTEACH=factor(Plotdata$TDTEACH, levels=c("Low","Medium","High"))
+ggplot(Plotdata,
+       aes(x=IBTEACH, y=TDTEACH, size=Mean_Sci_Score))+
+  geom_point(colour="red")+
+  labs(x="Inquiry Based Teaching", y="Teacher directed Teaching") +
+  geom_text(aes(label=signif(Mean_Sci_Score,3)), size=4)
+  
+```
+```{r}
+#| code-fold: true
+#| eval: false
+#| code-summary: anova, Tukey HSD and eta squared output
+
+# Recreate the categorised dataset  
+Anovdata <- PISAIBTD%>%
+  mutate(IBTEACH=ifelse(IBTEACH >= 1, "High", 
+                        ifelse(IBTEACH > -1.2, "Medium","Low")))%>%
+  mutate(TDTEACH=ifelse(TDTEACH >= 0.5, "High", 
+                        ifelse(TDTEACH > -1, "Medium","Low")))
+# Perform the anova, Tukey HSD and eta-squared test.
+resaov<-aov(data=Anovdata, PV1SCIE~ TDTEACH + IBTEACH)
+
+summary(resaov)
+TukeyHSD(resaov)
+eta<-etaSquared(resaov)
+eta<-100*eta
+eta
+```
+
+## A fuller attempt - Step 1, Wrangling the data {#sec-sweet_density}
+
+Now we have a statistical grasp of the data we can try to recreate the study. First, we need to categorise `IBTEACH` and `TDTEACH` into three levels, *high*, *medium* and *low*, we will use these instead of the "None to few lessons", "Some to many lessons" and "Many to all lessons". We can use the `quantile` function to do this. The function tells us the value of `IBTEACH` and `TDTEACH` which contain 1/3 and 2/3 of this responses. We can use these values to divide the data into 3 parts with equal numbers of students in each by using the `mutate` function with `ifelse` (as above) to replace the values with the categories, `High`, `Medium` and `Low`.
+
+```{r}
+# split into three 'quantiles'. The function returns the value of IBTEACH and TD teach which account for 33% and 66% of students
+
+quant_IBTEACH <- quantile(PISA_2015$IBTEACH, prob=c(.33,.66), na.rm=TRUE)
+quant_TDTEACH <- quantile(PISA_2015$TDTEACH, prob=c(.33,.66), na.rm=TRUE)
+
+# Mutate the IBTEACH and TDTEACH columns, replacing values with 'High', 'Low' and 'Medium' based on the quantile calculation values
+
+PISA_2015IBTD <- PISA_2015 %>% 
+  select(PV1SCIE, IBTEACH, TDTEACH, ST004D01T, OECD, CNT) %>%
+  mutate(IBTEACH = ifelse(IBTEACH < quant_IBTEACH["33%"], "Low",
+                       ifelse(IBTEACH >= quant_IBTEACH["33%"] & 
+                                IBTEACH < quant_IBTEACH["66%"], 
+                              "Medium", "High"))) %>%
+   mutate(TDTEACH = ifelse(TDTEACH < quant_TDTEACH["33%"], "Low",
+                       ifelse(TDTEACH >=quant_TDTEACH["33%"] & 
+                                TDTEACH < quant_TDTEACH["66%"],
+                              "Medium", "High"))) %>%
+  filter(!is.na(IBTEACH), !is.na(TDTEACH)) %>%
+  rename(gender = ST004D01T)
+
+# Plot graphs of variation in science score by level of inquiry based teaching
+ggplot(PISA_2015IBTD,
+       aes(x=PV1SCIE, fill=IBTEACH))+
+  geom_density(alpha=0.5)
+
+```
+
+This graph shows the peak of High `IBTEACH` (in red) having a smaller `PV1SCIE` grade than the other categories. This suggests we should avoid high levels of `IBTEACH`
+
+```{r}
+# Plot graphs of variation in science score by level of teacher directed  teaching
+ggplot(PISA_2015IBTD,
+       aes(x=PV1SCIE, fill=TDTEACH))+
+  geom_density(alpha=0.5)
+
+```
+
+This graph shows the peak of Low `TDTEACH` (in green) having a smaller `PV1SCIE` grade than the other categories. This suggests we should avoid low levels of `TDTEACH`
+
+```{r}
+#| echo: false
+#| eval: false
+
+# Find mean scores of the three levels of inquiry based teaching
+PISA_2015IB <- PISA_2015IBTD %>%
+  group_by(IBTEACH)%>%
+  summarise(Meansci=mean(PV1SCIE),
+            Mediansci=median(PV1SCIE))
+PISA_2015IB
+
+# Find mean scores of the three levels of teacher directed teaching
+PISA_2015TD <- PISA_2015IBTD %>%
+  group_by(TDTEACH) %>%
+  summarise(Meansci=mean(PV1SCIE),
+            Mediansci=median(PV1SCIE))
+
+Plotdata<-cbind(PISA_2015IB, TDscore=PISA_2015TD$Meansci)
+
+# Remove the first column of labels which is not needed for plotting
+Plotdata2<-Plotdata[,-1]
+# Rename rows and columns
+rownames(Plotdata2)<-Plotdata[,1]
+Plotdata2<-Plotdata2[c(1,3,2),]
+colnames(Plotdata2)<-c("Inquiry based", "Teacher Directed")
+# Calculate mean and median science scores, grouped by levels of IBTEACH
+# and TDTEACH
+plot_data <- PISA_2015IBTD %>%
+  mutate(mean_sci= mean(PV1SCIE),
+         median_sci= median(PV1SCIE)) %>%
+  group_by(IBTEACH, TDTEACH, mean_sci, median_sci) %>%
+  summarise(group_mean_sci=mean(PV1SCIE),
+            group_median_sci=median(PV1SCIE),
+            mean_diff = unique(group_mean_sci - mean_sci),
+            median_diff = unique(group_median_sci - median_sci),
+            mean_col = mean_diff > 0,
+            median_col = median_diff > 0) %>% ungroup()
+
+# Produce a balloon plot of the data (which resembles the McKinsey graph)
+ggballoonplot(data=plot_data, x="IBTEACH", y="TDTEACH", size="mean_diff", fill="mean_col")
+
+# Perform the same calculation for the UK subset
+
+UKPISA<-PISA_2015 %>% 
+  select(CNT, PV1SCIE, IBTEACH, TDTEACH) %>%
+  filter(CNT=="United Kingdom") 
+
+resaov<-aov(mean_diff ~ IBTEACH + TDTEACH, data=plot_data)
+sumresaov<-summary(resaov)
+sumresaov
+
+eta<-as.data.frame(etaSquared(resaov))
+eta<-eta*100
+eta
+
+# The Pr(\>F) value for IBTEACH is less than 0.05, so there are statistically significant differences between the IBTEACH groups, but not for TDTEACH.
+
+```
+
+## Searching for the sweet spot(s)
+
+The "sweet spot" chart by @mourshed2017improve looks at the average point increase in PISA scores given different teaching methods. We need to calculate this average difference.
+
+Here the mean score for `PV1SCIE` are calculated and then compared to the means for the groups by the levels of `TDTEACH` and `IBTEACH.`
+
+```{r}
+#| warning: false
+# Using ggplot
+# optional gender filter
+plot_data <- PISA_2015IBTD %>% 
+  mutate(mean_sci  = mean(PV1SCIE),
+         median_sci= median(PV1SCIE)) %>%
+  group_by(IBTEACH, TDTEACH, mean_sci, median_sci) %>%
+  summarise(group_mean_sci=mean(PV1SCIE),
+            group_median_sci=median(PV1SCIE),
+            mean_diff = unique(group_mean_sci - mean_sci),
+            median_diff = unique(group_median_sci - median_sci),
+            mean_col = mean_diff > 0,
+            median_col = median_diff > 0,
+            n=n()) %>% 
+  ungroup() %>%
+  mutate(IBTEACH = factor(IBTEACH, levels=c("Low", "Medium", "High")),
+         TDTEACH = factor(TDTEACH, levels=c("Low", "Medium", "High")))
+```
+
+-   line 4 and 5 creates an overall mean and median score for `PV1SCIE`
+-   line 6 we want to find out the difference in average score for each combination of `IBTEACH` and `TDTEACH`, e.g. `IBTEACH-Low` and `TDTEACH-Low`, `IBTEACH-Low` and `TDTEACH-Medium`, etc. So we need to group these, and group the `mean_sci`, `median_sci` values so we don't lose them when summarising.
+-   line 7 and 8 - creates a mean and median `PV1SCIE` score for each grouping
+-   line 9 and 10 - calculates the differences from the overall mean and median `PV1SCIE` score for each grouping
+-   line 11 and 12 - calculates whether this difference is positive (or negative) and stores this as `True` or `False`
+-   line 13 stores the number of students in each grouping
+-   line 15 and 16 uses `factor` to set the order of `IBTEACH` and `TDTEACH`, we want them running `"Low", "Medium", "High"` on our graph
+
+Now we can try and build our graph using `geom_point`
+
+```{r}
+#| echo: false
+#| eval: false
+# adding percentage labels, not for final book
+plot_data %>% 
+         select(IBTEACH, TDTEACH, mean_diff, mean_col, n) %>%
+         mutate(mean_diff = signif(mean_diff,2),
+                mean_diff_txt = ifelse(sign(mean_diff)==1, 
+                                   paste0("+",mean_diff),
+                                   paste0(mean_diff)),
+                per = 100 * (n / sum(n)))
+
+
+ggplot(plot_data %>% 
+         select(IBTEACH, TDTEACH, mean_diff, mean_col, n) %>%
+         mutate(mean_diff = signif(mean_diff,2),
+                mean_diff_txt = ifelse(sign(mean_diff)==1, 
+                                   paste0("+",mean_diff),
+                                   paste0(mean_diff)),
+                per = signif(100 * n / sum(n),3)), 
+       aes(x =IBTEACH, y = TDTEACH)) +
+  geom_point(aes(size=abs(mean_diff), colour=mean_col)) +
+  scale_size(range = c(0, 40)) +
+  geom_label(aes(label=paste(per, "%"), vjust=3.5)) +
+  geom_text(aes(label=mean_diff_txt, 
+                colour=ifelse(abs(mean_diff) > 8, "big",
+                              ifelse(mean_diff > 0, "positive", "negative")))) +
+  scale_color_manual(values = c("big" = "white", "positive" = "#6592a5", 
+                                "negative" = "#c37d7f",
+                                "TRUE" = "#6592a5", "FALSE"= "#c37d7f")) +
+  theme(panel.background=element_rect(fill = "#dce1e5"),
+        legend.position = "none") +
+  ggtitle("Point change in PISA science scores relative to mean") + 
+  xlab("Inquiry-based science teaching") +
+  ylab("Teacher-directed science instruction")
+```
+
+```{r}
+ plt_sweetspot <- ggplot(plot_data %>% 
+         select(IBTEACH, TDTEACH, mean_diff, mean_col) %>%
+         mutate(mean_diff = signif(mean_diff,2),
+                mean_diff_txt = ifelse(sign(mean_diff)==1, 
+                                   paste0("+",mean_diff),
+                                   paste0(mean_diff))), 
+       aes(x =IBTEACH, y = TDTEACH)) +
+  geom_point(aes(size=abs(mean_diff), colour=mean_col)) +
+  scale_size(range = c(0, 40)) +
+  geom_text(aes(label=mean_diff_txt, 
+                colour=ifelse(abs(mean_diff) > 8, "big",
+                              ifelse(mean_diff > 0, "positive", "negative")))) +
+  scale_color_manual(values = c("big" = "white", "positive" = "#6592a5", 
+                                "negative" = "#c37d7f",
+                                "TRUE" = "#6592a5", "FALSE"= "#c37d7f")) +
+  theme(panel.background=element_rect(fill = "#dce1e5"),
+        legend.position = "none") +
+  ggtitle("Point change in PISA science scores relative to mean") + 
+  xlab("Inquiry-based science teaching") +
+  ylab("Teacher-directed science instruction")
+```
+
+-   line 1 to 6 - we pass the `plot_data` dataframe specified above to `ggplot`, we also make a few changes to this dataframe, using `signif` to reduce the number of signficant digits in `mean_diff` and we create `mean_diff_txt` which is `mean_diff` but with the sign `+/-` on the front.
+-   line 7 - we pass the `IBTEACH` and `TDTEACH` to x and y, this means we'll plot a point for each combination, Low/Low, Low/Medium, Low/High, etc.
+-   line 8 - `geom_point` takes the x and y from line 7 and adjusts the size of the points based on the `abs` (the number without a sign) value of `mean_diff`, and set the colour `mean_col`, whether the point is positive or negative.
+-   line 9 - this increases the overall size of the points to range from 0, the smallest, to 40 the biggest
+-   line 10 to 12 - add a text label to each point with the value of the difference and added sign `mean_diff_txt`. Change the colour of the text, if `abs(mean_diff) > 8` then the text will go on top of the points and will need to be `white`, otherwise the colour of the text should be a colour to reflect positive or negative.
+-   line 13 to 15 - manually set the colours of the text and the points.
+-   line 16 to 17 - change the background colour, and get rid of the legend
+-   line 18 to 20 - add a title and new labels
+
+```{r}
+#| echo: false
+plt_sweetspot
+```
+
+We can see that our graph is very different to theirs?! We have *two* "sweet spots", Low Inquiry and Medium Directed at `+29` and Medium inquiry and High Directed at `+25`. Going back to our exploration above, this matches what we saw in the density charts (@sec-sweet_density), where High Inquiry and Low Directed gave the worst results.
+
+But why is ours different? It's very hard to tell and without seeing the original code or a well written methodology; we might never know. Is our model better than theirs? Maybe! It's just hard to tell. People have taken the McKinsey report very seriously and it does seem unlikely that national centres of education will be reading this subsection of session 7 of an MA STEM Quantitative methods course at KCL to shape their policy making decisions. Maybe you could explore this further in your dissertation and try to come up with a stronger conclusion.
+
+::: question
+How does the sweet spot change for the UK? Repeat the analysis above only looking at student results for the "United Kingdom"
+
+```{r}
+#| code-fold: true
+#| eval: false
+
+PISA_2015_UK <- PISA_2015 %>% filter(CNT == "United Kingdom")
+
+quant_IBTEACH <- quantile(PISA_2015_UK$IBTEACH, prob=c(.33,.66), na.rm = TRUE)
+quant_TDTEACH <- quantile(PISA_2015_UK$TDTEACH, prob=c(.33,.66), na.rm = TRUE)
+
+# Mutate the IBTEACH and TDTEACH columns, replacing values with 'High', 'Low' and 'Medium' based on the quantile calculation values
+
+PISA_2015IBTD <- PISA_2015_UK %>% 
+  select(PV1SCIE, IBTEACH, TDTEACH, ST004D01T, OECD, CNT) %>%
+  mutate(IBTEACH = ifelse(IBTEACH < quant_IBTEACH["33%"], "Low",
+                       ifelse(IBTEACH >= quant_IBTEACH["33%"] & 
+                                IBTEACH < quant_IBTEACH["66%"], 
+                              "Medium", "High"))) %>%
+   mutate(TDTEACH = ifelse(TDTEACH < quant_TDTEACH["33%"], "Low",
+                       ifelse(TDTEACH >=quant_TDTEACH["33%"] & 
+                                TDTEACH < quant_TDTEACH["66%"],
+                              "Medium", "High"))) %>%
+  filter(!is.na(IBTEACH), !is.na(TDTEACH)) %>%
+  rename(gender = ST004D01T)
+
+# Plot graphs of variation in science score by level of inquiry based teaching
+ggplot(PISA_2015IBTD,
+       aes(x=PV1SCIE, fill=IBTEACH))+
+  geom_density(alpha=0.5)
+
+ggplot(PISA_2015IBTD,
+       aes(x=PV1SCIE, fill=TDTEACH))+
+  geom_density(alpha=0.5)
+
+# optional gender filter
+plot_data <- PISA_2015IBTD %>% 
+  mutate(mean_sci  = mean(PV1SCIE),
+         median_sci= median(PV1SCIE)) %>%
+  group_by(IBTEACH, TDTEACH, mean_sci, median_sci) %>%
+  summarise(group_mean_sci=mean(PV1SCIE),
+            group_median_sci=median(PV1SCIE),
+            mean_diff = unique(group_mean_sci - mean_sci),
+            median_diff = unique(group_median_sci - median_sci),
+            mean_col = mean_diff > 0,
+            median_col = median_diff > 0,
+            n=n()) %>% 
+  ungroup() %>%
+  mutate(IBTEACH = factor(IBTEACH, levels=c("Low", "Medium", "High")),
+         TDTEACH = factor(TDTEACH, levels=c("Low", "Medium", "High"))) %>% 
+         select(IBTEACH, TDTEACH, mean_diff, mean_col, n) %>%
+  mutate(mean_diff = signif(mean_diff,2),
+                mean_diff_txt = ifelse(sign(mean_diff)==1, 
+                                   paste0("+",mean_diff),
+                                   paste0(mean_diff)),
+                per = signif(100 * (n / sum(n)),3))
+
+plt_sweetspot <- ggplot(plot_data, 
+       aes(x =IBTEACH, y = TDTEACH)) +
+  geom_point(aes(size=abs(mean_diff), colour=mean_col)) +
+  scale_size(range = c(0, 40)) +
+  geom_label(aes(label=paste(per, "%"), vjust=3.5)) +
+  geom_text(aes(label=mean_diff_txt, 
+                colour=ifelse(abs(mean_diff) > 8, "big",
+                              ifelse(mean_diff > 0, "positive", "negative")))) +
+  scale_color_manual(values = c("big" = "white", "positive" = "#6592a5", 
+                                "negative" = "#c37d7f",
+                                "TRUE" = "#6592a5", "FALSE"= "#c37d7f")) +
+  theme(panel.background=element_rect(fill = "#dce1e5"),
+        legend.position = "none") +
+  ggtitle("Point change in PISA science scores relative to mean (UK only)") + 
+  xlab("Inquiry-based science teaching") +
+  ylab("Teacher-directed science instruction")
+  
+
+
+```
+:::
+
+```{r}
+#| echo: false
+#| eval: false
+aov(mean_diff ~ IBTEACH + TDTEACH, data=plot_data) %>% summary()
+
+lm(mean_diff ~ IBTEACH + TDTEACH, plot_data) %>% summary()
+lm(median_diff ~ IBTEACH + TDTEACH, plot_data) %>% summary()
+```

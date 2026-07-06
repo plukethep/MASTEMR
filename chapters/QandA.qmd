@@ -1,0 +1,296 @@
+---
+title: "Questions and Answers"
+---
+
+```{r setup}
+#| eval: true
+#| warning: true
+#| echo: false
+
+# only load this code if testing this file independently of overall project
+if(!exists("test")){
+  warning("RUNNING LOCAL FILE LOAD")
+  
+  library(glue)
+  proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
+  proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  
+  node <- Sys.info()
+  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
+    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
+    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
+  }else if(node["nodename"] == "PETES_PC"){ #Pete's NEW Laptop
+    proj_folder <- r"(C:\Users\Peter\Google Drive\Kings\Code\MASTEMR\)"
+  }
+  
+  source(glue("{proj_folder}MASTEMR_functions.R"))
+  OpenAnalysis_load_ALL(use_cache = TRUE, 
+                        report_cache_folder=r"[C:\temp\cache\MASTEMR\]",
+                        over_write=FALSE)
+}
+```
+
+# Questions about R {#sec-QANDA}
+
+## Why doesn't my `select`/`filter` statement work?
+
+When you are loading packages, sometimes different packages have the same function names in them, and the functions themselves will do very different things. For example, there is a `select` function in the `tidyverse`, but also *another* `select` function in the package `MASS` that does something very different. If we load the tidyverse before loading MASS, then the MASS version of select is the one that will be used?!
+
+```{r}
+#| echo: false
+#| eval: false
+#| warning: false
+# if("package:broom" %in% search()) detach("package:broom", unload=TRUE)
+# if("package:tidyr" %in% search()) detach("package:tidyr", unload=TRUE)
+# if("package:dbplyr" %in% search()) detach("package:dbplyr", unload=TRUE)
+# if("package:gt" %in% search()) detach("package:gt", unload=TRUE)
+# if("package:dplyr" %in% search()) detach("package:dplyr", unload=TRUE)
+# 
+# if("package:multcomp" %in% search()) detach("package:multcomp", unload=TRUE)
+# if("package:TH.data" %in% search()) detach("package:TH.data", unload=TRUE)
+# if("package:MASS" %in% search()) detach("package:MASS", unload=TRUE)
+# if("package:see" %in% search()) detach("package:see", unload=TRUE)
+# if("package:stats" %in% search()) detach("package:stats", unload=TRUE)
+# remove all packages
+while(!is.null(sessionInfo()$loadedOnly)){
+  lapply(names(sessionInfo()$loadedOnly), require, character.only = TRUE)
+  invisible(lapply(paste0('package:', names(sessionInfo()$otherPkgs)), detach, character.only=TRUE, unload=TRUE, force=TRUE))    
+}
+
+```
+
+```{r}
+#| error: true
+#| eval: false
+#| echo: true
+library(tidyverse)
+library(MASS)
+
+diamonds %>% select(carat, cut, color)
+```
+
+To get around this make sure that you load the `tidyverse` *after* `MASS`, to be safe you should always load the `tidyverse` last.
+
+```{r}
+#| error: true
+#| echo: true
+library(MASS) 
+library(tidyverse)
+
+diamonds %>% select(carat, cut, color)
+```
+
+you can also specify the package that select comes from (in this case from a package within the `tidyverse` called `dplyr`):
+
+```{r}
+#| error: true
+#| echo: true
+diamonds %>% dplyr::select(carat, cut, color)
+```
+
+Finally, there is a package that helps your deal with conflicts called `conflicted`. At the top of your script you can define which version of a function you prefer, this will be the version that will always be used. If you want to specify another version of a function, you can still use other versions of the function using the `::` notation:
+
+```{r}
+#| eval: false
+#| echo: true
+library(conflicted)
+conflicts_prefer(dplyr::select)
+conflicts_prefer(dplyr::mutate)
+conflicts_prefer(dplyr::summarise)
+conflicts_prefer(dplyr::filter)
+
+df %>% select(name, age) # uses select from dplyr
+df %>% MASS::select(name) # uses select from MASS
+```
+
+To find out if you have any conflicts, you can run `conflict_scout()`.
+
+## How can I unload packages
+
+If you are finding yourself with a conflict as mentioned above and want to `unload` packages, then you need to run the following code:
+
+```{r}
+#| eval: false
+#| echo: true
+# adapted from: @mmfrgmpds https://stackoverflow.com/questions/7505547/detach-all-packages-while-working-in-r
+while(!is.null(sessionInfo()$loadedOnly)){
+  lapply(names(sessionInfo()$loadedOnly), require, character.only = TRUE)
+  invisible(lapply(paste0('package:', names(sessionInfo()$otherPkgs)), detach, character.only=TRUE, unload=TRUE, force=TRUE))    
+}
+```
+
+## Why am I getting the error 'could not find function "%>%"'
+
+The pipe operator `%>%` is loaded when you load the tidyverse package - make sure you have installed tidyverse and loaded it
+
+```{r}
+#| eval: false
+#| echo: true
+install.packages("tidyverse")  # install
+library(tidyverse)             # load
+```
+
+## I am getting the error: '"Error: Mapping should be created with `aes()` or `aes_()`."' when using ggplot
+
+This may be caused by having a bracket after the geom rather than before it
+
+```{r}
+#| eval: false
+#| echo: true
+data<-data.frame(x=5:1,
+                 y=10:6)
+ggplot(data, aes(x, y) +           # Reproduce error message
+         geom_point())
+
+```
+
+```{r}
+#| eval: false
+#| echo: true
+data<-data.frame(x=5:1,
+                 y=10:6)
+ggplot(data, aes(x, y)) +           # Fixed error by moving bracket
+         geom_point()
+
+```
+
+## My axis labels are too long
+
+If you want to use long axis titles you may find they overrun the space available
+
+```{r}
+#| eval: false
+#| echo: true
+data<-data.frame(x=5:1,
+                 y=10:6)
+ggplot(data, aes(x=x, y=y)) +           
+         geom_col()+
+  ylab("A very long description for the y-axis label that will overflow and not look very nice")
+
+```
+
+To insert a line break in the axis label, add `\n` to the text where you want line breaks.
+
+```{r}
+#| eval: false
+#| echo: true
+data<-data.frame(x=5:1,
+                 y=10:6)
+ggplot(data, aes(x=x, y=y)) +           
+         geom_col()+
+  ylab("A very long description \n for the y-axis label that will \n overflow and not look very nice")
+
+```
+
+## How can I find out the full item labels in the PISA data frame?
+
+The code below will give you a list of all the item labels:
+
+```{r}
+#| eval: false
+#| echo: true
+
+# You may want to set the maximum print output to see all the labels
+options(max.print = 1300)
+
+lapply(PISA_2022, attr, "label")
+
+```
+
+## How do I turn a data frame into a form I can put into an assingment or paper?
+
+You can use the `gt` package to convert data frames to aesthetically pleasing outputs.
+
+```{r}
+#| eval: false
+#| echo: true
+
+# load the gt package - you will need to run install.packages("gt") the first time
+# install.packages("gt")
+library(gt)
+
+# Make the data frame you want you want to output
+science_mean_scores <- PISA_2022 %>%
+  group_by(CNT) %>%
+  summarise(mean_science_score = mean(PV1SCIE, na.rm = TRUE),
+            sd_science = sd(PV1SCIE, na.rm =TRUE))
+
+# Use gt to produce an output - you can copy and paste the table from the
+# viewer window to your report
+
+gt(science_mean_scores)
+
+# You can see more options on formating the table here: https://gt.rstudio.com
+# For example to add a heading
+
+gt(science_mean_scores) %>% tab_header(
+    title = "Mean science scores",
+    subtitle = "PISA 2022 data")
+
+# Or to change the number of decimal places and a column name
+
+gt(science_mean_scores) %>% tab_header(
+  title = "Mean science scores",
+  subtitle = "PISA 2022 data") %>%
+  fmt_number(columns = c(mean_science_score , sd_science), decimals = 1) %>%
+  cols_label("CNT" = md("**Country**"))
+
+## If you have an output from a linear model, there is an additional step to do before using gt
+# You need to use the broom package, which has the `tidy` function which gets the output of `lm`
+# Into a suitable format for turing into a table
+# install.packages("broom")
+
+library(broom)
+
+# Create example dataframe
+
+UK_PISA <- PISA_2022 %>%
+  select(PV1SCIE, PV1MATH, CNT) %>%
+  filter(CNT == "United Kingdom")
+
+# Run the model
+
+uk_mod <- lm(data = UK_PISA, PV1SCIE ~ PV1MATH)
+
+# tidy the model
+
+uk_mod_tidy <- tidy(uk_mod)
+
+# pass to gt to produce nice output
+
+gt(uk_mod_tidy)
+
+
+```
+## How can I change the colours of a plot if I don't want the default colours?
+
+ggplot will use a default palette - you can sometimes identify plots in papers as being produced by ggplot from the distinctive green and pink colour! If you want to move away from these, you can use the `scale_fill_manual` and `scale_colour_manual` functions.
+
+For example, if you have a bar graph of the number of boys and girls in the UK, you can change the fill colours using  `scale_fill_manual` and defining the colours for the categories (in this case `Male` and `Female`).
+
+```{r}
+
+UK_PISA <- PISA_2022 %>%
+  select(ST004D01T, CNT) %>%
+  filter(CNT == "United Kingdom")
+
+ggplot(UK_PISA, aes(x = ST004D01T, fill = ST004D01T)) +
+  geom_bar() +
+  scale_fill_manual(values = c("Male" = "orange", "Female" = "lightblue"))  # manually set the values for male and female
+
+```
+You need to match the scale manual command to the aesthetic you want to change. For example, when using `geom_point` you use the `colour` aesthetic to change the colour of points. In that case, you use `scale_colour_manual`.
+
+```{r}
+
+UK_PISA <- PISA_2022 %>%
+  select(ST004D01T, CNT, PV1SCIE, PV1MATH) %>%
+  filter(CNT == "United Kingdom")
+
+ggplot(UK_PISA, aes(x = PV1MATH, y = PV1SCIE, colour = ST004D01T)) +
+  geom_point() +
+  scale_colour_manual(values = c("Male" = "lightgreen", "Female" = "red")) # manually set the values for male and female
+
+```
+

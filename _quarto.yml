@@ -1,19 +1,116 @@
+# title: "Quantitative methods in the context of STEM education research"
+# subtitle: "MA STEM Education"
+
+# https://quarto.org/docs/websites/
+# https://quarto.org/docs/websites/website-navigation.html
+# https://quarto.org/docs/projects/code-execution.html
+
+number-sections: true
+echo: false
+warning: false
+
 project:
   type: website
+  render:
+      #- !chapters/
+    - index.qmd
+    # - about.qmd
+    # - chapters/A6-Bayesian.qmd
+    - chapters/07-ChisqPISA.qmd
+    - chapters/10-Correlation_and_regression.qmd
+    - chapters/01-Intro_to_quant_methods.qmd
+    - chapters/02-1-Intro_to_analysis_software.qmd
+    - chapters/02-2-Intro_to_analysis_software.qmd
+    - chapters/02-3-Intro_to_analysis_software.qmd
+    - chapters/02-4-Intro_to_graphs.qmd
+    - chapters/03-Descriptive.qmd
+    - chapters/04-Introduction_to_PISA.qmd
+    - chapters/05-Presentations.qmd
+    - chapters/06-T-testsPISA.qmd
+    #- chapters/08-Writing_report.qmd
+    - chapters/09-Assignment_3_tutorials.qmd
+    - chapters/11-selecting_statistical_tools.qmd
+    #- chapters/12-value_of_quant.qmd
+    - chapters/A8-SEM.qmd
+    - chapters/A1-PISA_analysis.qmd
+    - chapters/A2-DfE_analysis.qmd
+    - chapters/A3-TIMSS_analysis.qmd
+    - chapters/A4-Other_datasets.qmd
+    - chapters/A5-Self_Study_Tasks.qmd
+    - chapters/A6-QandA.qmd
+    
+
+execute:
+  freeze: auto
+
+knitr:
+  opts_chunk:
+    out.width: "95%"
 
 website:
   title: "MASTEMR"
   navbar:
-    left:
-      - href: index.qmd
-        text: Home
-      - about.qmd
-      - quarto_help.qmd
+    logo: images/KCL_logo.png
+    logo-href: ../index.html
+    # left:
+    #   - href: index.qmd
+    #     text: Home
+     # - about.qmd
+
+  sidebar:
+    style: "docked"
+    search: true
+    contents:
+      - text: "Home"
+        href: index.qmd
+      - section: "Sessions"
+        contents:
+          - chapters/01-Intro_to_quant_methods.qmd
+          - section: "02 Introduction to R"
+            contents:
+              - chapters/02-1-Intro_to_analysis_software.qmd
+              - chapters/02-2-Intro_to_analysis_software.qmd
+              - chapters/02-3-Intro_to_analysis_software.qmd
+              - chapters/02-4-Intro_to_graphs.qmd
+          - chapters/03-Descriptive.qmd
+          - chapters/04-Introduction_to_PISA.qmd
+          - chapters/05-Presentations.qmd
+          - chapters/06-T-testsPISA.qmd
+          - chapters/07-ChisqPISA.qmd
+          #- chapters/08-Writing_report.qmd
+          - chapters/09-Assignment_3_tutorials.qmd
+          - chapters/10-Correlation_and_regression.qmd
+          - chapters/11-selecting_statistical_tools.qmd
+          #- chapters/12-value_of_quant.qmd
+      - section: "Additional tests"
+        contents:
+          - chapters/A8-SEM.qmd
+      - section: "Appendicies"
+        contents:
+          - chapters/A1-PISA_analysis.qmd
+          - chapters/A2-DfE_analysis.qmd
+          - chapters/A3-TIMSS_analysis.qmd
+          - chapters/A4-Other_datasets.qmd
+          - chapters/A5-Self_Study_Tasks.qmd
+          - chapters/A6-QandA.qmd
+          
+
+#      - section: "Common questions"
+#        contents:
+          
+         
 format:
   html:
-    theme: cosmo
-    css: styles.css
+    theme: journal #cosmo
+    css: css/mastemr.css
     toc: true
+    code-line-numbers: true
+    code-link: true
 
-editor: visual
+editor: 
+  mode: source
 
+crossref: 
+  chapters: true
+  
+bibliography: references/mastemr.bib

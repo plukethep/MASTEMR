@@ -1,0 +1,1065 @@
+---
+# title: "07 T-tests"
+# bibliography: references.bib
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+```{r}
+#| eval: true
+#| warning: true
+#| echo: false
+
+# only load this code if testing this file independently of overall project
+if(!exists("test")){
+  warning("RUNNING LOCAL FILE LOAD")
+  
+  library(glue)
+  proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
+  proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  
+  node <- Sys.info()
+  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
+    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
+    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
+  }else if(node["nodename"] == "Amys-MacBook-Air.local"){ #Amy's NEW Laptop
+    proj_folder <- r"(/Users/amyobrien/Google Drive/My Drive/MASTEMR/)"
+    
+  }
+
+  source(glue("{proj_folder}MASTEMR_setup.R"))
+}
+```
+
+## T-tests
+
+T-tests are statistical tests that determine if there are statistically
+significant differences between the means of two groups. Consider the
+data giving the results of girls and boys on a test:
+
+**Boys' scores**
+
+| Boy  | Score (/10) |
+|------|-------------|
+| A    | 7           |
+| B    | 8           |
+| C    | 6           |
+| D    | 5           |
+| E    | 8           |
+| Mean | 6.8         |
+
+**Girls' scores**
+
+| Girls | Score (/10) |
+|-------|-------------|
+| A     | 9           |
+| B     | 4           |
+| C     | 7           |
+| D     | 8           |
+| E     | 8           |
+| Mean  | 7.2         |
+
+The means of the two groups are different (6.8 for boys and 7.2 for
+girls) but the difference may simply be due to random variation. A
+t-test can report the probability that a difference is means is due to
+chance.
+
+```{r}
+#| eval: true
+library(tidyverse)
+Boys<-data.frame(Score=c(7,8,6,5,8))
+Girls<-data.frame(Score=c(9,4,7,8,8))
+print(mean(Boys$Score))
+print(mean(Girls$Score))
+t.test(Boys$Score, Girls$Score)
+
+```
+
+The `t.test` function returns a p-value greater than `0.05` so the mean
+test-results can be assumed to the result of chance, and we conclude
+there are no detectable differences by gender for this data set.
+
+There are a number of types of t-tests:
+
+• One-tailed test - checks if the mean of one group is different in one
+direction (e.g. are scores only higher)
+
+• Two-tailed tests - checks if the means are different in two
+directions - i.e. are tests higher or lower
+
+• Paired tests - compares the means of measurements from the same
+individual or object (e.g. in a pre- and post-test - the comparison of
+means and before and after scores compares the same student's scores
+before and after)
+
+• Unpaired t-tests - compares the means of two unrelated groups (for
+example, are the mean science scores of boys and girls different)
+
+For more information on t-tests, see [chapter
+13](https://learningstatisticswithr.com/book/ttest.html), in Navaro's
+Learning Statistics with R.
+
+### Task 1 Choice of tests
+
+Consider the following scenarios. Which (if any) of the t-tests would be
+most of appropriate, including whether it would be a one or two tailed
+test.
+
+::: callout-note
+One and two-tailed tests
+
+Remember that a one-tailed test only looks for differences in one
+direction from the mean (for example, that one sample has a higher mean
+than the other). A two-tailed tests tests for the possibility of the
+means of the two groups being higher or lower than each other.
+:::
+
+::: question
+a)  An educational researcher wants to test a teaching approach with a
+    group of 12 students to see if an intervention increases performance
+    in their year 6 SATs results. Pupils are given a SATS paper before
+    the intervention and again after. The results of these are
+    normalised and then compared.
+
+b)  A teacher wants to see if their pupils' GCSE computer science test
+    scores are in line with the national average or not. The tests are
+    out of 180 marks.
+
+c)  The DfE want to compare uptake of STEM subjects pre and post
+    pandemic to see if there has been any change in the percentage of
+    students studying at least one STEM subject for A level.
+
+d)  A school wants to compare salaries of staff between this academic
+    year and last academic year to see whether there has been a
+    significant increase.
+
+e)  The same school as in d) wants to compare salaries of support staff
+    and teaching staff to see if there is a significant difference.
+
+f)  A researcher wants to find out how much time pupils spend looking at
+    screens during lesson time, to see if there is a difference between
+    year 7 and year 10 students. 10 pupils in year 7 and 10 pupils in
+    year 10 are randomly selected across a school and observed
+    throughout a school day in November. The times are recorded to the
+    nearest minute.
+
+g)  A business manager wants to check if the financial expenditure on
+    STEM teachers per year is similar to the national average (based on
+    average numbers of pupils on role)
+:::
+
+## T-tests
+
+There are four assumptions that need to be met by dataset for a t-test
+to be applicable: a) the data are continuous b) the sample was randomly
+sampled c) The variance of the data in each group is similar
+(homogeneity of variance) d) The data are approximately normally
+distributed
+
+::: callout-note
+A rule of thumb researchers use is that if the ratio of variances of the
+larger sample to the smaller is less than 4, then a t-test can be used.
+:::
+
+**Normality checking**
+
+To check for normality we can use a number of different tests and
+approaches, some of which will be covered in the seminar. For data sets
+that are below 5000 observations then Sharpiro-Wilk is a good test to
+use. For data sets above 5000 (as with the PISA data) then qqplots and
+the Kolmogorov-Smirnov Test test are good approaches. Histograms can
+also be used to help visualise the data and compare with the normal
+distribution.
+
+Are the PISA reading scores in the UK normally distributed?
+
+Quantiles are sections of data, for example a type of quantile is a
+quartile, a section of data containing a quarter of the data points, a
+quintile contains 20% of the data and so on. A quintile-quantile plot,
+plots the quantiles of two distributions against each other. If the
+distributions are the same, a straight line is formed.
+
+```{r}
+#| eval: true
+#| code-fold: false
+# Create a UK reading subset
+PISAUKRead<-PISA_2018%>%
+  select(CNT, PV1READ)%>%
+  filter(CNT=="United Kingdom")
+# Perform a qqplot
+qqnorm(PISAUKRead$PV1READ)
+# If data are normally distributed, a qq plot should be a straight line.
+# To assist judgement, you can add a straight line with:
+qqline(PISAUKRead$PV1READ, col="red")
+# The data in this case look normal.
+
+
+```
+
+A non-graphical approach to normality testing is the Kolmogorov-Smirnov
+Test test. The package `dgof` contains `ks.test` which tests for
+normality. The test is carried out by passing the data to
+`ks.test(PISA_2018$PV1READ, "pnorm", mean=mean(PISA_2018$PV1READ), sd=sd(PISA_2018$PV1READ))`.
+`"pnorm"` sets the test to testing for normality (`ks.test` can test for
+different distributions), we also pass the function the mean (`mean`)
+and standard deviation (`sd`) of our dataset. If the p-value is below
+0.05, the data are normally distributed (or parametric).
+
+```{r}
+#| warning: false
+
+# the Kolmogorov-Smirnov Test
+library(dgof)
+# Create a UK reading subset
+PISAUKRead<-PISA_2018%>%
+  select(CNT, PV1READ)%>%
+  filter(CNT=="United Kingdom")
+ks.test(PISAUKRead$PV1READ, "pnorm", mean=mean(PISAUKRead$PV1READ), sd=sd(PISAUKRead$PV1READ))
+# The p-value is less than 0.05, assume the data are normally distributed
+```
+
+Finally, a third approach, which is harder to judge, is to plot a
+histogram and to examine it for the normal shape.
+
+```{r}
+#| eval: true
+#| code-fold: false
+# Create a UK reading subset
+PISAUKRead<-PISA_2018%>%
+  select(CNT, PV1READ)%>%
+  filter(CNT=="United Kingdom")
+# Plot a histogram
+ggplot(data=PISAUKRead,
+       aes(x=PV1READ))+
+  geom_histogram(binwidth = 5, fill="darkseagreen4")
+
+
+```
+
+### Task 2 - Normality checking
+
+::: question
+Determine if the following subsets of PISA data are normal (you will
+need to use `select` and `filter`). Try to use all three methods of
+normality checking (a) qqplots, b) the Kolmogorov-Smirnov test, c)
+histrogram plotting, to reach your conclusion
+
+Are the following data normally distributed: a) PV1MATH scores in the
+UK; b) PV1MATH scores in Malta; c) Students in the UK who score more
+than 750 on their science test.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+#| warning: false
+# a) PV1MATH scores in the UK
+# Create UK Math subset
+UKMath<-PISA_2018%>%
+  select(CNT, PV1MATH)%>%
+  filter(CNT=="United Kingdom")
+  # Perform a qqplot
+qqnorm(UKMath$PV1MATH)
+# If data are normally distributed, a qq plot should be a straight line.
+# To assist judgement, you can add a straight line with:
+qqline(UKMath$PV1MATH, col="red")
+# The data in this case look normal.
+
+# Perform the KS test
+ks.test(UKMath$PV1MATH, "pnorm", mean=mean(UKMath$PV1MATH), sd=sd(UKMath$PV1MATH))
+# The p-value is 0.04783, less than 0.05, so we can assume the scores are normal
+
+# Plot a histogram
+ggplot(data=UKMath,
+       aes(x=PV1MATH))+
+  geom_histogram(binwidth = 5, fill="darkseagreen4")
+# The data in this case look normal.
+
+# b) PV1MATH scores in Malta
+
+# Create Malta Math subset
+MalMath<-PISA_2018%>%
+  select(CNT, PV1MATH)%>%
+  filter(CNT=="Malta")
+  # Perform a qqplot
+qqnorm(MalMath$PV1MATH)
+# If data are normally distributed, a qq plot should be a straight line.
+# To assist judgement, you can add a straight line with:
+qqline(MalMath$PV1MATH, col="red")
+# The data in this case look normal.
+
+# Perform the KS test
+ks.test(MalMath$PV1MATH, "pnorm", mean=mean(MalMath$PV1MATH), sd=sd(MalMath$PV1MATH))
+# The p-value, 0.03173, less than 0.05, so we can assume the scores are normal
+
+# Plot a histogram
+ggplot(data=MalMath,
+       aes(x=PV1MATH))+
+  geom_histogram(binwidth = 5, fill="darkseagreen4")
+# The data in this case look normal.
+
+# c) UK science high achievers
+
+# Create a UK over 750 Science score subset
+UKHighSci<-PISA_2018%>%
+  select(CNT, PV1SCIE)%>%
+  filter(CNT=="United Kingdom" & PV1SCIE>750)
+  # Perform a qqplot
+qqnorm(UKHighSci$PV1SCIE)
+# If data are normally distributed, a qq plot should be a straight line.
+# To assist judgement, you can add a straight line with:
+qqline(UKHighSci$PV1SCIE, col="red")
+# The data in this case does not look normal.
+
+# Perform the KS test
+ks.test(UKHighSci$PV1SCIE, "pnorm", mean=mean(UKHighSci$PV1SCIE), sd=sd(UKHighSci$PV1SCIE))
+# The p-value < 2.2e-16, less than 0.05, so we can assume the scores are normal
+
+# Plot a histogram
+ggplot(data=UKHighSci,
+       aes(x=PV1SCIE))+
+  geom_histogram(binwidth = 5, fill="darkseagreen4")
+# The data in this case look normal.
+
+
+```
+:::
+
+**Checking for Equal Variances**
+
+The second assumption of a test is that the samples have equal variance.
+Variance describes the spread of the data (standard deviation is the
+square root of variance).
+
+To check for equal variances, we can divide the variance of one sample
+by the other sample. A rule of thumb researchers use is that if the
+ratio of variances of the larger sample to the smaller is less than 4,
+then a t-test can be used. R will check this for you, and if they are
+unequal, will use the test for unequal variances (Welch's test).
+
+To check for the ratio of variance, we can use the `var` function, and
+calculate the ratio of the sample. We add `na.rm=TRUE` to the `var`
+function to omit NA values. For example, determine the ratio of girls'
+and boys' reading scores in the UK
+
+```{r}
+#| eval: true
+#| code-fold: false
+# Create a UK reading subset for boys
+PISAUKReadM<-PISA_2018%>%
+  select(CNT, PV1READ,ST004D01T)%>%
+  filter(CNT=="United Kingdom"|ST004D01T=="Male")
+# Create a UK reading subset for girls
+PISAUKReadF<-PISA_2018%>%
+  select(CNT, PV1READ,ST004D01T)%>%
+  filter(CNT=="United Kingdom"|ST004D01T=="Female")
+# Find the variance
+MVar<-var(PISAUKReadM$PV1READ, na.rm =TRUE)
+FVar<-var(PISAUKReadF$PV1READ, na.rm=TRUE)
+MVar/FVar
+
+```
+
+The ratio of variances is 1.15 so the samples meet the variance
+criterion for t-tests.
+
+###Task 3 - Variance checking
+
+Determine if the variance of these samples meets the criteria to carry
+out a t-test: a) Boys and Girls maths scores in the UK b) Reading scores
+in the US and the UK c) Wealth scores of boys and girls in the US
+
+::: question
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+
+# a)
+# Create a UK maths subset for boys
+PISAUKMATHM<-PISA_2018%>%
+  select(CNT, PV1MATH,ST004D01T)%>%
+  filter(CNT=="United Kingdom"|ST004D01T=="Male")
+# Create a UK reading subset for girls
+PISAUKMATHF<-PISA_2018%>%
+  select(CNT, PV1MATH,ST004D01T)%>%
+  filter(CNT=="United Kingdom"|ST004D01T=="Female")
+# Find the variance
+MVar<-var(PISAUKMATHM$PV1MATH, na.rm =TRUE)
+FVar<-var(PISAUKMATHF$PV1MATH, na.rm=TRUE)
+MVar/FVar
+# The ratio of variance is 1.132708 so a t-test can be performed
+
+# b)
+# Create a US reading score dataframe
+USREAD<-PISA_2018%>%
+  select(CNT, PV1READ)%>%
+  filter(CNT=="United States")
+# Create a UK reading score dataframe
+UKREAD<-PISA_2018%>%
+  select(CNT, PV1READ)%>%
+  filter(CNT=="United Kingdom")
+# Find the variance
+UKVar<-var(UKREAD$PV1READ, na.rm =TRUE)
+USVar<-var(USREAD$PV1READ, na.rm=TRUE)
+UKVar/USVar
+# The ratio of variance is 0.813 so a t-test can be performed
+
+# c)
+# Create a US Male Wealth  dataframe
+USWEALTHM<-PISA_2018%>%
+  select(CNT, WEALTH, ST004D01T)%>%
+  filter(CNT=="United States"|ST004D01T=="Male")
+# Create a US Female Wealth  dataframe
+USWEALTHF<-PISA_2018%>%
+  select(CNT, WEALTH, ST004D01T)%>%
+  filter(CNT=="United States"|ST004D01T=="Female")
+# Find the variance
+MVar<-var(USWEALTHM$WEALTH, na.rm =TRUE)
+FVar<-var(USWEALTHF$WEALTH, na.rm=TRUE)
+MVar/FVar
+# The ratio of variance is 1.05469 so a t-test can be performed
+
+
+
+
+```
+:::
+
+::: callout-note
+**Checking and Filtering for Outliers**
+
+Often, we need to check and filter for outliers in the data. There are
+many ways to do this, depending on the distribution of the data and how
+extreme the outliers are that we want to remove. A good rule of thumb is
+the median +/- 1.5 times the interquartile range (IQR), where the IQR is
+the upper quartile - lower quartile. If the data is normally
+distributed, then the mean +/- 1.5 time the standard deviation (sd) can
+be used. If we only want to remove more extreme outliers, then 2 or even
+3 times the IQR (or sd) from the median (or mean) can be used instead.
+
+Once we have determined the upper and lower bound of our outliers, we
+can remove any data points that lie outside of this and then perform our
+statistical test on the data.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+#| warning: false
+# Create a subset of UK math scores
+UKPISAmath<-PISA_2018%>%
+  select(CNT, PV1MATH)%>%
+  filter(CNT=="United Kingdom")
+# Test for normality in current form
+ks.test(UKPISAmath$PV1MATH, "pnorm", mean=mean(UKPISAmath$PV1MATH), sd=sd(UKPISAmath$PV1MATH))
+# p-value = 0.04783 - only just normal
+# Calculate value of scores at 1.5 x sd above and below the mean
+outl_h_b<-mean(PISA_2018$PV1MATH, na.rm=TRUE) +1.5 * sd(PISA_2018$PV1MATH, na.rm=TRUE)
+outl_l_b<-mean(PISA_2018$PV1MATH, na.rm=TRUE) -1.5 * sd(PISA_2018$PV1MATH, na.rm=TRUE)
+# Filter values that are 1.5 x sd above and below the mean
+UKPISAmath <- UKPISAmath %>%
+ filter(PV1MATH> outl_l_b & PV1MATH < outl_h_b)
+# Test for normality again
+ks.test(UKPISAmath$PV1MATH, "pnorm", mean=mean(UKPISAmath$PV1MATH), sd=sd(UKPISAmath$PV1MATH))
+# p-value now < 2.2e-16 - a much more normal distribution
+```
+:::
+
+**Performing t-tests**
+
+::: call-out note ***Types of t-test*** To set whether the t.test in R
+is one-tailed or two-tailed you can set the function `alternative` in
+`t.test` to "greater", "less" or "two.sided". To set the test as paired
+or unpaired, you can set the `paired` variable to TRUE or FALSE.
+
+```{r}
+#| eval: true
+#| code-fold: false
+# Create a UK reading subset
+UKSci<-PISA_2018%>%
+  select(CNT, PV1SCIE,ST004D01T)%>%
+  filter(CNT=="United Kingdom")
+# Plot a two-sided, unpaired t-test
+t.test(PV1SCIE ~ ST004D01T, data = UKSci, 
+       paired = FALSE, alternative = "two.sided")
+
+
+```
+
+:::
+
+To perform a t.test in R you use the `t.test` function. You need to pass
+the function the data set you want to test (`data=USMath`), and specify
+the groups to be compared (`PV1MATH ~ ST004D01T`) - here comparing the
+means of the mathematics scores (`PV1AMTH`) by the gender variable
+(`ST004D01T`). You can then specify if the test is two sided
+(`alternative = "two.sided"`), and the type of test (`paired = FALSE` -
+i.e. this is an unpaired test). For example, to determine if there are
+statistically signfciant differences in boys and girls maths scores in
+the United States:
+
+```{r}
+#| eval: true
+#| code-fold: false
+# Create a UK reading subset
+USMATH<-PISA_2018%>%
+  select(CNT, PV1MATH,ST004D01T)%>%
+  filter(CNT=="United States")
+# Plot a two-sided, unpaired t-test
+t.test(PV1MATH ~ ST004D01T, data = USMATH, 
+       paired = FALSE, alternative = "two.sided")
+
+
+```
+
+To interpret the outcome of the test, the key value is the p-value (in
+this case, p-value = 0.008006). As the p-value is \<0.05 we can conclude
+that there are significant differences between boys' and girls' mean
+mathematics scores in the US.
+
+### Task 3 T-tests
+
+Check you have the `PISA_2018` dataset loaded.If not, click here to
+download the parquet file:
+[PISA_2018.parquet](https://drive.google.com/open?id=17Owl5F5fmuOWiAXQomVfQMr_9CYDHoBC&authuser=richardandrewbrock%40gmail.com&usp=drive_fs)
+
+To load the data, use the code below:
+
+```{r}
+#| eval: false
+#| warning: false
+install.packages("arrow") # if you haven't already
+library(arrow)
+library(tidyverse)
+PISA_2018 <- read_parquet("<location of the downloaded PISA_2018.parquet file>")
+```
+
+::: question
+1.  Use the PISA dataset and the gender `ST004D01T` and `PV1MATH` (Math
+    score) variables to perform a two-sided, unpaired t-test to
+    determine if boys and girls perform differently on the test in the
+    UK. Before performing the test, check for the normality of the data,
+    and check for equal variance.
+
+```{r}
+#| eval: false
+#| warning: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Are there differences between the mean scores of UK boys and girls in PISA mathematics?
+
+# Select the gender (ST004D01T) and math score columns (PV1MATH)
+# Filter the data to select UK responses
+
+MaleUK <- PISA_2018 %>%
+  select(CNT, ST004D01T, PV1MATH) %>%
+  filter(CNT=='United Kingdom',
+         ST004D01T=='Male')
+
+FemaleUK <- PISA_2018 %>%
+  select(CNT, ST004D01T, PV1MATH) %>%
+  filter(CNT=='United Kingdom',
+         ST004D01T=='Female')
+
+# The conditions to do a t-test include that the data are normally distributed
+# and there is homogeneity (similarity) of the variances (the squared standard deviations)
+# Let us check the conditions are met by calculating first if the data sets are normally
+# distributed using a qq plot
+
+qqnorm(MaleUK$PV1MATH)
+qqline(MaleUK$PV1MATH, col="red")
+
+qqnorm(FemaleUK$PV1MATH)
+qqline(FemaleUK$PV1MATH, col="red")
+
+# The plots produces relatively straight lines so the distributions can be assumed to be normal
+#
+# We will then check the variances of the two data sets
+
+VarM <- var(MaleUK$PV1MATH, na.rm=TRUE)
+VarF <- var(FemaleUK$PV1MATH, na.rm=TRUE)
+VarM / VarF
+
+# The variance ratio is close to 1 (1.1)
+# So our two conditions are met and can we can perform the t-test
+
+# Create a UK Math subset
+UKMATH<-PISA_2018%>%
+  select(CNT, PV1MATH,ST004D01T)%>%
+  filter(CNT=="United Kingdom")
+# Plot a two-sided, unpaired t-test
+t.test(PV1MATH ~ ST004D01T, data = UKMATH, 
+       paired = FALSE, alternative = "two.sided")
+
+# The p-value is <0.05 (4.061e-08) suggesting there are statistically
+# differences between boys and girls
+
+
+```
+
+2.  Choose a different country of interest to compare performance in
+    males and females in that country
+
+```{r}
+#| eval: false
+#| warning: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Are there differences between the mean scores of boys and girls in China PISA mathematics?
+#
+# Select the gender (ST004D01T) and math score columns (PV1MATH)
+# Filter the data to select UK responses
+
+MaleChina <- PISA_2018 %>%
+  select(CNT,ST004D01T, PV1MATH) %>%
+  filter(CNT=='B-S-J-Z (China)', ST004D01T=='Male')
+
+FemaleChina<-PISA_2018 %>%
+  select(CNT,ST004D01T, PV1MATH) %>%
+  filter(CNT=='B-S-J-Z (China)', ST004D01T=='Female')
+
+# The conditions to do a t-test include that the data are normally distributed
+qqnorm(MaleChina$PV1MATH)
+qqline(MaleChina$PV1MATH, col="red")
+qqnorm(FemaleChina$PV1MATH)
+qqline(FemaleChina$PV1MATH, col="red")
+
+
+# The plots produces relatively straight lines so the distributions can be # assumed to be normal
+#
+# We will then check the variances of the two data sets
+
+VarM<-var(MaleChina$PV1MATH, na.rm=TRUE)
+VarF<-var(FemaleChina$PV1MATH, na.rm=TRUE)
+VarM/VarF
+
+# The variance ratio is close to 1 (1.17)
+# So our two conditions are met and can we can perform the t-test
+
+# Create a UK Math subset
+CHIMATH<-PISA_2018%>%
+  select(CNT, PV1MATH,ST004D01T)%>%
+  filter(CNT=="B-S-J-Z (China)")
+# Plot a two-sided, unpaired t-test
+t.test(PV1MATH ~ ST004D01T, data = CHIMATH, 
+       paired = FALSE, alternative = "two.sided")
+
+# The p-value is <0.05 (2.414e-07) suggesting there are statistically
+# differences between boys and girls in mathematics in China
+
+
+```
+
+3.  Now try to compare the performance of males and females in all
+    `OECD` countries in the PISA dataset. You may need to think about
+    how to do this using R without repeating the test for each country
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+
+MaleOECD <- PISA_2018 %>%
+  select(OECD, ST004D01T, PV1MATH) %>%
+  filter(OECD=='Yes', ST004D01T=='Male')
+
+FemaleOECD <- PISA_2018 %>%
+  select(OECD, ST004D01T, PV1MATH) %>%
+  filter(OECD=='Yes', ST004D01T=='Female')
+
+qqnorm(MaleOECD$PV1MATH)
+qqline(MaleOECD$PV1MATH, col="red")
+qqnorm(FemaleOECD$PV1MATH)
+qqline(FemaleOECD$PV1MATH, col="red")
+
+
+# The plots produces relatively straight lines so the distributions can be assumed to be normal
+
+# We will then check the variances of the two data sets
+
+VarM <- var(MaleOECD$PV1MATH, na.rm=TRUE)
+VarF <- var(FemaleOECD$PV1MATH, na.rm=TRUE)
+VarM / VarF
+
+# The variance ratio is close to 1 (1.1)
+# So our two conditions are met and can we can perform the t-test
+
+# The p-value is <0.05 (2.2e-16) suggesting there are statistically
+# differences between boys and girls
+
+OECD <- PISA_2018 %>%
+  select(OECD, ST004D01T, PV1MATH) %>%
+  filter(OECD=='Yes')
+
+t.test(PV1MATH ~ ST004D01T, data = OECD, 
+       paired = FALSE, alternative = "two.sided")
+
+```
+
+4.  Are there significant differences in mean wealth scores of boys and
+    girls in the UK?
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+
+MaleUK <- PISA_2018 %>%
+  select(ST004D01T, WEALTH) %>%
+  filter(ST004D01T=='Male')
+
+FemaleUK <- PISA_2018 %>%
+  select(ST004D01T, WEALTH) %>%
+  filter(ST004D01T=='Female')
+
+qqnorm(MaleUK$WEALTH)
+qqline(MaleUK$WEALTH, col="red")
+qqnorm(FemaleUK$WEALTH)
+qqline(FemaleUK$WEALTH, col="red")
+
+# The plots here are somewhat skewed which might suggest not performing the test
+
+# We will then check the variances of the two data sets
+
+VarM <- var(MaleUK$WEALTH, na.rm=TRUE)
+VarF <- var(FemaleUK$WEALTH, na.rm=TRUE)
+VarM / VarF
+
+# The variance ratio is close to 1 (1.1)
+# So our two conditions are met and can we can perform the t-test
+
+WEALTH <- PISA_2018 %>%
+  select(WEALTH, ST004D01T, CNT) %>%
+  filter(CNT=='United Kingdom')
+
+t.test(PV1MATH ~ ST004D01T, data = OECD, 
+       paired = FALSE, alternative = "two.sided")
+
+# p-value < 2.2e-16 so there are statistically significant differences between boys' and girls' reported wealth in the UK
+
+```
+:::
+
+## Anova (multiple t-tests)
+
+We have performed t-tests of the difference in mathematics scores
+between boys and girls in the UK. We may now want to perform the same
+t-test for all the countries in the sample. This can create a problem.
+Remember that a p-value report the probability that an outcome is due to
+chance. The more times we repeat a t-test, the more likely we are to see
+an effect, even when none-exists.
+
+To avoid potential artefacts from doing multiple t-tests, when we want
+to compate the means of more than two groups, we use an anova (anlaysis
+of variance) test.
+
+To determine if there is a statistically significant difference between
+groups we run an anova calculation, using the `aov` function in R. The
+dependent variable is the one we are interested in explaining, the
+independent variables are the factors we think might explain the
+variance.
+
+`aov(data, dependent_var ~ independent_var + independent_var + ...)`
+
+For example, we used t-tests to look at differences in scores between a
+pair of countries (e.g the UK and the US). We can now compare across all
+the countires.
+
+We pass the function the data we wish to focus on (`PV1MATH`) and then
+indicate we wish to look for variation in the `PV1MATH`, by `CNT`. We
+then summarise the result to get a table.
+
+```{r}
+#| eval: TRUE
+#| code-fold: false
+
+ALLPISAMATH<-PISA_2018%>%
+  select(CNT, PV1MATH)
+
+resaov <- aov(data=ALLPISAMATH, PV1MATH ~ CNT)
+sumresaov <- summary(resaov)
+sumresaov
+
+```
+
+The resulting table has two rows: `CNT` residuals. The `aov` function
+looks to determine if there is a difference in the variance across
+countires. After determining any variation from those two variables, any
+remaining variation is associated with residuals - you can think of this
+as the unexplained variation that isn't associated with the vectors we
+specified (i.e. the country).
+
+First, look at the `Pr(>F)` column. This is a test of significance and
+reports if the groups in that row show statistically significant
+variation. In our case, country returns `Pr(>F) <2e-16 ***` - which is
+over `0.05`. This suggests there are significant differences across
+countries.
+
+This is not terribly interesting so far(!) - but we can do two post-hoc
+tests (i.e. tests after the first test, to find out the effect size and
+between which countries differences exist)
+
+## Eta-squared
+
+Now knowing that there are significant differences between the two class
+groups, we can next determine how much variation in the test score is
+explained by class. To do this we calculate a variable called
+eta-squared.
+
+Eta-squared gives the proportion of variance explained by each variable.
+The eta squared function is in the package `lsr` so we will install
+`lsr`, and then use the result of our anova (`resaov`) to calculate the
+eta squared variable using the function `etaSquared`. To report the
+value of eta as a percentage we need to multiply the output of eta by
+100.
+
+Eta squared tells us the proportion of the total variance that is
+explained by a variable (you can also think of it as an effect size). An
+eta squared value of 1 indicates all the variance of a sample is explain
+by some variable and 0 means the variable is not responsible for any of
+the observed variance. We can multiply the eta-squared score by 100 to
+get a value for the percentage of variance explained.
+
+The percentage of variance explained is a useful figure. For example, it
+has been reported that schools only account for 14% of the variance in
+progress 8 scores, whilst family explains 43% (@wilkinson2018assessing).
+
+```{r}
+
+library(lsr)
+eta <- as.data.frame(etaSquared(resaov))
+eta <- eta*100
+eta
+
+```
+
+The important column here is the `eta.sq` column - it tells us that the
+country explains 26% of the variance in test scores. (The second column
+contains information about partial eta-squared, which we won't go into,
+but are used when the results of each measure are *not independent* i.e.
+one result influences another).
+
+::: callout-note
+As a rule of thumb, a percentage variance explained of 1% is considered
+small, 6% medium and 14% and more large
+:::
+
+## Tukey's HSD
+
+When an anova test reports that are some statistically significant
+differences between groups, it does not imply there are statistically
+significant differences between all subgroups. For example, if the anova
+reports statistically significant differences by age, statistically
+significant differences might exist between 11, 12 and 13-year old
+students, but not between 13 and 14-year olds.
+
+We can use an additional anova test, **Tukey's Honest Significant
+Difference** test (or Tukey's HSD for short), to find out which pairs of
+subgroups have statistically significant differences in means.
+
+Consider the question: Are there statistically significant differences
+in the variance of science scores of the UK, US, France and Germany? To
+determine if such differences exist, we create a new subset for those
+countries' science scores, and then run an anova test by country,
+reporting the eta squared value.
+
+```{r}
+PISAMULTI <- PISA_2018 %>%
+  select(CNT, PV1SCIE)%>%
+  filter(CNT=="United Kingdom" | CNT=="United States" | CNT=="Germany" | CNT=="France")
+  # filter(CNT %in% c("United Kingdom", "United States", "Germany", "France"))
+
+resaov<-aov(PV1SCIE ~ CNT, data=PISAMULTI)
+sumresaov<-summary(resaov)
+sumresaov
+
+eta<-as.data.frame(etaSquared(resaov))
+eta<-eta*100
+eta
+```
+
+The anova results tell us there are significant differences between the
+countries, which account for 0.4% of variance in scores. We can then run
+a Tukey HSD test to determine which countries have significant
+differences between mean scores.
+
+```{r}
+TukeyHSD(resaov)
+```
+
+From that we get a table with p values (p adj) for different pairs of
+countries. Note that these are below 0.005 for all pairs of countries,
+except the US and the UK. So we can conclude there are significant
+differences in science scores between all countries except the UK and
+the US.
+
+## Task 4 -Multiple t-tests with anova
+
+::: question
+For the UK, France, Thailand, and the US determine if there are
+statistically significant differences in variation in mathematics
+scores.
+:::
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: true
+PISAMULTI<-PISA_2018 %>%
+  select(CNT, PV1MATH)%>%
+  filter(CNT=="United Kingdom" | CNT=="Thailand" | CNT=="United States" | CNT=="France")
+
+
+resaov<-aov(PV1MATH ~ CNT, data=PISAMULTI)
+sumresaov<-summary(resaov)
+sumresaov
+
+eta<-as.data.frame(etaSquared(resaov))
+eta<-eta*100
+eta
+
+TukeyHSD(resaov)
+# There are statistically significant differences in mathematics scores for all pairs of countries
+
+```
+
+::: question
+For the UK, are there statistically significant differences in reading
+score by students who attend different types of school (`ISCEDO`), e.g.
+Vocational, General etc.
+:::
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: true
+UKSchRead<-PISA_2018 %>%
+  select(CNT, PV1READ, ISCEDO)%>%
+  filter(CNT=="United Kingdom")
+
+
+resaov<-aov(PV1READ ~ ISCEDO, data=UKSchRead)
+sumresaov<-summary(resaov)
+sumresaov
+
+eta<-as.data.frame(etaSquared(resaov))
+eta<-eta*100
+eta
+
+TukeyHSD(resaov)
+# There are statistically significant differences between Pre-vocational and general, and vocational and pre-vocational, but not between vocational and general.
+
+```
+
+::: question
+For the UK, use `ifelse` on the WEALTH variable to create categories for four quartiles (divide the data into top; upper-mid; lower-mid; and bottom). Use anova to determine between which groups there are statistically signficant differences in science scores
+
+Hint: You can use `quantiles<-quantile(UKSci$PV1SCIE, prob=c(.25,.5,.75), na.rm=TRUE)` to give the values of PV1SCIE that account for 25%, 50% and 75% of the responses.
+:::
+
+```{r}
+#| code-fold: true
+#| code-summary: answer
+#| eval: true
+UKSci<-PISA_2018 %>%
+  select(CNT, PV1SCIE, WEALTH)%>%
+  filter(CNT=="United Kingdom")%>%
+  na.omit()%>%
+  droplevels()%>%
+  select(PV1SCIE, WEALTH)
+# Find the cut of points for 25%, 50% and 75% (quantiles) of WEALTH
+quantiles<-quantile(UKSci$WEALTH, prob=c(.25,.5,.75), na.rm=TRUE)
+
+UKSci<-UKSci%>%
+  mutate(WEALTH=ifelse(WEALTH<quantiles[1], "Bottom", 
+                        ifelse(WEALTH<quantiles[2], "Lower-mid",
+                               ifelse(WEALTH<quantiles[3], "Upper-mid","Top"))))
+
+resaov<-aov(PV1SCIE ~ WEALTH, data=UKSci)
+sumresaov<-summary(resaov)
+sumresaov
+
+TukeyHSD(resaov)
+# There are statistically significant differences between all groups by wealth
+
+```
+
+
+
+## Doing t-tests in R
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/KdhAcLPq5B4?start=3" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+
+</iframe>
+
+You can find the code from the video below:
+
+```{r}
+#| label: ttest video code
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the Code"
+
+# Introduction to t-tests in R
+#
+# Download data from /Users/k1765032/Library/CloudStorage/GoogleDrive-richardandrewbrock@gmail.com/.shortcut-targets-by-id/1c3CkaEBOICzepArDfjQUP34W2BYhFjM4/PISR/Data/PISA/subset/Students_2018_RBDP_none_levels.rds
+# You want the file: Students_2018_RBDP_none_levels.rds
+# and place in your own file system
+# change loc to load the data directly. Loading into R might take a few minutes
+install.packages("nortest")
+
+library(tidyverse)
+library(nortest)
+loc <- "/Users/k1765032/Library/CloudStorage/GoogleDrive-richardandrewbrock@gmail.com/.shortcut-targets-by-id/1c3CkaEBOICzepArDfjQUP34W2BYhFjM4/PISR/Data/PISA/subset/Students_2018_RBDP_none_levels.rds"
+PISA_2018 <- read_rds(loc)
+
+# Are there differences between the mean scores of UK boys and girls in PISA mathematics?
+#
+# Select the gender (ST004D01T) and math score columns (PV1MATH)
+# Filter the data to select UK responses
+
+MaleUK<-PISA_2018 %>%
+  select(CNT,ST004D01T, PV1MATH) %>%
+  filter(CNT=='United Kingdom') %>%
+  filter(ST004D01T=='Male')
+
+FemaleUK<-PISA_2018 %>%
+  select(CNT,ST004D01T, PV1MATH) %>%
+  filter(CNT=='United Kingdom') %>%
+  filter(ST004D01T=='Female')
+
+# The conditions to do a t-test include that the data are normally distributed
+# and there is homogeneity (similarity) of the variances (the squared standard deviations)
+# Let us check the conditions are met by calculating first if the data sets are normally
+# distributed using the Pearson test of normality from the nortest package
+
+pearson.test(as.numeric(MaleUK$PV1MATH))
+pearson.test(as.numeric(FemaleUK$PV1MATH))
+
+# The p-values are over 0.05 so both distriburtions are normal
+# Pearson chi-square normality test
+#
+# data:  as.numeric(MaleUK$PV1MATH)
+# P = 75.714, p-value = 0.1936
+# Pearson chi-square normality test
+#
+# data:  as.numeric(FemaleUK$PV1MATH)
+# P = 74.06, p-value = 0.2589
+#
+# We will then check the variances of the two data sets
+
+VarM<-var(MaleUK$PV1MATH)
+VarF<-var(FemaleUK$PV1MATH)
+VarM/VarF
+
+# The variance ratio is close to 1 (1.1)
+# So our two conditions are met and can we can perform the t-test
+
+t.test(MaleUK$PV1MATH, FemaleUK$PV1MATH)
+
+# The p-value is <0.05 (4.061e-08) suggesting there are statistically
+# differences between boys and girls
+```

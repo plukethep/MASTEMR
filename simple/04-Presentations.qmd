@@ -1,0 +1,49 @@
+---
+title: "04 Presentations"
+---
+
+10% of total marks
+
+Prepare a 5-minute presentation: Compare a qualitative and quantitative paper on the same theme. What are the strengths and limitations of each approach for addressing the question?
+
+Ensure the two papers address a broadly similar question (for example, what factors impact female students\' decision to study post-compulsory design education?). The research questions of the papers need not be identical but should be similar enough for the comparison to be valid.
+
+The presentations should include the following elements
+
+- The research questions/aims of both papers are set out.
+
+- The sample and methods of each paper are clearly described.
+
+- The strengths and limitations of each paper are set out. Take care to avoid generic critiques, for example, the sample size of the quantitative paper could be larger. Try and develop critiques of specific elements of each paper.
+
+Areas to focus on include:
+
+- Are concepts and variables meaningful and well-defined?
+
+- Are the impacts of the sample selection on the findings acknowledged?
+
+- Is the impact of the tools on the data acknowledged? For example, how might interview or survey questions shape responses?
+
+- Are claims in the findings presented in a way that acknowledges how they were produced? For example, are limits of generalisability and validity acknowledged?
+
+The marking points are:
+
+- Were the research aims of both papers described?
+
+- Were the samples and methods of both papers clearly reported?
+
+- Were strengths of the qualitative paper reported?
+
+- Were strengths of the quantitative paper reported?
+
+- Were limitations of the qualitative paper reported?
+
+- Were limitations of the quantitative paper reported?
+
+::: callout-tip
+Make sure you practice your presentation to fit into the time
+:::
+
+::: callout-tip
+Avoid generic strengths and limitations such as, the quantitative paper has higher statistical generalisability. Aim to refer to unique features of the papers. How were the variables constructed? What was unique about the findings in each case?
+:::

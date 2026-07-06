@@ -1,0 +1,9 @@
+---
+title: "10 Teacher relationships and STEM achievement"
+---
+Stoet and Geary
+
+
+```{r}
+
+```

@@ -1,0 +1,138 @@
+---
+# title: "Questions and Answers"
+---
+
+```{r}
+#| eval: true
+#| warning: true
+#| echo: false
+
+# only load this code if testing this file independently of overall project
+if(!exists("test")){
+  warning("RUNNING LOCAL FILE LOAD")
+  
+  library(glue)
+  proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
+  proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  
+  node <- Sys.info()
+  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
+    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
+    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
+  }else if(node["nodename"] == "PETES_PC"){ #Pete's NEW Laptop
+    proj_folder <- r"(C:\Users\Peter\Google Drive\Kings\Code\MASTEMR\)"
+  }
+  
+  source(glue("{proj_folder}MASTEMR_functions.R"))
+  OpenAnalysis_load_ALL(use_cache = TRUE, 
+                        report_cache_folder=r"[C:\temp\cache\MASTEMR\]",
+                        over_write=FALSE)
+}
+```
+
+## Questions about R {#sec-QANDA}
+
+**Why doesn't my `select`/`filter` statement work?**
+
+When you are loading packages, sometimes different packages have the same function names in them, and the functions themselves will do very different things. For example, there is a `select` function in the `tidyverse`, but also *another* `select` function in the package `MASS` that does something very different. If we load the tidyverse before loading MASS, then the MASS version of select is the one that will be used?!
+
+```{r}
+#| echo: false
+#| eval: false
+#| warning: false
+# if("package:broom" %in% search()) detach("package:broom", unload=TRUE)
+# if("package:tidyr" %in% search()) detach("package:tidyr", unload=TRUE)
+# if("package:dbplyr" %in% search()) detach("package:dbplyr", unload=TRUE)
+# if("package:gt" %in% search()) detach("package:gt", unload=TRUE)
+# if("package:dplyr" %in% search()) detach("package:dplyr", unload=TRUE)
+# 
+# if("package:multcomp" %in% search()) detach("package:multcomp", unload=TRUE)
+# if("package:TH.data" %in% search()) detach("package:TH.data", unload=TRUE)
+# if("package:MASS" %in% search()) detach("package:MASS", unload=TRUE)
+# if("package:see" %in% search()) detach("package:see", unload=TRUE)
+# if("package:stats" %in% search()) detach("package:stats", unload=TRUE)
+# remove all packages
+while(!is.null(sessionInfo()$loadedOnly)){
+  lapply(names(sessionInfo()$loadedOnly), require, character.only = TRUE)
+  invisible(lapply(paste0('package:', names(sessionInfo()$otherPkgs)), detach, character.only=TRUE, unload=TRUE, force=TRUE))    
+}
+
+```
+
+```{r}
+#| error: true
+#| eval: false
+library(tidyverse)
+library(MASS)
+
+diamonds %>% select(carat, cut, color)
+```
+
+To get around this make sure that you load the `tidyverse` *after* `MASS`, in fact you should always load the `tidyverse` last.
+
+```{r}
+#| error: true
+library(MASS) 
+library(tidyverse)
+
+diamonds %>% select(carat, cut, color)
+```
+
+you can also specify the package that select comes from (in this case from a package within the `tidyverse` called `dplyr`):
+
+```{r}
+#| error: true
+diamonds %>% dplyr::select(carat, cut, color)
+```
+
+**How can I unload packages**
+
+If you are finding yourself with a conflict as mentioned above and want to `unload` packages, then you need to run the following code:
+
+```{r}
+#| eval: false
+# adapted from: @mmfrgmpds https://stackoverflow.com/questions/7505547/detach-all-packages-while-working-in-r
+while(!is.null(sessionInfo()$loadedOnly)){
+  lapply(names(sessionInfo()$loadedOnly), require, character.only = TRUE)
+  invisible(lapply(paste0('package:', names(sessionInfo()$otherPkgs)), detach, character.only=TRUE, unload=TRUE, force=TRUE))    
+}
+```
+
+**Why am I getting the error 'could not find function "%>%"'**
+
+The pipe operator `%>%` is loaded when you load the tidyverse package - make sure you have installed tidyverse and loaded it
+
+```{r}
+#| eval: false
+install.packages("tidyverse")  # install
+library(tidyverse)             # load
+```
+
+**I am getting the error: '"Error: Mapping should be created with `aes()` or `aes_()`."' when using ggplot**
+
+This may be caused by having a bracket after the geom rather than before it
+
+```{r}
+#| eval: false
+
+data<-data.frame(x=5:1,
+                 y=10:6)
+ggplot(data, aes(x, y) +           # Reproduce error message
+         geom_point())
+
+```
+
+```{r}
+#| eval: false
+
+data<-data.frame(x=5:1,
+                 y=10:6)
+ggplot(data, aes(x, y)) +           # Fixed error by moving bracket
+         geom_point()
+
+```
+
+## About the coursework
+
+?filter

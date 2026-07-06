@@ -1,0 +1,159 @@
+---
+title: PISA
+---
+
+### What is PISA
+
+The Programme for International Student Assessment (PISA) is an OECD initiative that looks at the reading, mathematics and science abilities of students aged 15 years old. Data is collected from \~38 OECD countries and other partner countries every three years.
+
+| Dataset   | Description                                                                                         | 03  | 06  | 09  |                                             12                                             |                                             15                                             |                                             18                                             |
+|---------|---------|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
+| Student   | demographic data on student participants                                                            |  x  |  x  |  x  | [x](https://drive.google.com/file/d/1-41Ynn4hzEL1vO2L-wIqdRotXDtDdjYh/view?usp=share_link) | [x](https://drive.google.com/file/d/1No_3a2zZsjxPurfDKIhzA3xpHD3iHECJ/view?usp=drive_link) | [x](https://drive.google.com/file/d/171x7ghqLfQhVdyWXdXNPOxDlS788Ui6Y/view?usp=share_link) |
+| School    | descriptive data about schools                                                                      |  x  |  x  |  x  | [x](https://drive.google.com/file/d/1wWfsZcGW2nGFloS0CUOX1DlX7KdptxQr/view?usp=share_link) | [x](https://drive.google.com/file/d/1sIrtiz035J4OT3-eHUhECIwtzfdDTCEa/view?usp=share_link) | [x](https://drive.google.com/file/d/1ZJkiIGkVfBdRupTVxbaRQ1fwOZr_RV8O/view?usp=share_link) |
+| Parent    | a survey for student's parents including information about home environments and parental education |  x  |  x  |     |                                                                                            |                                                                                            |                                                                                            |
+| Teacher   | demographic, teaching, qualification and training data                                              |     |     |     |                                             x                                              | [x](https://drive.google.com/file/d/1UpU_r8czkaIQdcSFbpRMqQ_lcOJg-voP/view?usp=share_link) | [x](https://drive.google.com/file/d/1UumvsA71ncvqrWGwqNqKsGn1ctja5no6/view?usp=share_link) |
+| Cognitive |                                                                                                     |  x  |  x  |  x  | [x](https://drive.google.com/file/d/19GLw1-YA1aJGWoCWXfZGtUWnQi4pcjik/view?usp=share_link) | [x](https://drive.google.com/file/d/1sTpe3TJSnByhZdxzezkmXjH2uTH9TOUP/view?usp=share_link) | [x](https://drive.google.com/file/d/1nhwySp0A-LHfN-oO8HES9PQOIDZNmOzT/view?usp=share_link) |
+
+PISA datasets above can be found on the [OECD website](https://www.oecd.org/pisa/data/). The links in the table above will allow you to download .rds versions of these files which we have created, though they might need additional editing, e.g. reducing the number of columns or changing the types of each column. If you want to find out more about what each field stores, take a look at the corresponding codebook, [2018](https://webfs.oecd.org/pisa2018/PISA2018_CODEBOOK.xlsx), [2015](https://webfs.oecd.org/pisa/Codebook_CMB.xlsx).
+
+### How to use it
+
+The PISA datasets come in *SPSS* or *SAS* formats. The data used in this course comes directly from downloading the SPSS `.sav` files and using the `haven` package to clean it into a native R format suitable for analysis, in most cases `.parquet` files (see: @sec-parquet). There are a few quirks that you need to be aware of:
+
+-   R uses levels (factors) instead of labelled data
+
+-   All SPSS fields are *labelled*, and auto conversion into the native R dataframe format would make numeric fields, factors(!?). To avoid this confusion we have stripped out the no-response data for numeric fields and replaced it with `NA` values. This means that you won't be able to tell the reason that a field is missing, and the following labels have all been set to `NA`:
+
+| value | label          |
+|-------|----------------|
+| 95    | Valid Skip     |
+| 97    | Not Applicable |
+| 98    | Invalid        |
+| 99    | No Response    |
+
+: Labels set to NA in .rds and .parquet files
+
+-   As the fields are now using R's native factor format you might find that the data doesn't quite match the format of the table labels. For example, `CNT` is labelled "Country code 3-character", but the data is now instead the full country name.
+-   the examples shown in the book use cut down PISA datasets, where only a limited number of columns are included. The full datasets are linked in the table above.
+
+### Common issues
+
+The PISA datasets can be absolutely huge and might bring your computer to its knees; if you are using a computer with less than 16GB of RAM you might not be able to load some tables at all. Tables such as the *Cognitive* dataset have hundreds of thousands of rows and thousands of columns, loading them directly might lead to an error similar to this: `Error: cannot allocate vector of size 2.1 Gb`. This means that R can't find enough RAM to load the dataset and has given up. You can see a rough estimate of how much RAM R is currently using the top Environment panel:
+
+![](/images/environment-RAM.png)
+
+To get around this issues you can try to clean your current R environment using the brush tool:
+
+![](/images/environment-brush.png)
+
+This will drop all the current dataframes, objects, functions and packages that you have loaded meaning you will have to reload packages such as `library(tidyverse)` and `library(haven)` before you can attempt to reload the PISA tables.
+
+A lack of RAM might also be the result of lots of other programs running concurrently on your computer. Try to close anything that you don't need, web browsers can be particularly RAM hungry, so close them or as many tabs as you can.
+
+If none of the above works, then please get in touch with the team, letting them know which table you need from which year, with which fields and for which countries. We will be able to provide you with a cutdown dataset.
+
+### Questions
+
+#### What are Plausible Values? {#sec-PV}
+
+In the PISA dataset, the outcomes of student tests are reported as plausible values, for example, in the variables of the science test (`PV1SCIE`, `PV2SCIE`, `PV3SCIE`, `PV3SCIE`, and `PV5SCIE`). It might seem counter intuitive that there are five values for a score on a test.
+
+Plausible values (PVs) are a way of expressing the error in a measurement. The number of questions in the full PISA survey is very large, so students are randomly allocated to take a subset of questions (and even then, the test still takes two hours!). As no student completes the full set of questions, estimating how a student would have performed on the full question set involves some error. Plausible values are a way of expressing the uncertainty in the estimation of student scores.
+
+One way of thinking of the PV scores is that they represent five different estimates of students' abilities based on the questions they have answered. To decrease measurement error, five different approaches are applied to create five different estimates, the PV scores.
+
+The PISA Data Analysis Manual suggests:
+
+> Population statistics should be estimated using each plausible value separately. The reported population statistic is then the average of each plausible value statistic. For instance, if one is interested in the correlation coefficient between the social index and the reading performance in PISA, then five correlation coefficients should be computed and then averaged
+>
+> Plausible values should never be averaged at the student level, i.e. by computing in the dataset the mean of the five plausible values at the student level and then computing the statistic of interest once using that average PV value. Doing so would be equivalent to an EAP estimate, with a bias as described in the previous section.
+>
+> (p. 100) @monseur2009pisa
+
+#### Why are some countries OECD countries and others aren't?
+
+The Organisation for Economic Co-operation and Development (OECD) has 38 member states. PISA is run by the OECD and its member states normally take part in each PISA cycle, but other countries are allowed to take part as *Partners*. You can find more details on participation [here](https://www.oecd.org/pisa/aboutpisa/pisa-participants.htm).
+
+Results for OECD members are generally higher than for Partner countries:
+
+```{r}
+PISA_2018 %>% 
+  group_by(OECD) %>% 
+  summarise(country_n = length(unique(CNT)),
+            math_mean = mean(PV1MATH, na.rm=TRUE),
+            math_sd = sd(PV1MATH, na.rm=TRUE),
+            students_n = n())
+```
+
+#### Why are the PV grades pivoting around the \~500 mark?
+
+The scores for students in mathematics, reading and science are scaled so that the mean of students in OECD countries is roughly 500 points with a standard deviation of 100 points. To see this, run the following code:
+
+```{r}
+PISA_2018 %>% 
+  filter(OECD=="Yes") %>% 
+  summarise(math_mean = mean(PV1MATH, na.rm=TRUE),
+            math_sd = sd(PV1MATH, na.rm=TRUE),
+            scie_mean = mean(PV1SCIE, na.rm=TRUE),
+            scie_sd = sd(PV1SCIE, na.rm=TRUE),
+            read_mean = mean(PV1READ, na.rm=TRUE),
+            read_sd = sd(PV1READ, na.rm=TRUE))
+```
+
+#### Why are the letters TA and NA used in some field names?
+
+#### How do I find fields that are numeric?
+
+```{r}
+#| eval: false
+# using the following code!
+
+nms <- PISA_2018_school %>% select(where(is.numeric)) %>% names()
+lbls <- map_dfr(nms,~{
+  message(.x)
+  lbl <- attr(PISA_2018_school[[.x]], "label")
+  nme <- .x
+  row <- c(nme, lbl)
+  names(row) <- c("name", "label")
+  return(row)
+})
+```
+
+#### How are students selected to take part in PISA?
+
+Students are selected by ... @ref
+
+Add Christian Bokhove papers
+https://bokhove.net/r-materials/
+
+From the data, you can see that 50% of schools entered fewer than 30 students into PISA.
+
+```{r}
+PISA_2018 %>% 
+  group_by(CNTSCHID) %>%
+  summarise(size = n()) %>%
+  mutate(quartile = ntile(size, 4)) %>%
+  group_by(quartile) %>%
+  summarise(Qmax = max(size),
+            Qmedian = median(size),
+            Qmean = mean(size))
+
+ggplot(PISA_2018 %>% 
+  group_by(CNTSCHID) %>%
+  summarise(size = n()), aes(x=size)) +
+  geom_density()
+```
+
+### Interesting papers and reading on PISA
+
+Jerrim @jiang2015effects @monseur2009pisa
+
+### Copyright
+
+> All PISA products are published under the [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 IGO](https://creativecommons.org/licenses/by-nc-sa/3.0/igo/) (CC BY-NC-SA 3.0 IGO)
+
+This includes the `.rds` and `.parquet` formatted datasets linked above.
+
+### fields to drop:
+CNTRYID, NatCen
+

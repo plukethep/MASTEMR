@@ -1,0 +1,615 @@
+---
+title: "03 Differing performance in STEM (+graphs)"
+# bibliography: references.bib
+---
+
+```{r}
+#| eval: true
+#| warning: true
+#| echo: false
+
+# only load this code if testing this file independently of overall project
+if(!exists("test")){
+  warning("RUNNING LOCAL FILE LOAD")
+  
+  library(glue)
+  proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
+  proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  
+  node <- Sys.info()
+  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
+    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
+    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
+  }else if(node["nodename"] == "PETES_PC"){ #Pete's NEW Laptop
+    proj_folder <- r"(C:\Users\Peter\Google Drive\Kings\Code\MASTEMR\)"
+  }
+
+  source(glue("{proj_folder}MASTEMR_setup.R"))
+}
+```
+
+## Seminar activities
+
+### Discussion activity
+
+Based on @davis2013introduction [Link to chapter](https://ieas-szeged.hu/downtherabbithole/wp-content/uploads/2018/02/Lennard-J.-Davis-ed.-The-Disability-Studies-Reader-Routledge-2014.pdf#page=15)
+
+![](images/03%20Normal%20Curve-01.jpg)
+
+Consider how and why we think of things as being 'normal' (or not). Some suggested questions are:
+
+-   What were your immediate thoughts on reading this paper?
+-   In what ways have you yourself been aware of being compared to norms or ideals?
+-   How do you feel about that? As an education professional, have you made comparisons between individual students and expected norms or averages? Between groups of students?
+-   When and how was this useful?
+-   When and how was this problematic?
+
+### Tasks
+
+**Getting set up**
+
+Using the following `.csv` data set and the `read.csv` command: [DfE_SEN_School_Level](https://content.explore-education-statistics.service.gov.uk/api/releases/daf8d64d-ce21-4f21-c28c-08da3ee963bf/files/4cba1d1f-7ee8-4731-96fe-08da47b59ff3) to load data on Special Educational Needs (SEN) students in UK schools.
+
+```{r}
+#| eval: false
+#| code-fold: false
+#| code-summary: "Loading the data"
+# Descriptive Statistics using the DfE SEN School Level Data
+
+library("tidyverse")
+loc <- "<your drive>/sen_school_level_underlying_data.csv"
+DfE_SEN_data <- read.csv(loc)
+```
+
+::: callout-tip
+You may find these explanation of acronyms used in the spreadsheet useful:
+
+-   ***LA*** stands for local authority and is an administrative region, for example, Camden and Greenwich.
+
+-   ***FSM*** refers to students who receive free school meals - this funding is available for students whose parents or carers receive certain government benefits, typically due to relatively low income. It is taken, by some policy makers and researchers, as a marker of socioeconomic disadvantage
+
+-   ***SEN support*** indicates a school has made a judgement that a student needs further support in school because of special educational needs or disabilities, for example dyslexia or speech and communication needs. If students need a higher level of support, they can be assessed by a specialist and are then placed on an education, health and care (EHC) plan. Students on EHC plans receive a higher level of support than those on SEN support.
+
+-   A Pupil Referral Unit (***PRU***) is a type of school for children who are not able to attend a mainstream school due to illness or behavioural issues that have led to being excluded.
+
+-   A ***special school*** is a school that provides support for students with special educational needs, for example, autism or physical disabilities, like deafness.
+
+-   ***EHC_primary_need_spld*** = specific learning difficulties, for example, dyslexia and dyspraxia
+
+-   ***EHC_primary_need_mld*** = moderate learning difficulties, indicating a delay in development
+
+-   ***EHC_primary_need_sld*** = severe learning difficulties, indicating significant learning needs
+
+-   ***EHC_primary_need_pmld*** = profound and multiple learning difficulties - students with multiple and complex needs
+:::
+
+#### Descriptive statistics
+
+We will now learn how to calculate means of subgroups of schools using the `filter` and `summarise` functions. We can use `filter` to focus on only a subset of our `data.frame`. For example, below, we choose to focus on schools in Camden.
+
+In line 3 below, we focus on schools in Camden. Note that, in `filter` we use `==`. Then we use `summarise` to calculate the totals of the variables we are interested in, students getting SEN support (`SEN.support`), students on an EHC plan (`EHC.plan`) and the total (`Total.Pupils`).
+
+```{r}
+#| eval: true
+#| code-fold: false
+#| code-summary: "Loading the data"
+# Selecting only schools in one LA and finding the mean of various variables
+
+DfE_SEN_data %>% 
+  filter(la_name == "Camden") %>% # Filter to only include schools in Camden (note the ==)
+  summarise(SEN_total=sum(SEN.support), 
+            EHCplan=sum(EHC.plan), 
+            Total=sum(Total.pupils))
+
+```
+
+::: callout-tip
+If you want to filter by a different vector (that is, a different column in the table), don't forget to change the name of the vector in the filter command, for example, to filter by the gender of pupils at the school. Don't forget to use the `%>%` and the `==` in `filter`!
+
+```{r}
+#| eval: true
+DfE_SEN_data %>% 
+ filter(sex_of_school_description=="Boys")%>%
+  summarise(SEN_total=sum(SEN.support), 
+            EHCplan=sum(EHC.plan), 
+            Total=sum(Total.pupils))
+```
+:::
+
+#### Task 1
+
+::: question
+-   Find the total number of students with SEN support, on EHC plans, and the total number of students (using `Total.pupils`) in Greenwich
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Selecting only schools in one LA and finding the mean of various variables
+
+DfE_SEN_data %>% 
+  filter(la_name=="Greenwich") %>% 
+  summarise(SEN_total=sum(SEN.support), 
+            EHCplan=sum(EHC.plan), 
+            Total=sum(Total.pupils))
+
+```
+:::
+
+::: callout-tip
+Make sure you have spelled the name of the variables SEN.support, etc. correctly. They are case sensitive. You can use the function `colnames(DfE_SEN_data)` to get a list of names and copy and paste them
+:::
+
+#### Task 2
+
+::: question
+-   Select a single local authority (LA) or region.
+-   Calculate the total number of pupils in the LA, the total number listed as receiving SEN support, and the total number with an EHC plan.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Selecting only schools in Hackney and finding the total pupils on SEN support and EHC plans
+
+DfE_SEN_data %>% 
+  filter(la_name=="Hackney") %>% 
+  summarise(SEN_total=sum(SEN.support), 
+            EHCplan=sum(EHC.plan))
+
+```
+
+-   Calculate the totals for all of London (note, you will need to change the name of the column you are filtering by).
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Filter for London  schools and finding the total pupils on SEN support and EHC plans
+
+DfE_SEN_data %>% 
+  filter(region_name=="London") %>% 
+  summarise(SEN_total=sum(SEN.support), 
+            EHCplan=sum(EHC.plan))
+
+```
+
+-   An extension task - use the functions `mean()` to calculate mean values, and `sd()` to calculate standard deviation in the `summarise` functions above, in Camden schools.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Filter for London schools and finding the mean and standard deviation of pupils on SEN support and EHC plans
+
+DfE_SEN_data %>% 
+  filter(region_name=="London") %>% 
+  summarise(SENmean=mean(SEN.support), 
+            EHCmean=mean(EHC.plan),
+            SENsd=sd(SEN.support),
+            EHCsd=sd(EHC.plan))
+```
+:::
+
+#### Calculating Percentages 
+
+Next, we will use the totals of SEN supported and EHC plan students to calculate percentages. We simply do an additional `summarise` with the equation to find the percentage of `EHCplan` students `=(EHCplan/Total)*100`.
+
+::: callout-tip
+When using `summarise`, be careful to add a comma after each function, and check you have closed as many brackets as you open!
+:::
+
+```{r}
+#| eval: true
+# Descriptive Statistics using the DfE SEN School Level Data
+
+# Calculating Percentages of students on EHC plans
+Percenttable <- DfE_SEN_data  %>% 
+  group_by(district_administrative_name) %>%
+  summarise(SEN_support = sum(SEN.support), 
+            EHCplan     = sum(EHC.plan), 
+            Total       = sum(Total.pupils),
+            percentageEHCplan = (EHCplan/Total)*100) 
+
+print(Percenttable)
+
+```
+
+This gives a table as an output, with the percentage of students on an EHC plan in each local authority.
+
+::: callout-tip
+You can use the `signif` function to display a given number of decimal places. Here, I have used `signif( ,2)` to limit the percentage calculation to two significant figures
+
+```{r}
+#| eval: true
+
+# Calculating Percentages of students on EHC plans
+Percenttable <- DfE_SEN_data  %>% 
+  group_by(district_administrative_name) %>%
+  summarise(SEN_support = sum(SEN.support), 
+            EHCplan     = sum(EHC.plan), 
+            Total       = sum(Total.pupils),
+            percentageEHCplan = signif((EHCplan/Total)*100,2))
+
+
+print(Percenttable)
+
+```
+:::
+
+#### Task 3
+
+::: callout-tip
+Don't forget to use the pipe operator `%>%` between each function
+:::
+
+::: question
+For each administrative district (local authority), calculate the percentages of pupils with SEN support.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Descriptive Statistics using the DfE SEN School Level Data
+
+
+# Calculating Percentages of students with SEN support in each administrative district (local authority)
+Percenttable <- DfE_SEN_data  %>% 
+  group_by(district_administrative_name) %>%
+  summarise(SEN_support = sum(SEN.support), 
+            EHCplan     = sum(EHC.plan), 
+            Total       = sum(Total.pupils),
+            percentagesupport = (SEN_support/Total)*100)
+
+
+ print(Percenttable)
+
+```
+:::
+
+#### Finding the mean, median, maximum, and minimum
+
+-   Example, Find the `mean`, `median`, `max`imum and `min`imum percentages of students with SEN support in each administrative district.
+
+To find the mean, we can use `summarise` to find the `mean` (`summarise(Mean_support=mean(SEN.support))`). Similarly, we can use the `max`, `min` and `median` function to find the respective values (modes are little more complicated).
+
+```{r}
+#| eval: true
+
+library(tidyverse)
+
+# We do the steps above to create our percentage table for SEN support
+Descrip <- DfE_SEN_data  %>% 
+  group_by(district_administrative_name)  %>%  
+  summarise(SEN_support = sum(SEN.support), 
+            Total       = sum(Total.pupils),
+            percentagesupport = (SEN_support/Total)*100,
+            Max_support = max(SEN.support),
+            Mean_support = mean(SEN.support),
+            Min_support=min(SEN.support),
+            Median_support=median(SEN.support))
+  
+
+# describe is a function from the psych package (remember to load tidyverse after it) which gives summary data for max, min, mean etc for the whole country.
+print(Descrip)  
+
+# An alternative way to do this is to turn the table into the longer format
+# This converts each entry in the table into an individual row in a list
+# which can then be used to calculate descriptive statistics
+#
+# new_table <- DfE_SEN_data %>%
+#  group_by(district_administrative_name) %>%
+#  summarise(SEN_support = sum(SEN.support), 
+#            EHCplan     = sum(EHC.plan), 
+#            Total       = sum(Total.pupils))
+#
+# new_table %>%
+#  pivot_longer(!district_administrative_name,
+#               names_to = "variable",
+#               values_to = "value") %>%
+#  group_by(variable) %>%
+#  summarise(mean_value = mean(value),
+#            max_value = max(value),
+#            median_value = median(value))
+```
+
+::: callout-tip
+Surprisingly, there is no function to calculate the mode in tidyverse. However, you can get one by loading the `modeest` package and using the most frequent value (`nfv`) function.
+
+```{r}
+#| eval: true
+#| warning: false
+# Install the modeest package to calculate a mode
+
+library(modeest)
+library(tidyverse)
+# The mode can be found with the most frequent value (mfv) function
+
+PISAUKMath<-PISA_2018%>%
+  select(CNT, PV1MATH)
+
+mfv(PISA_2018$PV1MATH, na_rm= TRUE)
+
+```
+:::
+
+#### Task 4
+
+::: question
+- Find the `mean`, `median`, `max`imum and `min`imum percentages of students with EHC plans in each local authority for the whole country.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+
+library(tidyverse)
+
+# We do the steps above to create our percentage table for EHC plans
+# after grouping by districts (LAs)
+EHCDescrip <- DfE_SEN_data  %>% 
+  group_by(district_administrative_name) %>%
+  summarise(EHC_support = sum(EHC.plan), 
+            Total       = sum(Total.pupils),
+            percentagesupport = (EHC_support/Total)*100,
+            Max_support = max(EHC.plan),
+            Mean_support = mean(EHC.plan),
+            Min_support=min(EHC.plan),
+            Median_support=median(EHC.plan))
+
+print(EHCDescrip)
+
+```
+
+- Find the `mean`, `median`, `max`imum and `min`imum percentages of students with EHC plans in the UK as a whole, and for London. What differences can you see?
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+# To get the descriptive statistics for EHC plans in all of the UK:
+
+EHCDescripTotal <- DfE_SEN_data  %>% 
+  summarise(EHC_support = sum(EHC.plan), 
+            Total       = sum(Total.pupils),
+            percentageEHC = (EHC_support/Total)*100,
+            Max_EHC = max(EHC.plan),
+            Mean_EHC = mean(EHC.plan),
+            Min_EHC=min(EHC.plan),
+            Median_EHC=median(EHC.plan))
+
+print(EHCDescripTotal)
+
+# To get the descriptive statistics for EHC plans in London, we add a filter first
+EHCDescripLon <- DfE_SEN_data  %>% 
+  filter(region_name=="London")  %>%
+  summarise(EHC_support = sum(EHC.plan), 
+            Total       = sum(Total.pupils),
+            percentageEHC = (EHC_support/Total)*100,
+            Max_EHC = max(EHC.plan),
+            Mean_EHC = mean(EHC.plan),
+            Min_EHC=min(EHC.plan),
+            Median_EHC=median(EHC.plan))
+
+print(EHCDescripLon)
+
+```
+:::
+
+### Graphing
+
+Using the same data set ( [DfE_SEN_School_Level](https://content.explore-education-statistics.service.gov.uk/api/releases/daf8d64d-ce21-4f21-c28c-08da3ee963bf/files/4cba1d1f-7ee8-4731-96fe-08da47b59ff3)) we are going to now plot some graphs
+
+For more details on graphing with the `PISA_2018` dataset, see @sec-graphing
+
+### Column graphs
+
+Imagine we want to plot a graph of the the percentage of students on EHC plans by gender of school
+
+When plotting graphs, it makes things easier to have a data.frame of the data you will pass to ggplot - a bit like the final table of data you will actually plot when drawing a graph in real life.
+
+To complete our take we are going to create a new `data.frame` we will use in the plot. I have called that `data.frame` `genderplot` (the data about percentage of students on EHC plans by gender, that I will plot). Then, I take the main data.frame and `group_by` `sex_of_school_description,` to get the schools grouped by whether they are single of mixed sex. Next I use the mutate function to create percentage columns, as we did before.
+
+The new element here is using ggplot, R's graphing function (more details on how to use geom_bar are in the section above: [Geom_bar)](https://peterejkemp.github.io/#geoms).
+
+To plot a graph, you call ggplot and specify the data you want to use for the graph (in our case, the new `data.frame` we have created, `genderplot`).
+
+The next layer of ggplot is the aesthetics (`aes`), i.e., what our graph will look like. First, we tell ggplot what we want our `x` (`sex_of_school_description`) and `y` (`percentageEHCplan`) variables to be. Finally, we use `geom_col()` to plot a column graph.
+
+```{r}
+#| eval: true
+#| code-fold: false
+#| code-summary: "Show the code"
+# Presenting % on EHC by gender of school
+genderplot <- DfE_SEN_data %>%
+  group_by(sex_of_school_description) %>%
+  summarise(SEN_support=sum(SEN.support), 
+            EHCplan=sum(EHC.plan), 
+            Total=sum(Total.pupils),
+            percentageEHCplan = (EHCplan/Total)*100, 
+            percentagesupport = (SEN_support/Total)*100)
+
+
+# using the genderplot data create a graph
+ggplot(data=genderplot,
+       aes(x=sex_of_school_description,
+           y=percentageEHCplan)) +
+  geom_col()
+
+```
+
+#### Task 5
+
+::: question
+Plot a column graph of the % of students of `EHC.plan`s by the type of school (the `type_of_establishment` variable)
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+
+# Calculate percentage on plan and support by type of school
+
+estabdata <- DfE_SEN_data %>%
+  group_by(type_of_establishment) %>%
+  summarise(EHCplan=sum(EHC.plan), 
+            Total=sum(Total.pupils),
+            percentageEHCplan = (EHCplan/Total)*100)
+
+# Plot the type of school data
+ggplot(data=estabdata,
+       aes(x=type_of_establishment,
+           y=percentageEHCplan)) +
+  geom_col(fill="red")+ # I have filled the columns in red here
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) 
+  # The final line rotates the text and spaces it nicely
+  
+```
+:::
+
+### Scatter Graphs
+
+To plot a scatter graph we use the `geom_point` (see also: [Geom_Point section](https://peterejkemp.github.io/#sec-geom_point)), which works in a similar way to `geom_col`.
+
+**Example**
+
+Imagine I want to plot a graph of total number of students (on the x-axis) against those with EHC plans (y-axis) for all schools in London.
+
+A above, I first want to create a `data.frame` to plot - in this case I have called it `plotdata`. I filter to select only London schools from the DfE dataset.
+
+Then I pass ggplot `plotdata`. As with `geom_col`, I use `ggplot` and first specify the data I want to plot (`ggplot(data=plotdata,`). Next, I set the `aes`thetic variables, to keep things simple,only the `x` and `y` variables. Then I call `geom_point` to plot the points as a scatter graph.
+
+```{r}
+#| eval: true
+#| code-fold: false
+
+# Filter to create a dataframe of only London schools
+plotdata<-DfE_SEN_data %>%
+  filter(region_name=="London")
+# Plot the type of school data
+ggplot(data=plotdata,
+       aes(x=Total.pupils,y=EHC.plan)) +
+  geom_point()
+```
+
+We can make things more pleasing by adding more features to the aesthetic variable. For example, I can add colour (`geom_point(colour="blue")`) and rename the axes `labs(x="Total number of pupils", y="Number of pupils on EHC plans")`. Note when adding to `ggplot`, the `+` should come at the end of the line before the new addition to avoid an error.
+
+```{r}
+#| eval: true
+#| code-fold: false
+
+#  Filter to create a dataframe of only London schools
+plotdata<-DfE_SEN_data %>%
+  filter(region_name=="London")
+# Plot the type of school data
+ggplot(data=plotdata,
+       aes(x=Total.pupils,y=EHC.plan)) +
+  geom_point(colour="blue")+
+  labs(x="Total number of pupils", y="Number of pupils on EHC plans")
+```
+
+I can also add a line using (`geom_smooth(method='lm')`) - here 'lm' specifies a linear plot (i.e. a straight line).
+
+```{r}
+#| eval: true
+#| code-fold: false
+#| warning: false
+
+# Filtter to create a dataframe of only London schools
+plotdata<-DfE_SEN_data %>%
+  filter(region_name=="London")
+# Plot the type of school data
+ggplot(data=plotdata,
+       aes(x=Total.pupils,y=EHC.plan)) +
+  geom_point(colour="blue")+
+  labs(x="Total number of pupils", y="Number of pupils on EHC plans")+
+  (geom_smooth(method='lm'))
+```
+
+I can also change the colour of the points by a variable in the dataframe - for example by the type of school (`aes(colour=type_of_establishment)`). I can vary the size of points and make them slightly transparent (their alpha level): `geom_point(alpha=0.4, size=0.6)`, and I can move the legend to the bottom
+
+```{r}
+#| eval: true
+#| code-fold: false
+# Filter to create a dataframe of only London schools
+plotdata<-DfE_SEN_data %>%
+  filter(region_name=="London")
+# Plot the type of school data
+ggplot(data=plotdata,
+       aes(x=Total.pupils,y=EHC.plan, colour=sex_of_school_description)) +
+  geom_point(alpha=0.4, size=0.6)+
+  labs(x="Total number of pupils", y="Number of puupils on EHC plans") +
+  theme(legend.position = "bottom")
+```
+
+::: callout-tip
+For a summary of all the elements of a graph you can change in `ggplot` - see this [help sheet](https://posit.co/wp-content/uploads/2022/10/data-visualization-1.pdf)
+:::
+
+#### Task 6
+
+::: question
+For schools in London, plot the number of students receiving SEN support (`SEN.Support`) against those on an EHC plan (`EHC.plan`). The try varying the colour of points by type of school, adding a line and changing the size of plot point by size of school
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Answer"
+# Filter to create a dataframe of only London schools
+plotdata<-DfE_SEN_data %>%
+  filter(region_name=="London")
+# Plot the type of school data
+ggplot(data=plotdata,
+       aes(x=SEN.support,y=EHC.plan, colour="red", size=Total.pupils)) +
+  geom_point(alpha=0.4)+
+  labs(x="Total number of pupils", y="Number of puupils on EHC plans")
+```
+:::
+
+#### Extension task - Binning data
+
+If we want to plot a frequency plot, the kind of chart that often gives a normal distribution, we need to divide data into counts of ranges of data.
+
+For example, if we wanted to plot a frequency chart of heights, we might divide the counts into those between 1.5m-1.6m, 1.6m-1.7m etc. To do this we can use the `cut(<field>,<breaks>)` function within the `mutate` command on a 'data.frame'.
+
+In the example below, I will use the data on Total.pupils. I use `cut(Total.pupils, breaks=seq(0,1500, 25))` to create a new vector (column in the table) with the total number of pupils divided up into bins. The specification `breaks=seq(0,1500, 25))` sets how the data are broken up - into bins (i.e. groups of schools) of pupil numbers starting at 0 and rising to 1500 in steps of 25.
+
+```{r}
+#| eval: true
+#| code-fold: false
+# Creates distribution of schools by size
+binnedsize <- DfE_SEN_data %>% # Creates a new data frame with binned data
+  mutate(Total.pupils = cut(Total.pupils, breaks=seq(0,1500, 25)))%>%
+  na.omit()
+ggplot(binnedsize,
+       aes(x=Total.pupils)) +
+  geom_bar(fill="dark green") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(y="Number of schools", x="Pupil range")
+
+```
+
+::: question
+Create a graph of the binned counts of number of students on SEN support in schools in the UK
+
+::: callout-tip
+To find out a range of a vector, you can use the `range` function in the console - for example, to get a sense of the range of numbers of students on SEN support. I can type: `range(DfE_SEN_data$SEN.support)`
+:::
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: Answer
+# Creates distribution of those on SEN support
+binnedSEN <- DfE_SEN_data %>% # Creates a new data frame with bins
+  mutate(SENbins = cut(SEN.support, breaks=seq(0,100, 2)))%>%
+  na.omit()
+ggplot(binnedSEN,
+       aes(x=SENbins)) +
+  geom_bar(fill="dark green") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(y="Number of schools", x="Number on SEN support")
+
+```
+:::

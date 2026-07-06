@@ -1,0 +1,800 @@
+---
+title: "04 Introduction to PISA"
+echo: false
+bibliography: "../references/mastemr.bib"
+---
+
+```{r setup}
+#| eval: true
+#| warning: false
+#| echo: false
+    
+    # options(max.print=10000)
+    options(max.print=15)
+    
+    # only load this code if testing this file independently of overall project
+    if(!exists("test")){
+      warning("RUNNING LOCAL FILE LOAD")
+      
+      library(glue)
+      proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
+      proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+      
+      node <- Sys.info()
+      if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richards PC
+        proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+      }else if(node["nodename"] == "KCL3Y7NKR3"){ #Petes NEW Laptop
+        proj_folder <- r"(G:/My Drive/Kings/code/MASTEMR/)"
+      }else if(node["nodename"] == "PETES_PC"){ #Petes NEW PC
+        proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
+      }
+      source(glue("{proj_folder}MASTEMR_setup.R"))
+      
+      source(glue("{proj_folder}MASTEMR_functions.R"))
+      source(glue("{proj_folder}MASTEMR_setup_libs.R"))
+    
+      OpenAnalysis_load_ALL(use_cache = TRUE, 
+                            report_cache_folder=r"[D:/MASTEMR/cache/]",
+                            over_write=FALSE)
+    }
+
+
+```
+
+# Introduction to PISA
+
+## Pre-session tasks
+
+### Pre-reading
+
+Please read section 1 ("What is PISA?") of the PISA 2022 Assessment and Analytical Framework: [PISA Assessment Framework](https://read.oecd.org/10.1787/dfe0bf9c-en?format=html)
+
+### Getting set up
+
+Remember to load the PISA 2022 data set
+
+```{r}
+#| eval: false
+#| echo: true
+library(arrow)
+library(tidyverse)
+
+PISA_2022 <- read_parquet(r"[<folder>PISA_2022_student_subset.parquet]")
+
+```
+
+## The PISA assessments
+
+The first International Large-Scale Assessment (ILSA) comparing the learning outcomes of school students between countries was attempted in the 1960s. However, ILSAs only became established and regular in the late 1990s and 2000s.
+
+The Organisation for Economic Co-operation and Development's (OECD) Programme for International Student Assessment (PISA) has tested 15-year-old students in a range of "literacies" or "competencies" every three years since 2000. There is a rotating focus on reading, mathematics and science, with PISA 2021 focusing on mathematics but delayed by the global pandemic until 2022 and the results only published in December 2023. Until then, PISA 2018, with a focus on reading, was the most recently available cycle and PISA 2015 remains the most recent cycle focusing on science.
+
+In addition to reading, mathematics and science, PISA has tested students on a range of "novel" competencies including problem-solving, global competence, financial literacy, and creative thinking. In addition to these tests, PISA also administers questionnaires to students, teachers and parents to identify "factors" which explain test score differences within and between countries.
+
+Since 2000, more than 90 "countries and economies" and around 3,000,000 students have participated in PISA. The growth in the number of countries participating in each cycle of PISA is reflected in the growth in the number of students taking the PISA tests and responding to the PISA questionnaires, as shown in Table 1.
+
+Table 1: Number of students participating in PISA by year
+
+| Year | Number completing assessment |
+|------|------------------------------|
+| 2000 | 265,000                      |
+| 2003 | 275,000                      |
+| 2006 | 400,000                      |
+| 2009 | 470,000                      |
+| 2012 | 510,000                      |
+| 2015 | 540,000                      |
+| 2018 | 600,000                      |
+| 2022 | 690,000                      |
+
+There is a degree of inherent error in all educational and psychological assessments - and indeed in all social or physical measurement. ILSAs such as PISA may be more prone to error because their comparisons across large and diverse populations make them particularly complex. However, it is particularly important to minimise the error in ILSAs because they influence education policy and practice across a large number of education systems, impacting a vast population of students beyond those sampled for the assessments.
+
+According to the @OECD2019results, three sources of error are worth considering. First, sampling error, uncertainty in the degree to which results from the sample generalise to the wider population - in 2018, the OECD average sampling error was 0.4 of a PISA point score (the value was not reported for 2022). Second, measurement error, uncertainty in the extent to which test items measure proficiency. In 2018, the measurement error was around 0.8 of a point in mathematics and science and 0.5 of a score point in reading (the measurement error was not reported for 2022). Third, the link error is the uncertainty in comparison between scores in different years. For comparisons of science scores between 2018 and 2015, the link error is 1.5 points. For 2018-2022, the link errors are reading (1.47), mathematics (2.24) and science (1.61) [@OECD2022results, p. 293]
+
+PISA uses a probabilistic, stratified clustered survey design [@jerrim2017weight]. However, sampling issues including sample representativeness, non-response rates and population coverage have been identified [@zieger2022conditioning; @rutkowski2016call; @gillis2016pisa; @hopmann2007pisa]. Furthermore, @anders2021canada and @jerrim2021pisa have shown that assumptions for imputing values (imputing means estimating any missing values based on existing data - for example by adding a mean or mode score for a missing test) for non-participating students used to construct the sample may have significant impacts on achievement scores.
+
+Since PISA 2015, the majority of participating countries have switched from paper-based assessment to computer-based assessment [@jerrim2016pisa]. A randomised controlled trial conducted by the OECD prior to the switch indicated a difference in score between the two modes of delivery. The OECD introduced an adjustment to compensate for this difference, but it is not entirely removed by the adjustment [@jerrim2016pisa, @jerrim2018pisa], with implications for any time series comparisons between PISA cycles. Nonetheless, Jerrim [-@jerrim2016pisa] notes that "in terms of cross-country rankings, there remains a high degree of consistency... the vast majority of countries are simply 'shifted' by a uniform amount" (pp. 508-509).
+
+In summary, comparisons within and between countries and comparisons over time using ILSAs need careful interpretations that bear in mind the specific design of each ILSA. In practice, this means considering a range of potential explanations for score differences. Does a difference in science ranking between two countries simply reflect sampling error? Does the same parental occupation or home possessions amount to the same economic, social and cultural status in different countries (e.g. the social status of a parent as a teacher or the economic status of the number of cars a family owns)? Does a difference in mathematical self-efficacy (i.e. student self-confidence in mathematics) between the USA and Japan reflect sociocultural differences in self-enhancement and modesty, respectively? How do score differences between boys and girls indicate gender inequalities in education that reflect wider society?
+
+::: callout-tip
+For useful critique and discussion of the construction of the measure of socio-economic status in PISA data see: Avvisati's [-@avvisati2020measure] paper.
+:::
+
+## A reminder about summarising data, graphing and categorising
+
+### Summarising data
+
+Recall you can use `group_by` and `summarise` to group individual student measures and find means and standard deviations for countries. For example, to find the mean wealth scores for the countries, and rank in descending order, we first select the variables of interest `CNT` and `HOMEPOS` (home possessions, a proxy for wealth), then `group_by` `CNT` and `summarise` to get the mean. As there are some NA values, we need to include `na.rm=TRUE` to tell `summarise` to ignore the missing values. Finally, we `arrange` in descending order by the new variable we create `meanwealth`. We can do the same and add a calculation to get the standard deviation.
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Create a data frame of PISA 2022 data of country mean wealth
+
+PISA2022WealthRank <- PISA_2022 %>%
+  select(CNT, HOMEPOS) %>%                                 # <2>
+  group_by(CNT) %>%                                        # <3>
+  summarise(meanwealth = mean(HOMEPOS, na.rm = TRUE)) %>%  # <4>
+  arrange(desc(meanwealth))                                # <5>
+
+PISA2022WealthRank
+
+# With standard deviations
+
+PISA2022WealthRank <- PISA_2022 %>%
+  select(CNT, HOMEPOS) %>% 
+  group_by(CNT) %>% 
+  summarise(meanwealth = mean(HOMEPOS, na.rm = TRUE),  
+            sdwealth=sd(HOMEPOS, na.rm = TRUE)) %>%       # <11>
+  arrange(desc(meanwealth)) 
+
+PISA2022WealthRank
+```
+
+2.  line 2 - select the variables of interest
+3.  line 3 - treat the data as grouped by country (`group_by(CNT)`)
+4.  line 4 - summarise to calculate the mean score of `HOMEPOS` in a new column `meanwealth`, setting `na.rm=TRUE` to ignore NA values
+5.  line 5 - arrange in descending order by `meanwealth` 
+11.  line 11 - add the mean standard deviation to the summary 
+
+
+### Bar charts
+
+Recall you can use `geom_bar` to plot a bar graph. For example, if we wanted to plot the `PISA2022WealthRank` data frame we just created, we pass the data to `ggplot`. Recall that if you are passing `geom_bar` the exact values you want to plot, rather than making it count (for example, by including the original dataset with all student entries), you need to specify `geom_bar(stat='identity')`
+
+I have added `+theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))` which rotates the text on the x-axis.
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Plot a bar graph of wealth by country
+
+ggplot(PISA2022WealthRank, aes(x = CNT, y = meanwealth)) +               # <1>
+  geom_bar(stat = 'identity') +                                          # <2>
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  # <3>
+  
+```
+
+1.  line 1 - pass the `PISA2022WealthRank` to `ggplot` and set the x and y variables
+2.  line 2 - as the data are already summarised, we don't want `geom_bar` to count items, but tell it to just plot the data as it is
+3.  line 3 - rotate the x-axis text
+
+We can improve this plot by reordering the x-axis to rank the countries - we switch `x=CNT` to `x=reorder(CNT, -meanwealth)` that is we reorder the x axis based on descending (indicated by the minus sign `-meanwealth`) meanwealth.
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Plot the wealth data frame as a bar graph, reordering the x axis by wealth
+
+ggplot(PISA2022WealthRank, aes(x=reorder(CNT, -meanwealth), y = meanwealth)) + # <1>
+  geom_bar(stat='identity') +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))       
+```
+
+1.  line 1 - rather than simply specifying the x axis (e.g. `x=CNT`) to change the order of the x-axis by the `meanwealth` score we can use `x=reorder(CNT, -meanwealth)`. Note the `-` before `meanwealth` sets the order is descending.
+
+If you like, you can add colour, tidy up the axis labels, and give a title:
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Plot the wealth data frame as a bar graph, reordering the x axis by wealth
+
+ggplot(PISA2022WealthRank, aes(x = reorder(CNT, -meanwealth), 
+                               y = meanwealth)) +
+  geom_bar(stat='identity', fill = "skyblue") +                            # <3>
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  ggtitle("Countries ranked by HOMEPOS") +                                 # <5>
+  xlab("Country") +                                                        # <6>
+  ylab("Mean HOMEPOS")                                                     # <7>
+```
+
+3.  line 3 - set the bar fill colour to sky blue (`fill = "skyblue"`)
+5.  line 5 - give a title
+6.  line 6 - set the x-axis title
+7.  line 7 - set the y-axis title
+
+### Scatter plots
+
+To plot a scatter plot, recall we use `geom_point`. For example, to plot reading scores against mathematics scores in the UK we: a) create a data set of reading and science scores after filtering for UK; b) pass the data to `ggplot`; c) use `aes` to specify the x and y variables and d) plot with `geom_point()`.
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Create a data.frame of the UK's science and reading scores
+
+UKplot <- PISA_2022 %>%
+  select(CNT, PV1READ, PV1SCIE) %>%
+  filter(CNT == "United Kingdom")
+
+# Plot the data on a scatter graph using geom_point
+
+ggplot(UKplot, aes(x = PV1READ, y = PV1SCIE)) +
+  geom_point()
+  
+```
+
+That graph is quite dense, so we can use the `alpha` function to make the points slightly transparent, `size` to make them smaller, and set their colour. I will also tidy up the axis names and add a line (note that in: `geom_smooth(method = "lm", colour = "black")` `method = "lm"` sets the line to a straight (i.e., linear model, lm) line).
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Create a data.frame of the UK's science and reading scores
+
+UKplot <- PISA_2022 %>%
+  select(CNT, PV1READ, PV1SCIE) %>%
+  filter(CNT == "United Kingdom")
+
+# Plot the data on a scatter graph using geom_point
+
+ggplot(UKplot, aes(x = PV1READ, y = PV1SCIE)) +             # <4>
+  geom_point(alpha = 0.6, size = 0.1, colour = "red") +     # <5>
+  xlab("Reading score") +                                   # <6>
+  ylab("Science score") +                                   # <7>
+  geom_smooth(method = "lm", colour = "black")              # <8>
+  
+```
+
+4.  line 4 - set the data to plot and set which variable goes on the x and y axis
+5.  line 5 - set the point size (`size=0.1`), colour (`colour = "red"`) and opacity (`alpha = 0.6`)
+6.  line 6 - set the x-axis title
+7.  line 7 - set the y-axis title
+8.  line 8 - plot a straight line (`method = "lm"`) and set its colour to black
+
+### Density plots
+
+An alternative type of plot is the density plot, which is a kind of continuous histogram. The density plot can be useful for visualising the achievement scores of students. For example, the mathematics scores of girls and boys (recall the gender variable is `ST004D01T`) in the US. We use `na.omit` to omit `NA`s. Notice, for the plot, I use `aes` to set my x variable, and then specify that the plot should fill by gender (`fill=ST004D01T`). Finally, in `geom_density(alpha=0.6)` I set the alpha to 0.6 to make the fill areas partially transparent.
+
+::: callout-tip
+The y-axis on a density plot is chosen so that the total area under the graph adds up to 1
+:::
+
+```{r}
+#| echo: true
+#| eva: true
+
+# Create a data.frame of US Math data including gender
+
+USMathplot <- PISA_2022 %>%
+  select(CNT, PV1MATH, ST004D01T) %>%
+  filter(CNT == "United States") %>%
+  na.omit()
+
+# PLot a density chart, seeting the fill by gender, and setting the opacity to
+# 0.6 to show both gender plots
+
+ggplot(USMathplot, aes(x = PV1MATH, fill = ST004D01T)) +
+  geom_density(alpha = 0.6)
+```
+
+### Facet wrapping - producing the same graph for multiple countries.
+
+A powerful feature of ggplot is being able to produce the same graph for multiple values of a variable, for example, for multiple countries. For example, we may want to produce the density graph of `PV1MATH` score by gender, for several countries in the data set. To do that, we produce a data set of `PV1MATH` scores, and gender (`ST004D01T`) and filter for four countries (Philippines, UK, Bulgaria and Germany). We use the same code as above to plot the graphs but add `+facet_wrap(.~CNT)` - `facet_wrap` tells ggplot to produce a multi-panel plot and `.~CNT` means do the same as above (the `.` means, as above), but vary across countries (`~CNT`).
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Create a data.frame of the maths scores for the 4 countries
+Mathplot <- PISA_2022 %>%
+  select(CNT, PV1MATH, ST004D01T) %>%
+  filter(CNT == "Philippines"|CNT == "United Kingdom"|CNT == "Bulgaria" |
+           CNT == "Germany")
+
+# Plot the data, changing colour by gender, and faceting for the countries
+
+ggplot(Mathplot, aes(x = PV1MATH, fill = ST004D01T)) +  # <5>
+  geom_density(alpha = 0.6) +                           # <6>
+  facet_wrap(. ~ CNT)                                   # <7>
+```
+5.  line 5 - pass the data to plot `Mathplot` and set the x axis (no y is needed for a `geom_density` plot) - set that we want two series, with the colour set by gender (`ST004D01T`)
+6.  line 6 - set fill (`alpha = 0.6`) so both gender plots are visible where they overlap
+7.  line 7 - `facet_wrap` repeats the initial graph for some variable. In this case we specify we want the same graph as above (`.`) but we want to produce versions for each country (`~CNT`) to give `facet_wrap(. ~ CNT)`
+
+
+### Categorising responses
+
+A useful analytical choice is to categorise some a numerical variable into ordinal classes. For example, rather than treating `HOMEPOS` as a continuous scale, you might want to split into high and low wealth groups (for example, those above and below the mean value).
+
+To do this, first calculate the mean `mean(HOMEPOS)`. Then we add a new vector, which we will call `wealthclass` using the `mutate` function. We set the value of `wealthclass` using `case_when`. If `HOMEPOS` is more than the mean score, we set `wealthclass` to `High`, and if it is less than the mean, we set it to `Low`. We do that using `mutate(wealthclass =  case_when(HOMEPOS > mean(HOMEPOS, na.rm =TRUE) ~ "High", HOMEPOS < mean(HOMEPOS, na.rm =TRUE) ~ "Low", .default = NA))`. This means that in the case when `HOMEPOS` is more than the mean (note the `na.rm =TRUE` to remove missing values) the value of the new column `wealthclass` is set to `High`. When `HOMEPOS` is less than `mean(HOMEPOS, na.rm =TRUE)`, `weatlthclass` is set to `Low`. The `.default` sets what to return if neither of those conditions are met.
+
+For example, create a data frame of UK participants `HOMEPOS` sorted into `HIGH` and `LOW` categories.
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Create a data frame of UK responses
+UKPISA2022 <- PISA_2022 %>%
+  select(CNT, HOMEPOS) %>%
+  filter(CNT == "United Kingdom") %>%
+  mutate(wealthclass =  case_when(HOMEPOS > mean(HOMEPOS, na.rm =TRUE) ~ "High",  # <4> 
+                                  HOMEPOS < mean(HOMEPOS, na.rm =TRUE) ~ "Low",
+                                   .default = NA)) 
+UKPISA2022
+```
+
+4.  line 4 - mutate to create a new column `wealthclass` - if HOMEPOS is more than mean(HOMEPOS), set the column to "High" otherwise set it to "Low"
+
+## Seminar activities
+
+### Task 1 Discussion activity
+
+::: question
+-   Discuss the design features of PISA (for example, sampling, forms of tests etc.) and the sources of error that arise from them.
+-   As researchers, what issues should we bear in mind when interpreting the data? (Consider, for example, measures of wealth, gender and "competency")
+-   What caveats should policy makers bear in mind when making high stakes decisions based on the PISA measures (for example, what to include to curricula, where to target funding)?
+
+:::
+
+::: callout-tip
+
+Note that the PISA data collection protocol allows countries to exclude up to 5% of the relevant population (see the PISA 2018 technical report [@OECD2018technical], Annex A2), in particular allowing the exclusion from the data of either individual students by their disability status, or whole schools which provide specialist education (e.g. for blind students). Permitted exclusions include: "intellectual disability, i.e. a mental or emotional disability resulting in the student being so cognitively delayed that he/she could not perform in the PISA testing environment", and "functional disability, i.e. a moderate to severe permanent physical disability resulting in the student being unable to perform in the PISA testing environment" along with other exclusions.
+
+:::
+
+### Task 2 Create a ranked list
+
+::: question
+Create a ranked list of countries by their mean science scores (`PV1SCIE`). What are the top five countries for science? Do the same for wealth (`HOMEPOS`). What patterns do you notice? Why might a researcher be critical of such rankings \[Extension: Include the standard deviation of each country (hint: use the `sd` function) - can you detect any patterns?\]
+:::
+
+::: callout-tip
+Note that the PISA 2022 links wealth to `HOMEPOS` (a self reported measure of possessions in the home). You might want to consider the implications of that definition for interpreting the data
+:::
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the answer"
+
+# Create a ranked data data frame for science
+
+PISA2022SciRank <- PISA_2022 %>%
+  select(CNT, PV1SCIE) %>% # Select variables of interest
+  group_by(CNT) %>% # group by country
+  summarise(meansci = mean(PV1SCIE)) %>% 
+     # summarise  country data to find the mean Sci score
+  arrange(desc(meansci)) # arrange in descending order based on the meansci score
+
+print(PISA2022SciRank)
+
+# And repeat the ranking for wealth
+
+PISA2022WealthRank <- PISA_2022 %>%
+  select(CNT, HOMEPOS) %>% # Select variables of interest
+  group_by(CNT) %>% # group by country
+  summarise(meanwel = mean(HOMEPOS, na.rm=TRUE)) %>% 
+     # summarise  country data to find the mean Sci score
+  arrange(desc(meanwel)) # arrange in descending order based on the meansci score
+
+print(PISA2022WealthRank)
+
+
+# With standard deviations
+
+PISA2022SciRank <- PISA_2022 %>%
+  select(CNT, PV1SCIE) %>% # Select variables of interest
+  group_by(CNT) %>% # group by country
+  summarise(meansci = mean(PV1SCIE), 
+            sdsci = sd(PV1SCIE)) %>% 
+  # summarise  country data to find the mean Sci score
+  arrange(desc(meansci)) # arrange in descending order based on the meansci score
+
+print(PISA2022SciRank)
+
+PISA2022WealthRank <- PISA_2022%>%
+  select(CNT, HOMEPOS)%>% # Select variables of interest
+  group_by(CNT) %>% # group by country
+  summarise(meanwel = mean(HOMEPOS, na.rm=TRUE),
+            sdwel = sd(HOMEPOS, na.rm=TRUE)) %>% 
+  # summarise  country data to find  mean wealth score
+  arrange(desc(meanwel)) 
+  # arrange in descending order based on the meanwel score
+print(PISA2022WealthRank)
+
+
+```
+
+### Task 3 Plot distributions of wealth scores
+
+::: question
+Use a scatter plot to show the correlation between `HOMEPOS` and `ESCS`. Use a `facet_wrap` to show the charts for the UK, Japan, Colombia and Sweden. Discuss the different relationships between the two variables across the countries.
+:::
+
+::: callout-tip
+Note that the PISA variable, Economic, Social and Cultural Status `ESCS` is based on highest parental occupation ('HISEI'), highest parental education ('PARED'), and home possessions ('HOMEPOS'), including books in the home. Do consider the implications of this definition.
+:::
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the answer"
+#| warning: false
+
+# Create a data frame with the ESCS, gender (ST004D01T) and HOMEPOS variables for the 4 countries 
+
+WealthcompPISA<-PISA_2022 %>%
+  select(CNT, ESCS, HOMEPOS, ST004D01T)%>%
+  filter(CNT == "Japan" | CNT == "United Kingdom" | CNT == "Colombia" | CNT == "Sweden")
+
+# Use ggplot to create a scatter graph
+# Set the x variable to ESCS and the y to HOMEPOS, set the colour to gender
+# Set point size and transparency
+# Facet wrap to produce graphs for each country
+
+ggplot(WealthcompPISA, aes(x = ESCS, y = HOMEPOS, colour=ST004D01T))+
+  geom_point(size=0.1, alpha=0.5)+
+  facet_wrap(.~CNT)
+
+```
+
+### Task 4 Plot distributions of scores
+
+::: question
+-   Use geom_density to plot distributions to plot the distribution of Japanese and UK mathematics scores - what patterns do you notice?
+:::
+
+::: callout-tip
+To plot a distribution, you can use `geom_density` to plot a distribution curve. In `ggplot` you specify the data, and then in `aes` set the x-value (the variable of interest, and set the fill to change by different groups). Within the `geom_density` call you can specify the `alpha`, the opacity of the plot.
+
+For example, to plot science scores in the UK by gender, you would use the code below:
+
+```{r}
+#| echo: true
+#| eval: true
+# Create a data frame of UK science scores including gender
+
+UKSci<-PISA_2022 %>%
+  select(CNT, PV1SCIE, ST004D01T) %>%
+  filter(CNT == "United Kingdom")
+
+# Plot the density chart, changing colour by gender, and setting the alpha (opacity) to 0.5
+ggplot(data = UKSci,
+       aes(x = PV1SCIE, fill = ST004D01T)) +
+  geom_density(alpha = 0.5)
+
+
+```
+:::
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the answer"
+# Create a data frame of UK and Japanese mathematics scores
+
+JPUKMath<-PISA_2022 %>%
+  select(CNT, PV1MATH) %>%
+  filter(CNT == "United Kingdom"|CNT == "Japan")
+
+# Plot the density chart, changing colour by country, and setting the alpha (opacity) to 0.5
+ggplot(data = JPUKMath,
+       aes(x = PV1MATH, fill = CNT)) +
+  geom_density(alpha = 0.5)
+
+```
+
+### Task 5 Plot distributions of scores by gender
+
+::: question
+-   Examine gender differences: Plot the distributions of mathematics achievement in the UK by gender. What patterns can you see?
+:::
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the answer"
+
+UKMathGender <- PISA_2022 %>%
+  select(CNT, PV1MATH, ST004D01T) %>%
+  filter(CNT == "United Kingdom")
+
+ggplot(data = UKMathGender,
+       aes(x = PV1MATH, fill = ST004D01T)) +
+  geom_density(alpha = 0.5)
+
+```
+
+### Task 6 Facet wrap by country
+
+::: question
+Plot density graphs of gender differences in mathematics scores in the UK, Spain, Japan, Korea and Finland. Hint use `facet_wrap(.~CNT)`
+:::
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the answer"
+
+# Create a data frame of mathematics scores, gender and country
+# Filter by the five countries of interest
+
+MathGender <- PISA_2022 %>%
+  select(CNT, PV1MATH, ST004D01T) %>%
+  filter(CNT == "United Kingdom"|CNT == "Spain"|CNT == "Japan"
+         | CNT=="Korea"|CNT == "Finland")
+
+# Plot a density graph of mathematics scores, splitting into groups, with coloured fills by gender. Set transparency to 0.5 to show overlap 
+
+ggplot(data = MathGender,
+       aes(x = PV1MATH, fill = ST004D01T)) +
+  geom_density(alpha = 0.5) +
+  facet_wrap(.~CNT)
+
+```
+
+### Task 7 Plot a scatter graph
+
+::: question
+Plot a scatter graph of mean mathematics achievement (y-axis) by mean wealth (x-axis) with each country as a single point. Hint: You will first need to use `group_by` and then `summarise` to create a data frame of mean scores.
+:::
+
+::: callout-tip
+Note that the competency tests for Vietnam in PISA are all `NA` at the student level. This is because many students finish compulsory schooling before 15. Hence, we add an `na.omit` to remove the data from Vietnam
+:::
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the answer"
+
+# Create a summary data frame
+# Group by country, and then summarise the mean meath and wealth scores
+
+Wealthdata <- PISA_2022 %>%
+  select(CNT, HOMEPOS, PV1MATH) %>%
+  filter(CNT!="Vietnam")%>%  # To cut Vietnam due to lack of data
+  group_by(CNT) %>%
+  summarise(MeanWealth=mean(HOMEPOS, na.rm = TRUE),
+            MeanMath=mean(PV1MATH, na.rm = TRUE))
+
+# Use ggplot to create a scatter graph
+
+ggplot(data = Wealthdata,
+       aes(x = MeanWealth, y = MeanMath)) +
+  geom_point(alpha = 0.5, colour="red") +
+  xlab("Home Possessions (Wealth proxy)") +
+  ylab("Mathematics score")
+
+```
+
+::: question
+In the previous scatter of mathematics vs wealth scores, highlight outlier countries (any score of over 500) in a different colour. Hint, mutate the data frame to include a label column (by the condition of the maths score being over 500). Then set the colour in ggplot by this label column.
+:::
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the answer"
+
+# Create a summary data frame
+# Group by country, and then summarise the mean math and wealth scores
+
+Wealthdata <- PISA_2022 %>%
+  select(CNT, HOMEPOS, PV1MATH) %>%
+  group_by(CNT) %>%
+  filter(CNT!="Vietnam")%>%
+  summarise(MeanWealth = mean(HOMEPOS, na.rm = TRUE),
+            MeanMath = mean(PV1MATH, na.rm = TRUE)) %>%
+  mutate(label=ifelse(MeanMath > 500, "Red", "Blue")) # mutate to add a label
+# the column label is "Red" if MeanMath > 500 and "Blue" otherwise
+
+# Use ggplot to create a scatter graph
+
+ggplot(data = Wealthdata,
+       aes(x = MeanWealth, y = MeanMath, colour = label)) +
+  geom_point() +
+  xlab("Wealth") +
+  ylab("Mathematics score")
+
+```
+
+::: question
+Add the country names as a label to the outliers. Hint: add an additional column `labelname` to which the country name `as.charachter(CNT)` is added if the `MeanMath` score is over 500. Hint: you can use `geom_label_repel` to add the labels. You can set: `(aes(label = labelname), colour = "black", check_overlap = TRUE)` to give the source of the lables (`labelname`) the colour and to force the lables not to overlap.
+:::
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the answer"
+#| warning: false
+# Mutate to give a new column labelname, set to the country name (CNT) if Meanmath is over 500, or NA if not.
+Wealthdata <- PISA_2022 %>%
+  select(CNT, HOMEPOS, PV1MATH) %>%
+  group_by(CNT) %>%
+  filter(CNT!="Vietnam")%>%
+  summarise(MeanWealth = mean(HOMEPOS, na.rm = TRUE),
+            MeanMath = mean(PV1MATH, na.rm = TRUE)) %>%
+  mutate(label = ifelse(MeanMath>500, "Red", "Blue")) %>%
+  mutate(labelname = ifelse(MeanMath>500, as.character(CNT), NA))
+  
+# Use geom_label_repel to add the labelname column to the graph
+ggplot(data = Wealthdata,
+       aes(x = MeanWealth, y = MeanMath, colour = label)) +
+  geom_point() +
+  geom_label_repel(aes(label = labelname), 
+            colour = "black", 
+            check_overlap = TRUE) +
+  xlab("Wealth") +
+  ylab("Mathematics score") 
+
+```
+
+### Task 8 Plot Likert responses using facet wrapping
+
+::: question
+Examine Likert responses by country using facet plot.
+
+For `ST125Q01NA` - How old were you when you started early childhood education? Plot responses, first, for the whole data set, then facet plot for the UK, Germany, Belgium, Austria, France, Poland, Estonia, Finland and Italy.
+
+• What international differences can you note?
+:::
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the answer"
+
+# Create a data frame of childhood education data for the whole data frame 
+ChildhoodEd<-PISA_2022 %>%
+  select(CNT, ST125Q01NA) %>%
+  group_by(CNT)
+
+# Plot a bar graph of responses  
+
+ggplot(data = ChildhoodEd,
+       aes(x = ST125Q01NA, fill = ST125Q01NA)) +
+  geom_bar() +
+  xlab("How old were you when you started early childhood education?") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+```
+
+Then use faceting to split the plots by country
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the answer"
+
+# Repeat filtering for UK, Germany, Belgium, Austria, France, Poland, Estonia, Finland and Italy
+
+ChildhoodEd <- PISA_2022 %>%
+  select(CNT, ST125Q01NA) %>%
+  filter(CNT == "United Kingdom"|CNT == "Germany" | CNT == "Belgium"
+         | CNT == "Austria"| CNT == "France" | CNT == "Poland"
+         | CNT == "Estonia" | CNT=="Finland"| CNT=="Italy")
+
+# Plot the data and facet wrap by country
+
+ggplot(data = ChildhoodEd,
+       aes(x = ST125Q01NA, fill = CNT))+
+  geom_bar()+
+  xlab("How old were you when you started early childhood education?") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  facet_wrap(. ~ CNT)
+
+```
+
+### Task 9 Categorise `HOMEPOS` scores
+
+::: question
+Categorising Variables
+
+Split the `HOMEPOS` variable for the UK and Germany into the following groups:
+
+| HOMEPOS       | Name of category |
+|---------------|------------------|
+| \>1           | Very High        |
+| 0\>HOMEPOS\<1 | High             |
+| 0\<           | Low              |
+
+Plot bar graphs of participants in these categories for both countries.
+
+• What differences can you observe between the countries?
+
+Hint: You can use `mutate` with `case_when` to do the categorisation. For example in combination with teh `mutate` to create the new column `maths_scores_category`, we use `case_when(PV1MATH < 400 ~ "Low"` to set the `maths_scores_category` to `Low` when `PV1MATH` is below 400. Then `maths_scores_category` becomes High if the score is between 400 and 500 (note the use of `&` and the repeat of `PV1MATH`: `PV1MATH >= 400 & PV1MATH > 500`. Here `<=` means less than or equal to).
+
+```{r}
+#| eval: true
+Mathscore <- PISA_2022%>%
+  select(PV1MATH, CNT)%>%
+  filter(CNT=="France")%>%
+  mutate(maths_scores_category = case_when(PV1MATH < 400 ~ "Low",
+                                  PV1MATH >= 400 & PV1MATH < 500 ~ "High",
+                                  PV1MATH > 500 ~ "Very high"))
+```
+:::
+
+```{r loading_data_wealth}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the answer"
+# Create a data frame for the UK and Germany
+# Mutate the wealth_cat (wealth category) column by the boundaries of wealth categories
+Wealth <- PISA_2022 %>%
+  select(CNT, HOMEPOS) %>%
+  filter(CNT == "United Kingdom" | CNT == "Germany") %>%
+  mutate(wealth_cat = case_when(HOMEPOS < 0 ~ "Low",
+                                HOMEPOS >= 0 & HOMEPOS < 1 ~ "High",
+                                HOMEPOS >= 1 ~ "Very High",
+                                .default = NA)) %>%
+  group_by(CNT) %>%
+  droplevels()
+
+# You can set the factors to a logical order for plotting
+# The default is alphabetical which gives High, Low, Very High which 
+# doesn't make sense
+
+Wealth$wealth_cat <- factor(Wealth$wealth_cat, levels = c("Low", "High", "Very High"))
+
+# Plot the data
+ggplot(data = Wealth, 
+       aes(x = wealth_cat, fill = wealth_cat))+
+  geom_bar()+
+  facet_wrap(.~CNT)+
+  xlab("Wealth grouping")
+
+```
+
+### Task 10 Compare the association between mathematics and science PV values across three diverse countries
+
+::: question
+Plot scatter plots of science versus mathematics achievement in United Kingdom, Qatar and Brazil. What differences can you see between the countries?
+:::
+
+```{r loading_data}
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: "Show the answer"
+# Create a data frame of science and mathematics scores, across the countries Including gender)
+
+SciMaths <- PISA_2022 %>%
+  select(CNT, PV1MATH, PV1SCIE, ST004D01T) %>%
+  filter(CNT == "Colombia" | CNT == "New Zealand" | CNT == "Qatar"|
+           CNT == "Israel") %>%
+  droplevels()
+
+# Scatter plot the data, faceting by country
+
+ggplot(data = SciMaths, 
+       aes(x = PV1MATH, y = PV1SCIE, colour = ST004D01T))+
+  geom_point(size = 0.1, alpha = 0.5)+
+  facet_wrap(.~CNT)
+
+
+# Low achieving (filter for scores less than 400)
+
+SciMaths <- PISA_2022 %>%
+  select(CNT, PV1MATH, PV1SCIE, ST004D01T) %>%
+  filter(CNT == "Colombia" | CNT == "New Zealand" | CNT == "Qatar"|
+           CNT == "Israel") %>%
+  filter(PV1MATH < 400)%>%
+  filter(PV1SCIE < 400)%>%
+  droplevels()
+
+ggplot(data = SciMaths, 
+       aes(x = PV1MATH, y = PV1SCIE, colour = ST004D01T))+
+  geom_point(size = 0.1, alpha = 0.5)+
+  facet_wrap(.~CNT)
+
+```

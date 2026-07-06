@@ -1,0 +1,209 @@
+---
+title: "11 Selecting statistical tools"
+---
+
+```{r}
+#| eval: true
+#| warning: true
+#| echo: false
+
+# only load this code if testing this file independently of overall project
+if(!exists("test")){
+  warning("RUNNING LOCAL FILE LOAD")
+  
+  library(glue)
+  proj_folder <- "C:/Users/Peter/Google Drive/Kings/Code/MASTEMR/"
+  proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  
+  node <- Sys.info()
+  if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard's PC
+    proj_folder <- r"(/Users/k1765032/Google Drive/My Drive/MASTEMR/)"
+  }else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete's NEW Laptop
+    proj_folder <- r"(G:\My Drive\Kings\Code\MASTEMR\)"
+  }
+
+  source(glue("{proj_folder}MASTEMR_setup.R"))
+}
+```
+
+## Choosing appropriate quantitative tests
+
+In the lecture, this flow chart was introduced:
+
+![](images/011%20Selecting%20a%20test-01.pdf){width="20cm" height="15cm"}
+
+That chart will help you choose the test to use for the tasks below.
+
+## Seminar Tasks
+
+Use the reduced [PISA 2018 dataset](https://drive.google.com/open?id=1goZwdHOrwW70-zqQpOK-9NvxI1qowRxT&authuser=richardandrewbrock%40gmail.com&usp=drive_fs)
+
+We will store the location of the file in loc and then use read-rds to import the file. This is a cut down version of the PISA 2018 student dataset.
+
+Load the data from there dataset:
+
+```{r}
+#| eval: false
+install.packages("tidyverse")
+library(tidyverse)
+
+# Download data from /Users/k1765032/Library/CloudStorage/GoogleDrive-richardandrewbrock@gmail.com/.shortcut-targets-by-id/1c3CkaEBOICzepArDfjQUP34W2BYhFjM4/PISR/Data/PISA/subset/Students_2018_RBDP_none_levels.rds
+# You want the file: Students_2018_RBDP_none_levels.rds
+# and place in your own file system
+# change loc to load the data directly. Loading into R might take a few minutes
+
+loc <- "/Users/k1765032/Library/CloudStorage/GoogleDrive-richardandrewbrock@gmail.com/.shortcut-targets-by-id/1c3CkaEBOICzepArDfjQUP34W2BYhFjM4/PISR/Data/PISA/subset/Students_2018_RBDP_none_levels.rds"
+ PISA_2018 <- read_rds(loc)
+```
+
+### Task 1 Plot a graph of mean science scores by country
+
+Imagine we wish to compare the mean scores of students on the science element of PISA by plotting a bar graph. First you need to use the `sumarise` function to calculate means by countries. Then use ggplot with `geom_col` to create the graph.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+
+# Task 1: Plot a graph of mean science scores by country
+# Create a variable avgscience - for every country (Group_by(CNT)) calcuate the mean
+# science score (PV1SCIE) and ignore NA (na.rm=TRUE)
+avgscience <- PISA_2018 %>% 
+  group_by(CNT) %>%
+  summarise(mean_sci = mean(PV1SCIE, na.rm=TRUE)) %>%
+# Arrange in descending order  
+  arrange(desc(mean_sci))
+# Plot the data in avgscience, x=CNT (reorder to ascending order), mean science score on the y
+# Change the fill colour to red, rotate the text, locate the text and reduce the font size
+    ggplot(data = avgscience, 
+           aes(x= reorder(CNT, -mean_sci), y=mean_sci)) +
+    geom_col(fill="red") +
+    theme(axis.text.x = element_text(angle = 90, hjust=0.95, vjust=0.2, size=5))
+  
+```
+
+### Task 2 Are there differences in Science scores by gender for the total data set?
+
+Consider the kinds of variables that represent the science score. What is an appropriate test to determine differences in the means between the two groups? Create two vectors, for boys and girls, that you can feed into the `t.test` function.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+# Task 2: Are there differences in Science scores by gender for the total data set? (No)
+
+# Choose the  gender (ST004D01T) and science score columns (PV1SCIE) from  2018 data, filter for males 
+# Put that data into MaleSci
+MaleSci <- PISA_2018 %>% 
+  select(ST004D01T, PV1SCIE) %>% 
+  filter(ST004D01T == "Male")
+
+# Choose the  gender (ST004D01T) and science score columns (PV1SCIE) from  2018 data, filter for females 
+# Put that data into FemaleSci
+FemaleSci <- PISA_2018 %>% 
+  select(CNT, ST004D01T, PV1SCIE) %>% 
+  filter(ST004D01T == "Female")
+
+#Do a t-test comparing MaleSci and FemaleSci
+t.test(MaleSci$PV1SCIE, FemaleSci$PV1SCIE)
+```
+
+### Task 3 Are there differences in Science scores by gender for UK students?
+
+As above, but include a filter by country.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+# Task 3: Are there differences in Science scores by gender for UK students? (No)
+
+# Choose the country (CNT), gender (ST004D01T) and science score columns (PV1SCIE) from  2018 data, filter for males and the UK
+# Put that data into UKMaleSci
+UKMaleSci <- PISA_2018 %>% 
+  select(CNT, ST004D01T, PV1SCIE) %>% 
+  filter(ST004D01T == "Male")  %>% 
+  filter(CNT=="United Kingdom")
+
+# Choose the country (CNT), gender (ST004D01T) and science score columns (PV1SCIE) from  2018 data, filter for females and the UK
+# Put that data into UKFemaleSci
+UKFemaleSci <- PISA_2018 %>% 
+  select(CNT, ST004D01T, PV1SCIE) %>% 
+  filter(ST004D01T == "Female") %>% 
+  filter(CNT=="United Kingdom")
+
+# Do a t-test comparing UKMaleSci and UKFemaleSci
+t.test(UKMaleSci$PV1SCIE, UKFemaleSci$PV1SCIE)
+
+```
+
+### Task 4 For the whole data set, is there a correlation between students' science score and reading scores?
+
+Reflect on the appropriate test to show correlation between two scores. This test can be carried out quite simply using a couple of lines of code.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+# Task 4: For the whole data set, is there a correlation between students’ science score reading score? (Yes, significant 0.77)
+
+# Do the regression test between science score (PV1SCIE) and reading score (PV1READ) on the PISA_2018 data
+lmSciRead <- lm(PV1SCIE ~ PV1READ, data=PISA_2018)
+summary(lmSciRead)
+
+# Add Gender to this as well? Not sure I have the correct lm type here, but it looks interesting!
+# lmSciRead <- lm(PV1SCIE ~ PV1READ + ST004D01T, data=PISA_2018)
+# summary(lmSciRead)
+
+```
+
+### Task 5 Plot a representation of UK students' science score against reading score.
+
+It can help here to create a `data.frame` that contains a filtered version of the whole dataset you can pass to ggplot.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+# Task 5: Plot a representation of UK students’ science score against reading score.
+ 
+# Choose the three variables of interest, science score (PV1SCIE), reading score (PV1READ) and country (CNT)
+# and filter for the UK. Put the values into regplotdata
+regplotdata<- PISA_2018 %>% 
+  select(PV1SCIE, PV1READ, CNT) %>% 
+  filter(CNT=="United Kingdom")
+
+# Plot the data in regplotdata, set the science score on the x-xis and reading on y-axis, set the size, colour and alpha (transparency)
+# of points and add a linear ('lm') black line
+  ggplot(data = regplotdata, 
+         aes(x=PV1SCIE, y=PV1READ)) +
+    geom_point(size=0.5, colour="red", alpha=0.3) + 
+    geom_smooth(method = "lm", colour="black")
+```
+
+### Task 6 Is there a relationship between UK students' gender and the number of years students spend in early childhood care (e.g. kindergarten)?
+
+Note here that the time spent learning science (SMIS) is categorical as only certain values of time are allowed (0, 45, 90, 130 etc). Consider an appropriate test in that case.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "Show the code"
+
+# Task 6: Is there a relationship between UK students’ gender and the number of years students spend in early childhood care (e.g. kindergarten)? (No significant difference by gender exists)
+  
+chi_data <- PISA_2018 %>%
+  select(CNT, ST004D01T, DURECEC) %>% 
+  filter(CNT=="United Kingdom")  %>% 
+  na.omit()
+
+# Create a frequency table
+YrsECFred <- chi_data %>%
+    group_by(ST004D01T, DURECEC)%>%
+    count()
+  
+# Perform the Kruskal Wallis test (note the no of years is
+# ordinal rather than categorical)  test on the data
+
+kruskal.test(YrsECFred$ST004D01T,YrsECFred$n)
+```

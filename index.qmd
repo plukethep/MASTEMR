@@ -1,82 +1,151 @@
 ---
-title: "Quantitative methods in the context of STEM education research"
-subtitle: "MA STEM Education"
-author: "MA STEM @ KCL"
-toc: true
-number-sections: true
-bibliography: references/mastemr.bib
-crossref: 
-  chapters: true
-format:
-  # pdf:
-  #   code-line-numbers: true
-  #https://quarto.org/docs/authoring/callouts.html 
-  html:
-    code-line-numbers: true
-    code-link: true
-css: css/CRESTEMR.css
+title: "Quantitative methods in the context of education research"
+subtitle: "MA Education courses, School of Education, Communication & Society, King's College London"
 execute:
   cache: false
+editor:
+  mode: source
+date: "Last compiled on `r format(Sys.time(), '%d %B, %Y')`"
+
+author:
+  - name: Peter EJ Kemp
+    orcid: 0000-0003-1131-0787
+    email: peter.kemp@kcl.ac.uk
+    # affiliations:
+    #   - name: King's College London
+  - name: Richard Brock
+    orcid: 0000-0003-2497-8030
+    email: richard.brock@kcl.ac.uk
+    # affiliations:
+    #   - name: King's College London
+  - name: Amy O'Brien
+    orcid: 0000-0003-3846-6538
+    email: amy.l.o'brien@kcl.ac.uk
+    # affiliations:
+    #   - name: King's College London
+  - name: Carla Finesilver
+    orcid: 0000-0003-0136-7536
+    email: carla.finesilver@kcl.ac.uk
+    # affiliations:
+    #   - name: King's College London
+  - name: Lulu Healy
+    orcid: 0000-0003-1698-5134
+    email: Lulu.healy@kcl.ac.uk
+    # affiliations:
+    #   - name: King's College London
+  - name: David Pepper
+    orcid: 0000-0002-2228-7677
+    email: david.pepper@kcl.ac.uk
+    # affiliations:
+    #   - name: King's College London
+
 ---
 
 ```{r setup}
-#| include=FALSE
-library(glue)
-folder_images <- "images"
+    #| eval: true
+    #| warning: false
+    #| echo: false
+
+    # options(max.print=10000)
+    options(max.print=15)
+    
+  # only load this code if testing this file independently of overall project
+  if(!exists("test")){
+    warning("RUNNING LOCAL FILE LOAD")
+
+    library(glue)
+    node <- Sys.info()
+	if(node["nodename"] == "KCL8KWNXY2"){
+	  datafolder <- r"(C:\\Users\\w1926273\\OneDrive - King\'s College London\\Code\\SCARI\\)"
+	  loc_amy <- r"(G:\\My Drive\\Kings\\Code\\MASTEMR\\data\\)"
+	}else if(node["nodename"] == "PETES_PC"){
+    pisa_data <- "C:/Users/peter/OneDrive - King\'s College London/Code/QERKCL_PISA/data/pisa/"
+    base_location <- "C:/Users/peter/OneDrive - King\'s College London/Code/MASTEMR/"
+	  proj_folder <- r"(C:/tmp/MASTEMR/)"
+	}else if(node["nodename"] == "KCLMLVXD9XH6P"){
+	  pisa_data <- "/Users/k1926273/Library/CloudStorage/OneDrive-King\'sCollegeLondon/Code/QERKCL_PISA/data/pisa/"
+    base_location <- "/Users/k1926273/Library/CloudStorage/OneDrive-King\'sCollegeLondon/Code/MASTEMR/"
+    proj_folder <- "/Users/k1926273/Desktop/MASTEMR/"
+	}else if(node["nodename"] == "KCLJ7J6LFC74J"){ #Richard"s Mac
+	  datafolder <- r"(/Users/k1765032/Google Drive/My Drive/PISR/data/PISA/)"
+	  pisa_data <- r"[/Users/k1765032/Library/CloudStorage/OneDrive-King\'sCollegeLondon/QERKCL_PISA/data/pisa/]"
+	  base_location <- "/Users/k1765032/Library/CloudStorage/OneDrive-King\'sCollegeLondon/Peter Kemp\'s files - MASTEMR/"
+	  proj_location <- "/Users/k1765032/Library/CloudStorage/OneDrive-King\'sCollegeLondon/Peter Kemp\'s files - MASTEMR/"
+	  proj_folder <- r"[/Users/k1765032/Documents/Teaching/STEM MA/Quantitative module/R/Temp/MASTEMR/]"
+	}else if(node["nodename"] == "KCL3Y7NKR3"){ #Pete"s NEW Laptop
+	  datafolder <- "G:/My Drive/Kings/Code/PISR/Data/PISA/)"
+	  pisa_data <- "C:/Users/k1926273/OneDrive - King\'s College London/Code/QERKCL_PISA/data/pisa/)"
+	}else if(node["nodename"] == "Amys-MacBook-Air.local"){ #Pete"s NEW Laptop
+	  datafolder <- r"(/Users/amyobrien/Google Drive/My Drive/Data/PISA/)"
+	  loc_amy <- r"(/Users/amyobrien/Google Drive/My Drive/MASTEMR/data/)"
+	}else{
+	  warning("Can\'t find PC name, using default folder location")
+	  datafolder <- "D:/OneDrive/KCL OneDrive/OneDrive - King\'s College London/Code/SCARI/"
+	}
+	
+	loc_amy <- glue("{base_location}data/")
+    
+    source(glue("{proj_folder}MASTEMR_functions.R"))
+  }
+      source(glue("{proj_folder}MASTEMR_functions.R"))
+      source(glue("{proj_folder}MASTEMR_setup_libs.R"))
+      source(glue("{proj_folder}MASTEMR_setup.R"))
+      # OpenAnalysis_load_ALL(use_cache = TRUE, 
+      #                       report_cache_folder=r\'[",MASTEMR_cache,"]\',
+      #                       over_write=FALSE)
+
 ```
 
-# Introduction to quantitative methods
+```{r}
+#| error: false
+#| eval: false
+#| echo: false
+```
 
-{{< include chapters/_01-Intro_to_quant_methods.qmd >}}
+```{r}
+#| eval: true
+#| echo: false
+#| warning: false
+PISA2018subset <- PISA_2022 %>%
+  select(CNT, PV1MATH, PV1READ, PV1SCIE, HOMEPOS)%>%
+  group_by(CNT)%>%
+  summarise(Science=mean(PV1SCIE), Mathematics=mean(PV1MATH), Reading=mean(PV1READ), HOMEPOS=mean(HOMEPOS, na.rm=TRUE),
+            n=n())
 
-# Introduction to analysis software
+PISA2018subset<-pivot_longer(PISA2018subset, cols=c("Science","Reading","Mathematics"),names_to = "Subject",values_to = "Scores")
 
-{{< include chapters/_02-Intro_to_analysis_software.qmd >}}
+PISA2018subset<-PISA2018subset%>%
+  mutate(label=ifelse(Scores>550, as.character(CNT),
+                      ifelse(Scores<350, as.character(CNT),"")))
 
-# What can we say about the performance of different groups in STEM education?
+ggplot(PISA2018subset, aes(x=HOMEPOS, y=Scores, size=n))+
+  geom_point(aes(colour=CNT), alpha=0.6)+
+  geom_smooth(formula = 'y ~ x', method="lm", colour="darkgrey", size=0.5)+
+  facet_grid(.~Subject)+
+  xlab("Home possessions")+
+  ylab("Score")+
+  ggtitle("PISA 2022 test scores against home possessions")+ 
+  theme_bw() +
+  theme(legend.position = "none") +
+  geom_label_repel(label=PISA2018subset$label, label.size = NA,
+                   fill = alpha(c("white"),0.0))
 
-{{< include chapters/_03-Differing_performance_in_STEM.qmd >}}
+```
 
-# Are there significant gender differences in aspects of STEM education?
+This book has been written to accompany the MA STEM quantitative methods course at King's College London. It will take the reader through the process of learning the R statistical programming language through the analysis of the **2022 PISA survey data**. The book does not assume any prior knowledge and should suit the needs of those looking to learn R, learn statistics, learn how to analyse PISA data, or any combination of these. 
 
-{{< include chapters/_05-Gender_differences.qmd >}}
+# Copyright and usage
 
-# Maths Anxiety
+This book is free to use under a [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/deed.en) license.
 
-{{< include chapters/_06-Maths_anxiety.qmd >}}
+All PISA products are published under the [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 IGO](https://creativecommons.org/licenses/by-nc-sa/3.0/igo/) (CC BY-NC-SA 3.0 IGO) license. This includes the `.feather` and `.parquet` formatted datasets linked throughout the text. The PISA 2022 dataset is also available from the [OECD website](https://www.oecd.org/pisa/data/2022database/).
 
-# Inquiry learning in science
+We have tested the software and datasets used in the making of this book, but cannot guarantee that they are free from errors. If you find any errors or have any questions, please contact [peter.kemp\@kcl.ac.uk](mailto:peter.kemp@kcl.ac.uk) and/or [richard.brock\@kcl.ac.uk](mailto:richard.brock@kcl.ac.uk). You are using this book at your own risk and we cannot be held responsible for any loss or damage arising from the use of this book (please don't overwrite your hard disks!).
 
-{{< include chapters/_07-Inquiry_learning_in_science.qmd >}}
+To reference this book, please use:<!--@MASTEMR2023-->
 
-# Science capital
+> Kemp, Peter EJ, Richard Brock, Amy O’Brien, Carla Finesilver, Lulu Healy, and David Pepper. 2023. _Quantitative Methods in the Context of Education Research: The PISA 2022 data set_. London, United Kingdom: King’s College London. https://peterejkemp.github.io/v3/.
 
-{{< include chapters/_08-Science_capital.qmd >}}
+And to reference the PISA 2022 dataset, please use:<!-- @OECD2022results. -->
 
-# Teacher relationships
-
-{{< include chapters/_10-teachers_relationships_and_STEM_achievement.qmd >}}
-
-# Teacher relationships
-
-{{< include chapters/_12-effective_international_STEM_ed.qmd >}}
-
-\_12-effective international STEM ed
-
-# Setting up analysis for specific datasets
-
-The examples shown in this booklet use a range of freely available datasets. We would like to encourage you to use one of these datasets in your own analysis. This section will take you through the process of downloading and using these datasets.
-
-## PISA
-
-{{< include chapters/_A1-PISA_analysis.qmd >}}
-
-## English Department for Education
-
-{{< include chapters/_A2-DfE_analysis.qmd >}}
-
-## TIMSS
-
-{{< include chapters/_A3-TIMSS_analysis.qmd >}}
-
-# References
+> OECD. 2022. _PISA 2022 Results (Volume i)_. OECD. https://www.oecd-ilibrary.org/docserver/53f23881-en.pdf.

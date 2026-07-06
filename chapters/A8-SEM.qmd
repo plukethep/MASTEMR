@@ -1,0 +1,416 @@
+---
+title: "SEM"
+format: html
+editor: visual
+bibliography: references.bib
+---
+
+```{r setup}
+```
+
+
+# Structural Equation Modelling
+
+Structural Equation Modelling (SEM) is an approach to represent the correlations between a number of variables linked to some phenomenon. A dependent variable (for example, scores on some test) might be linked to a number of independent variables (for example, hours of study, teacher's level of experience, etc.). A powerful aspect of SEM is that it can be used to construct latent variables - variables which have explanatory usefulness but can't be measured directly.
+
+For example, a researcher might wish to investigate how home environment impacts students' mathematics achievement. There is no single variable, no single score, that can be measured to say a young person's home environment is a 7/10 or a 3/10. We might then consider their home environment a latent variable. We imagine that the nature of the circumstances in their home impacts their learning, but we cannot directly report the level of the home environment as a variable.
+
+SEM allows us to propose a latent variable, like home environment, and calculate the contribution of a number of variables we can measure (e.g. the number of books in the home, parents' occupation and level of education, family wealth, etc.) to the latent variable.
+
+### A simple structural model
+
+Researchers use SEM to determine the correlations between a number of variable in a data set. It allows the relationship between multiple variables to be taken into account.
+
+In the PISA data set, in the context of data related to UK students achievement in mathematics, a researcher might be interested in building a model of mathematics (`PV1MATH`) score by a number of variables in the data set, for example, reading score `PV1READ`), science score (`PV1SCIE`), family cultural capital (the index of economic, social and cultural status `ESCS`), wealth (`WEALTH`) and gender (`ST004D01T`). SEM can be used to represent the relationship between these variables and students' mathematics achievement.
+
+To create the SEM we will use the `lavaan` package - `lavaan` is a contraction of Latent Variable Analysis and allows us to fit a number of different SEMs to data. We will also need to install the `semPlot` package. The relationships between variables in SEMs are often represented as path diagrams - representations in which variables are represented as squares or circles and arrows labelled with correlation coefficients join the variables to represent the relationships.`semPlot` allows use to draw path diagrams
+
+```{r}
+#| eval: false
+#| echo: false
+install.packages("lavaan",repos = "http://cran.us.r-project.org")
+install.packages("semPlot",repos = "http://cran.us.r-project.org")
+
+library(tidyverse)
+library(arrow)
+
+# You will need to load the 2022 PISA data set
+# PISA_2022_student<-read_parquet("")
+
+```
+
+## Model Syntax
+
+To create the SEM of UK mathematics achievement we first create a subset `data.frame` of UK data, `UKdata`. As `lavaan` uses numeric variables we need to convert gender (`ST004D01T`) to a numeric variable.
+
+```{r}
+#| echo: true
+#| eval: true
+# Load lavaan to create the SEM and semPlot to draw path diagrams
+library(lavaan)
+library(semPlot)
+# Create a subset of PISA data related to the UK containing the dependent variable of interest (PV1MATH) and the independent variables we are interested in
+UKdata<-PISA_2022 %>%
+  select(CNT, PV1SCIE, PV1MATH, PV1READ, ESCS, HOMEPOS, ST004D01T)%>%
+  filter(CNT=="United Kingdom")
+# lavaan requires numeric variables as input, gender is a character varibale in the data.frame so convert it.
+UKdata$ST004D01T<-as.numeric(UKdata$ST004D01T)
+
+```
+
+The first step is to create the model. Models in `lavaan` are represented as a dependent variable `y`, linked to a number of independent variables `x1`, `x2`, `x3`, etc. The `~` symbol is the regression operator. A simple regression forumla might then take the form of:
+
+y \~ x1 + x2 + x3
+
+To indicate a variable is a latent variable we use the `=~` operator. So to define a model in which the latent variable `f1` varies with three indepdent variables we would write:
+
+f1 =\~ x1 + x2 + x3
+
+In some cases, the independent variables may correlate. For example, if we are investigating mathematics achievement (the dependent variable, `y`), by looking at the independent variables of reading (`x1`) and science score (`x2`), it may be the case that reading and science cores covary (that is changes to one impacts the other). In this case, we can specify covariance in our model by stating:
+
+y \~ x1 + x2 The regression model x1 \~ x2 Indicating the covariance
+
+In our case, considering UK mathematics achievement, we can set up a model that mathematics score `PV1MATH` varies with science score `PV1SCIE`, reading score `PV1READ`, cultural resources in the home `ESCS`, a wealth proxy measure, HOMEPOS and gender `ST004D01T`: `model<-"PV1MATH ~ PV1SCIE + PV1READ + ESCS + HOMEPOS"`
+
+We then pass the model, and the `data.frame` to the `sem` function: `fit<-sem(model, data=UKdata)`. This produces a model as the ouput `fit`. To see the results we call `summary(fit)`
+
+```{r}
+#| echo: true
+#| eval: true
+
+model<-"PV1MATH ~ PV1SCIE + PV1READ + ESCS + HOMEPOS"
+fit<-sem(model, data=UKdata)
+summary(fit)
+
+```
+
+In the regressions table, the function returns the value of the regression coefficients for each independent variable, and the P value (`P(>|z|)`). Note in the model above all the independent variables are significant, but the largest loading comes from the `WEALTH` variable, with the science (`PV1SCIE`) and reading (`PV1READ`) scores contributing comparatively little.
+
+Finally, to produce a visual representation of the model, we pass our model, `fit` to the `semPaths` function (from the `semPlot` package we loaded above). We can specify was we want displayed on the lines, in this case the estimate of the regression coefficients between the variables.
+
+```{r}
+
+#| echo: true
+#| eval: true
+semPaths(fit, whatLabels = "Estimate")
+```
+
+In path diagrams, directly measured variables, manifest variables, are shown as squares. Latent variables are represented as circles. Single headed arrows represent the regression effects between variables. The curved arrows starting and ending on a square or circle indicate the variances of those variables. When curved arrows start and end on different variables, they represent covariance.
+
+One issue to note here is the difference in the variance for the science and mathematics scores. `PV1SCIE`, `PV1READ` and `PV1MATH` are test scores and so have a large variance (the maximum and minimum science scores, for example, are 0.0 and 895.4). The variance of the two test variables is much greater that for `HOMEPOS` (Min=-10.0741 mean=-0.4447, Max=15.240) and `ESCS` (Min=-6.841 mean=-0.310, Max=7.380).
+
+To resolve this difference, we can use the scale function to create a similar scale for `PV1SCIE`, `PV1MATH` and `PV1READ`. The `scale` function sets the mean of the variable to 0 and the variance to 1.
+
+```{r}
+#| echo: true
+#| eval: true
+UKdata$PV1READ<-scale(UKdata$PV1READ)
+UKdata$PV1MATH<-scale(UKdata$PV1MATH)
+UKdata$PV1SCIE<-scale(UKdata$PV1SCIE)
+
+fit<-sem(model, data=UKdata)
+summary(fit)
+semPaths(fit, whatLabels = "Estimate")
+
+```
+
+Scaling the test scores gives a more balanced model.
+
+We can make the model more complex, by adding that two or our independent variables, reading (`PV1READ`) and science (`PV1SCIE`) scores may co-vary, and vary with other independent variables.
+
+```{r}
+#| echo: true
+#| eval: true
+
+
+model<-"PV1MATH ~ PV1SCIE + PV1READ + ESCS + HOMEPOS
+        PV1READ ~~ PV1SCIE
+        PV1READ ~ PV1SCIE + PV1MATH + ESCS + HOMEPOS
+        PV1SCIE ~ PV1READ + PV1MATH + ESCS + HOMEPOS"
+fit<-sem(model, data=UKdata)
+summary(fit)
+semPaths(fit)
+semPaths(fit, whatLabels = "Estimate")
+
+
+```
+
+### Modelling a latent variable
+
+As introduced above, we can use SEM to model a latent variable. For example, we might assume that students have some underlying variable linked to their general intelligence. However, we have no way to directly measure their general intelligence. We do have data on their achievement in science (`PV1SCIE`), mathematics (`PV1MATH`) and reading (`PV1READ`) we might assume that as the latent variable of general achievement increases so does achievement in science, mathematics and reading.
+
+To perform the analysis, we use the `=~` operator in our model, which indicates a latent variable. This time, our model then sets out that we are interested in a `lv` (latent variable) which varies with science (`PV1SCIE`), mathematics (`PV1MATH`) and reading (`PV1READ`) scores:
+
+model\<-"lv =\~ PV1SCIE + PV1READ + PV1MATH"
+
+Then we run the model using `sem` in the same way as above, and plot the model using `semPaths`.
+
+```{r}
+#| echo: true
+#| eval: true
+
+# For a latent variable
+# =~ means a latent variable
+model<-"lv =~ PV1SCIE + PV1READ + PV1MATH"
+
+fit<-sem(model, data=UKdata)
+summary(fit)
+semPaths(fit, whatLabels = "Estimate")
+
+
+```
+
+The mode raises the question of how strong does correlation between independent variables and a proposed latent variable need to be. Cho and colleagues @cho2020 suggest that:
+
+> "When N = 100, researchers may choose a GFI \[Meaning Goodness-of-Fit Index\] cutoff value of .89 ...When N \> 100, researchers may choose a GFI cutoff value of .93" [@cho2020, p. 197]
+
+We can develop a more complex latent variable model. Let us assume that UK students reading scores depend on two latent variables, home environment (e.g. number of books, parental level of education etc) and cognitive ability (e.g. as reported by science and mathematics scores). Here are some relevant variables:
+
+| Item name  | Description                                                        |
+|---------------|---------------------------------------------------------|
+| ST005Q01JA | What is the <highest level of schooling> completed by your mother? |
+| ST007Q01JA | What is the <highest level of schooling> completed by your father? |
+| ST256Q02JA | In your home: Classic literature (e.g. <Shakespeare>)              |
+| ST255Q01JA | How many books are there in your home?                             |
+| HOMEPOS    | Family Wealth                                                      |
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Create a UK dataframe with plausible values
+UKdata<-PISA_2022%>%
+  select(CNT, ESCS, HOMEPOS, ST007Q01JA, ST256Q02JA, ST255Q01JA,
+         PV1READ, PV1SCIE, PV1MATH)%>%
+  filter(CNT=="United Kingdom")
+
+# Make varibale numeric for lavan
+UKdata$ST007Q01JA<-as.numeric(UKdata$ST007Q01JA)
+UKdata$ST256Q02JA<-as.numeric(UKdata$ST256Q02JA)
+UKdata$ST255Q01JA<-as.numeric(UKdata$ST255Q01JA)
+
+
+# Scale the test scores
+UKdata$PV1READ<-scale(UKdata$PV1READ)
+UKdata$PV1MATH<-scale(UKdata$PV1MATH)
+UKdata$PV1SCIE<-scale(UKdata$PV1SCIE)
+# Propose a model with two latent variables - one related to home (lvh), the other cognitive ability (lva)
+model<-"lvi =~ ESCS + HOMEPOS + ST007Q01JA + ST256Q02JA + ST255Q01JA
+        lvc =~ PV1MATH + PV1READ
+        PV1SCIE ~ lvi + lvc"
+# Fit the model
+fit<-sem(model, data=UKdata)
+summary(fit)
+semPaths(fit, whatLabels = "Estimate")
+
+```
+
+Interesting features to note are a) the much higher loading of the cognitive latent variable (lvc has a loading of 0.71) than the home environment (liv, loading 0.02); b) the roughly equal contribution of mathematics and reading scores to lvb (the cognitive ability latent variable); c) and interesting to note the negative loadings of parental education (ST005, and ST007) on the home enviroment latent variable.
+
+Note the dotted line from the ESCS variable (truncated here to ESC) indicates that ESCS is acting as a marker variable, that is, it is fixed at 1.0, and the other variables determined relative to it. The same is true for `PV1MATH` for the ability latent variable.
+
+### Formatting a path diagram
+
+There are a number of formatting options in the `semPaths` function.
+
+Starting from this plot:
+
+```{r}
+#| echo: true
+#| eval: true
+
+semPaths(fit, whatLabels = "Estimate") 
+```
+
+-   To rotate the plot (`rotation=2`):
+
+```{r}
+#| echo: true
+#| eval: true
+
+semPaths(fit, whatLabels = "Estimate", rotation=2) 
+
+```
+
+-   To change the colour of the lines (`edge.color="blue"`) and the size of the nodes (`sizeMan=8`):
+
+```{r}
+#| echo: true
+#| eval: true
+
+semPaths(fit, whatLabels = "Estimate", rotation=2, edge.color="blue", sizeMan =8) 
+
+```
+
+-   To link the thickness of lines to their value (`"std"`):
+
+```{r}
+#| echo: true
+#| eval: true
+
+semPaths(fit, whatLabels = "Estimate", rotation=2, edge.color="blue", 
+         sizeMan =5, "std") 
+
+```
+
+-   To make the labels larger (`edge.label.cex = 0.8`):
+
+```{r}
+#| echo: true
+#| eval: true
+
+semPaths(fit, whatLabels = "Estimate", rotation=2, edge.color="blue", 
+         sizeMan =5, "std", edge.label.cex = 0.8) 
+
+```
+
+-   To add a title (`title("PISA path diagram")`):
+
+```{r}
+#| echo: true
+#| eval: true
+
+
+semPaths(fit, whatLabels = "Estimate", rotation=2, edge.color="blue", 
+         sizeMan =5, "std", edge.label.cex = 0.8) 
+title("PISA path diagram")
+
+```
+
+-   To give longer node names (`nodeNames=nodenames`):
+
+```{r}
+#| echo: true
+#| eval: true
+
+nodenames<-c("Economic, social and cultural status",
+             "Wealth","Maternal Schooling","Paternal Schooling",
+             "In home: classical literature","Books in home",
+             "Math score", "Reading score", "Science Score")
+semPaths(fit, whatLabels = "Estimate", rotation=2, edge.color="blue", 
+         sizeMan =5, "std",, edge.label.cex = 0.8, nodeNames=nodenames)
+title("PISA path diagram")
+
+```
+
+## Tasks
+
+### Task 1 - create a model of reading score
+
+::: question
+Make a SEM of reading scores in the PISA data for students in the United States. Consider co-variation between independent variables. First consider what independent variables in the data set might influence reading scores. Some potential items of interest include:
+
+| Item name  | Description                                                        |
+|---------------|---------------------------------------------------------|
+| ST005Q01JA | What is the <highest level of schooling> completed by your mother? |
+| ST007Q01JA | What is the <highest level of schooling> completed by your father? |
+| ST256Q02JA | In your home: Classic literature (e.g. <Shakespeare>)              |
+| ST255Q01JA | How many books are there in your home?                             |
+| HOMEPOS    | Family Wealth                                                      |
+| ESCS       | Index of economic, social and cultural status                      |
+| ST254Q02JA | How many of the following \[digital devices\] are in your          |
+|            | \[home\]: Desktop computers                                        |
+:::
+
+::: call-out warning
+
+Don't forget to convert any non-numeric variables to numeric
+
+:::
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-summary: "Answer"
+
+# Using ST255Q01JA	How many books are there in your home?
+# ST254Q02JA	How many in your home: Computers (desktop computer, portable laptop, or notebook)
+USdata<-PISA_2022%>%
+  select(CNT, ESCS, HOMEPOS, PV1READ, ST255Q01JA, ST254Q02JA)%>%
+  filter(CNT=="United States")
+# Making ST255Q01JA and ST012Q06NA numeric
+USdata$ST255Q01JA<-as.numeric(USdata$ST255Q01JA)
+USdata$ST254Q02JA<-as.numeric(USdata$ST254Q02JA)
+
+
+model<-"PV1READ ~ ESCS + HOMEPOS + ST255Q01JA+ ST254Q02JA"
+
+fit<-sem(model, data=USdata)
+summary(fit)
+semPaths(fit, whatLabels = "Estimate")
+
+```
+
+### Task 2 - Modelling a latent variable for the home environment
+
+::: question
+There are a number of variables in the PISA data set that could be used to model the home environment (e.g. Number of books in the home, number of computers, etc.). Using the home environment for UK students as a latent variable, create a model of the home environment.
+:::
+
+::: call-out warning
+
+Don't forget to convert any non-numeric variables to numeric
+
+:::
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-summary: "Answer"
+
+# Using ST251Q06JA	How many of these items are there at your [home]: Musical instruments (e.g. guitar, piano, [country-specific example])
+# and ST251Q07JA	How many of these items are there at your [home]: Works of art (e.g. paintings, sculptures, [country-specific example])
+UKdata<-PISA_2022%>%
+  select(CNT, ESCS, HOMEPOS, ST251Q06JA, ST251Q07JA)%>%
+  filter(CNT=="United Kingdom")
+# Making variables numeric
+UKdata$ST251Q06JA<-as.numeric(UKdata$ST251Q06JA)
+UKdata$ST251Q07JA<-as.numeric(UKdata$ST251Q07JA)
+model<-"lv =~ ESCS + HOMEPOS + ST251Q06JA + ST251Q07JA "
+
+fit<-sem(model, data=UKdata)
+summary(fit)
+semPaths(fit, whatLabels = "Estimate")
+
+```
+
+### Task 3 - building a more complex latent varibale SEM
+
+::: question
+You believe that there are two latent variables underlying UK students' performance in science - a science self-identity variable (related to the home environment, for example, gender, parents' level of education) and a cognitive ability variable (indicated by performance in other subjects). Propose a model of science performance based on these two latent variables - linking each latent variable to multiple independent variables. Determine how much variance your model explains
+:::
+
+::: call-out warning
+
+Don't forget to convert any non-numeric variables to numeric and consider scaling the test scores
+
+:::
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-summary: "Answer"
+# Create a UK data frame with plausible values
+UKdata<-PISA_2022%>%
+  select(CNT, ESCS, HOMEPOS, ST005Q01JA, ST007Q01JA, PV1READ, PV1SCIE, 
+         PV1MATH, ST004D01T)%>%
+  filter(CNT=="United Kingdom")
+# Convert to numeric where not numeric
+UKdata$ST005Q01JA<-as.numeric(UKdata$ST005Q01JA)
+UKdata$ST007Q01JA<-as.numeric(UKdata$ST007Q01JA)
+UKdata$ST004D01T<-as.numeric(UKdata$ST004D01T)
+
+# Scale the test scores
+UKdata$PV1READ<-scale(UKdata$PV1READ)
+UKdata$PV1MATH<-scale(UKdata$PV1MATH)
+UKdata$PV1SCIE<-scale(UKdata$PV1SCIE)
+# Propose a model with two latent variables - one related to identity (lvi), the other ability (lva)
+model<-"lvi =~ ESCS + HOMEPOS + ST005Q01JA + ST007Q01JA + ST004D01T
+        lva =~ PV1MATH + PV1READ
+        PV1SCIE ~ lvi + lva"
+# Fit the model
+fit<-sem(model, data=UKdata)
+summary(fit)
+semPaths(fit, whatLabels = "Estimate")
+
+```
